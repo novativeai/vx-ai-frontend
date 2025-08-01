@@ -62,7 +62,7 @@ function GeneratorComponent() {
     setGenerating(true); setError(''); setVideoUrl('');
 
     try {
-      const response = await fetch('http://localhost:8000/generate-video', {
+      const response = await fetch('https://aivideogenerator-production.up.railway.app/generate-video', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.uid, model_id: modelId, params }),
       });
