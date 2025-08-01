@@ -1,9 +1,10 @@
+// src/app/generator/page.tsx
 "use client";
 
 import { useState, Suspense, useEffect, ChangeEvent } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
-import { modelConfigs } from '@/lib/modelConfigs'; // Note: I corrected the filename from your provided code
+import { modelConfigs } from '@/lib/modelConfigs';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,10 +15,12 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// ... (imports)
-import { TipsSection } from "@/components/TipsSection"; // Import the new component
-import { Separator } from "@/components/ui/separator"; // Import Separator
+import { TipsSection } from "@/components/TipsSection";
+import { Separator } from "@/components/ui/separator";
 import { Wand2, Frown, Video } from 'lucide-react';
+
+// Define a type for the parameters state for better type safety
+type ParamValues = string | number | null;
 
 function GeneratorComponent() {
   const { user, credits, setCredits } = useAuth();
@@ -25,7 +28,8 @@ function GeneratorComponent() {
   const modelId = searchParams.get('model') || 'veo-3-fast';
   const currentModelConfig = modelConfigs[modelId];
 
-  const [params, setParams] = useState<{[key: string]: any}>({});
+  // THE FIX: State is now strongly typed.
+  const [params, setParams] = useState<{[key: string]: ParamValues}>({});
   const [videoUrl, setVideoUrl] = useState('');
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
@@ -33,20 +37,22 @@ function GeneratorComponent() {
 
   useEffect(() => {
     if (!currentModelConfig) return;
-    const defaultParams: {[key: string]: any} = {};
+    // THE FIX: Type is inferred correctly now, no 'any' needed.
+    const defaultParams: {[key: string]: ParamValues} = {};
     currentModelConfig.params.forEach(param => { defaultParams[param.name] = param.defaultValue; });
     setParams(defaultParams);
     setImagePreview(null); setVideoUrl(''); setError(''); setGenerating(false);
   }, [currentModelConfig]);
 
-  const handleParamChange = (name: string, value: any) => { setParams(prev => ({ ...prev, [name]: value })); };
+  // THE FIX: 'value' parameter is now strongly typed.
+  const handleParamChange = (name: string, value: string | number) => { setParams(prev => ({ ...prev, [name]: value })); };
+  
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUrl = reader.result as string;
-        // Assuming your config uses 'image' as the parameter name now
         handleParamChange('image', dataUrl);
         setImagePreview(dataUrl);
       };
@@ -78,8 +84,8 @@ function GeneratorComponent() {
       }
 
       setCredits(credits - 1);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) { // THE FIX: Removed ': any' and safely access the message.
+      setError((err as Error).message);
     } finally {
       setGenerating(false);
     }
@@ -108,10 +114,10 @@ function GeneratorComponent() {
               {currentModelConfig.params.map(param => (
                 <div key={param.name} className="grid w-full items-center gap-2">
                   <Label htmlFor={param.name} className="font-semibold">{param.label}</Label>
-                  {param.type === 'textarea' && <Textarea id={param.name} value={params[param.name] || ''} onChange={(e) => handleParamChange(param.name, e.target.value)} rows={5} disabled={generating} />}
-                  {param.type === 'slider' && <div className="flex items-center gap-4 pt-1"><Slider id={param.name} value={[params[param.name] || param.defaultValue]} onValueChange={([value]) => handleParamChange(param.name, value)} min={param.min} max={param.max} step={param.step} disabled={generating} /><span className="font-mono text-sm w-12 text-center rounded-md border p-2">{params[param.name]}</span></div>}
+                  {param.type === 'textarea' && <Textarea id={param.name} value={params[param.name] as string || ''} onChange={(e) => handleParamChange(param.name, e.target.value)} rows={5} disabled={generating} />}
+                  {param.type === 'slider' && <div className="flex items-center gap-4 pt-1"><Slider id={param.name} value={[params[param.name] as number || 0]} onValueChange={([value]) => handleParamChange(param.name, value)} min={param.min} max={param.max} step={param.step} disabled={generating} /><span className="font-mono text-sm w-12 text-center rounded-md border p-2">{params[param.name] as number}</span></div>}
                   {param.type === 'image' && <div className='grid gap-3'><Input id={param.name} type="file" onChange={handleImageChange} accept="image/*" disabled={generating} />{imagePreview && <AspectRatio ratio={16 / 9} className="bg-muted rounded-md border"><img src={imagePreview} alt="Image preview" className="object-contain w-full h-full rounded-md" /></AspectRatio>}</div>}
-                  {param.type === 'dropdown' && <Select value={params[param.name] || param.defaultValue} onValueChange={(value) => handleParamChange(param.name, value)} disabled={generating}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{param.options?.map(option => <SelectItem key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>}
+                  {param.type === 'dropdown' && <Select value={params[param.name] as string || ''} onValueChange={(value) => handleParamChange(param.name, value)} disabled={generating}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{param.options?.map(option => <SelectItem key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>}
                 </div>
               ))}
             </CardContent>
@@ -126,7 +132,6 @@ function GeneratorComponent() {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 Result
-                {/* --- THE BADGE LOGIC FIX --- */}
                 <Badge variant={generating ? "secondary" : "default"}>
                   {generating ? "Generating..." : (videoUrl ? "Complete" : "Example")}
                 </Badge>
@@ -142,9 +147,6 @@ function GeneratorComponent() {
                 ) : videoUrl ? (
                   <video src={videoUrl} controls autoPlay loop className="w-full h-full rounded-md" />
                 ) : (
-                  // --- THE PLACEHOLDER VIDEO FIX ---
-                  // This video will play when there's no active generation or result.
-                  // It must be placed in your /public folder.
                   <video
                     src="/warrior.mp4"
                     autoPlay
@@ -159,7 +161,6 @@ function GeneratorComponent() {
           </Card>
         </div>
       </div>
-            {/* --- THE NEW DYNAMIC TIPS SECTION --- */}
       <Separator className="my-16" />
       <TipsSection tips={currentModelConfig.tips} />
     </div>

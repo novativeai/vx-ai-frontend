@@ -3,12 +3,13 @@
 interface ModelParameter {
   name: string;
   label: string;
-  type: 'textarea' | 'image' | 'slider' | 'dropdown'; // Add 'dropdown' type
-  defaultValue: any;
+  type: 'textarea' | 'image' | 'slider' | 'dropdown';
+  // --- THE FIX: Replace 'any' with the specific types you are using ---
+  defaultValue: string | number | null;
   min?: number;
   max?: number;
   step?: number;
-  options?: string[]; // Add options for dropdown
+  options?: string[];
 }
 
 // Add this interface to define the structure of our new tips content
@@ -27,7 +28,7 @@ interface ModelConfig {
   id: string;
   displayName: string;
   params: ModelParameter[];
-  tips?: TipSection[]; // Add the new optional 'tips' property
+  tips?: TipSection[];
 }
 
 export const modelConfigs: { [key: string]: ModelConfig } = {
@@ -82,7 +83,6 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         type: "textarea",
         defaultValue: "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
       },
-      // --- NEW DROPDOWN PARAMETER ---
       {
         name: "resolution",
         label: "Resolution",
@@ -99,7 +99,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         max: 5,
         step: 1,
       },
-            {
+      {
         name: "fps",
         label: "FPS",
         type: "slider",
