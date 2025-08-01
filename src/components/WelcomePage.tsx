@@ -53,7 +53,7 @@ export function WelcomePage() {
                 </div>
                 <h3 className="text-xl font-bold">Unmatched Quality</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Powered by the best models like Google's VEO-3 for cinematic quality, realism, and visual coherence.
+                  Powered by the best models like Google&apos;s VEO-3 for cinematic quality, realism, and visual coherence.
                 </p>
               </div>
                <div className="flex flex-col items-center text-center">
