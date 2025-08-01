@@ -37,8 +37,8 @@ export default function SignIn() {
         });
       }
       router.push('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError((err as Error).message);
     }
   };
 
@@ -47,7 +47,7 @@ export default function SignIn() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/');
-    } catch (err: any) {
+    } catch (err) {
       setError('Invalid email or password. Please try again.');
     }
   };

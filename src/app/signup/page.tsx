@@ -39,8 +39,8 @@ export default function SignUp() {
         });
       }
       router.push('/');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError((err as Error).message);;
     }
   };
 
@@ -59,9 +59,9 @@ export default function SignUp() {
         credits: 10,
       });
       router.push('/');
-    } catch (err: any)
+    } catch (err)
     {
-      setError(err.message);
+      setError((err as Error).message);
     }
   };
 
