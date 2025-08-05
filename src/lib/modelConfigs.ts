@@ -37,11 +37,24 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "VEO 3 Fast",
     params: [
       {
+        name: "image",
+        label: "Image",
+        type: "image",
+        defaultValue: null,
+      },
+            {
         name: "prompt",
         label: "Prompt",
         type: "textarea",
         defaultValue: "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
       },
+            {
+        name: "negative_prompt",
+        label: "Negative prompt",
+        type: "textarea",
+        defaultValue: "",
+      },
+
     ],
     tips: [
       {
@@ -98,15 +111,6 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         min: 1,
         max: 5,
         step: 1,
-      },
-      {
-        name: "fps",
-        label: "FPS",
-        type: "slider",
-        defaultValue: 24,
-        min: 24,
-        max: 60,
-        step: 36,
       },
     ],
     tips: [
@@ -167,6 +171,31 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         label: "Prompt",
         type: "textarea",
         defaultValue: "Commercial video photoshoot of a pair of shoes with tons of effect.",
+      },
+      {
+        name: "resolution",
+        label: "Resolution",
+        type: "dropdown",
+        defaultValue: "480p",
+        options: ["480p", "720p"]
+      },
+      {
+        name: "num_frames",
+        label: "Number of frames",
+        type: "slider",
+        defaultValue: 81,
+        min: 81,
+        max: 100,
+        step: 1
+      },
+      {
+        name: "frames_per_second",
+        label: "Frames per second",
+        type: "slider",
+        defaultValue: 16,
+        min: 5,
+        max: 24,
+        step: 1
       },
     ],
     tips: [

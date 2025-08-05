@@ -1,27 +1,35 @@
+"use client"
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Zap, Film, Sparkles, ArrowRight } from 'lucide-react';
+import { Zap, Film, Sparkles, ArrowRight, Rocket } from 'lucide-react';
 import { ModelGallery } from './ModelGallery';
+import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook
 
 export function WelcomePage() {
+    // Get the current user's authentication state
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800">
+        <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 rounded-2xl "
+        style={{ backgroundImage: `url(/top-no-text.png)` }}>
           <div className="container px-4 md:px-6 text-center">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
                 Create Breathtaking Video with AI
               </h1>
-              <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+              <p className="mt-4 text-lg  md:text-xl">
                 VX AI leverages the power of state-of-the-art AI models to transform your text prompts into stunning, high-definition videos.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/signup">
+                <Link href={user ? "#model-gallery" : "/signup"}>
                   <Button size="lg" className="w-full sm:w-auto">
-                    Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
+                    {/* Change text and behavior based on login state */}
+                    {user ? "Explore Models" : "Get Started for Free"}
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="#features">
@@ -35,7 +43,7 @@ export function WelcomePage() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="w-full py-16 md:py-24 lg:py-32 bg-background">
+        <section id="features" className="w-full py-16">
           <div className="container px-4 md:px-6">
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
               <div className="flex flex-col items-center text-center">
@@ -103,7 +111,33 @@ export function WelcomePage() {
                 </div>
             </div>
         </section>
-
+        {/* --- NEW FINAL CTA SECTION --- */}
+        <section  className="w-full py-16 md:py-8 lg:py-8">
+          <div  className="container">
+            <div style={{ backgroundImage: `url(/bottom-no-text.png)` }} className="mx-auto max-w-5xl rounded-2xl bg-primary text-primary-foreground p-8 md:p-12 lg:p-16 text-center shadow-lg">
+              <Rocket className="h-12 w-12 mx-auto mb-4" />
+              <h2 className="text-3xl font-extrabold tracking-tighter sm:text-4xl md:text-5xl">
+                Ready to Start Creating?
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-lg text-primary-foreground/80">
+                Sign up today to receive your free welcome credits and begin transforming your ideas into incredible videos in just a few clicks.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href={user ? "#model-gallery" : "/signup"}>
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto"> 
+                    {/* Change text and behavior based on login state */}
+                    {user ? "Start Creating Now" : "Get Started for Free"}
+                  </Button>
+                </Link>
+                <Link href="/pricing">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"> 
+                    View Pricing
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
