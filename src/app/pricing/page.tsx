@@ -1,141 +1,196 @@
 "use client";
 
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { Check, Star } from "lucide-react";
+import { cn } from "@/lib/utils"; // Make sure you have this utility from Shadcn
+import { PaymentFormPopup, BillingDetails } from "@/components/PaymentFormPopup";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 
-// Define the structure for a pricing tier
+// The data structure for the 3-tier pricing cards
 const pricingTiers = [
   {
     name: "Starter",
-    credits: 50,
-    price: 10,
-    pricePerCredit: 0.20,
+    price: 0,
+    description: "For individuals and small projects",
     features: [
-      "Perfect for trying things out",
-      "Generate up to 50 videos",
-      "Standard support"
+      "10 Welcome Credits",
+      "Standard Generation Speed",
+      "Access to All Models"
     ],
     isFeatured: false,
+    isCurrent: true, // To disable the button
   },
   {
     name: "Creator",
-    credits: 150,
-    price: 25,
-    pricePerCredit: 0.16,
+    price: 22,
+    description: "For frequent users and professionals",
     features: [
-      "Ideal for regular users",
-      "Generate up to 150 videos",
-      "Priority support",
-      "Early access to new features"
+      "250 Monthly Credits",
+      "Priority Generation Queue",
+      "Early Access to New Models",
+      "Standard Support"
     ],
     isFeatured: true,
+    isCurrent: false,
   },
   {
     name: "Pro",
-    credits: 500,
-    price: 75,
-    pricePerCredit: 0.15,
+    price: 49,
+    description: "For teams and power users",
     features: [
-      "For power users and professionals",
-      "Generate up to 500 videos",
-      "Dedicated 24/7 support",
-      "API access"
+      "1000 Monthly Credits",
+      "Highest Priority Queue",
+      "API Access",
+      "Dedicated Support"
     ],
     isFeatured: false,
+    isCurrent: false,
   },
 ];
 
 export default function PricingPage() {
-    const { user, loading } = useAuth();
-    const router = useRouter();
+  const { user } = useAuth();
+  const router = useRouter();
+  const [customAmount, setCustomAmount] = useState(10);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [purchaseRequest, setPurchaseRequest] = useState<{ plan?: string; customAmount?: number }>({});
 
-    const handlePurchase = (tierName: string) => {
-        if (!user) {
-            router.push('/signin');
-            return;
-        }
-        // This is where you would integrate with a payment provider like Stripe.
-        // For now, we'll just log to the console.
-        console.log(`User ${user.uid} is attempting to purchase the ${tierName} package.`);
-        alert(`Payment integration for the ${tierName} package would start here!`);
-    };
-
-    if (loading) {
-        return <div>Loading...</div>; // You can add a skeleton loader here
+  const initiatePurchase = async (details: { plan?: string; customAmount?: number }) => {
+    if (!user) {
+      router.push('/signin');
+      return;
     }
+    setPurchaseRequest(details);
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists() && userDoc.data().billingInfo) {
+      processPayment(details);
+    } else {
+      setIsPopupOpen(true);
+    }
+  };
+
+  const handlePopupSubmit = async (billingDetails: BillingDetails) => {
+    if (!user) return;
+    setIsProcessing(true);
+    const { cardNumber, expiry, cvv, ...storableInfo } = billingDetails;
+    await setDoc(doc(db, "users", user.uid), { billingInfo: storableInfo }, { merge: true });
+    await processPayment(purchaseRequest);
+    setIsProcessing(false);
+    setIsPopupOpen(false);
+  };
+
+  const processPayment = async (details: { plan?: string; customAmount?: number }) => {
+    if (!user) return;
+    setIsProcessing(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/create-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid, ...details }),
+      });
+      const data = await response.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        throw new Error("Failed to get payment URL from server.");
+      }
+    } catch (error) {
+      console.error("Payment creation failed:", error);
+      alert("Could not initiate payment. Please try again.");
+      setIsProcessing(false);
+    }
+  };
+  
+  const inputStyles = "bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 text-xl h-12 focus-visible:ring-0 focus-visible:border-b-white";
 
   return (
-    <div className="flex flex-col items-center bg-gray-50/50 dark:bg-gray-900/50 min-h-screen py-12 md:py-24">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">Find the Perfect Plan</h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Choose the credit package that fits your creative needs. Get more value with larger packs.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {pricingTiers.map((tier) => (
-            <Card
-              key={tier.name}
-              className={cn(
-                "flex flex-col transition-transform transform hover:scale-105",
-                { "border-2 border-primary shadow-xl relative": tier.isFeatured }
-              )}
-            >
-              {tier.isFeatured && (
-                <Badge variant="default" className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1">
-                    <Star className="h-4 w-4" />
-                    Best Value
-                </Badge>
-              )}
-
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
-                <CardDescription>
-                    ${tier.pricePerCredit.toFixed(2)} / credit
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="flex-grow flex flex-col items-center">
-                <div className="text-5xl font-bold my-4">
-                  ${tier.price}
-                  <span className="text-lg font-normal text-muted-foreground">/ one-time</span>
-                </div>
-                <p className="font-semibold text-primary mb-6">{tier.credits} Credits</p>
-                <ul className="space-y-3 text-sm text-muted-foreground text-left w-full">
-                  {tier.features.map((feature, index) => (
-                    <li key={index} className="flex items-center">
-                      <CheckCircle className="h-4 w-4 mr-2 text-green-500 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-
-              <CardFooter>
-                <Button 
-                    className="w-full" 
-                    variant={tier.isFeatured ? "default" : "outline"}
-                    onClick={() => handlePurchase(tier.name)}
-                >
-                  Purchase {tier.name}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-        <div className="text-center mt-12">
-            <p className="text-sm text-muted-foreground">
-                All purchases are final. Credits do not expire. Need a custom plan? <a href="#" className="underline">Contact us</a>.
+    <>
+      <PaymentFormPopup 
+        isOpen={isPopupOpen} 
+        onClose={() => setIsPopupOpen(false)} 
+        onSubmit={handlePopupSubmit}
+        isProcessing={isProcessing}
+      />
+      <div className="bg-black text-white min-h-screen pt-32">
+        <div className="container mx-auto py-16 md:py-24">
+          <div className="text-center max-w-2xl mx-auto">
+            <h1 className="text-7xl md:text-8xl font-extrabold tracking-tighter">Get more done</h1>
+            <p className="mt-4 text-lg text-neutral-400">
+              Choose the plan that fits your creative needs. Get more value and priority with a subscription.
             </p>
+          </div>
+
+          {/* --- REVERTED 3-TIER PRICING CARDS --- */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mt-16">
+            {pricingTiers.map((tier) => (
+              <Card
+                key={tier.name}
+                className={cn(
+                  "flex flex-col bg-[#1C1C1C] border-neutral-800 transition-transform transform hover:scale-105",
+                  { "border-2 border-[#D4FF4F] shadow-xl relative": tier.isFeatured }
+                )}
+              >
+                {tier.isFeatured && (
+                  <Badge className="absolute -top-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-[#D4FF4F] text-black">
+                      <Star className="h-4 w-4" />
+                      Best Value
+                  </Badge>
+                )}
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
+                  <CardDescription className="text-neutral-400">{tier.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow flex flex-col">
+                  <div className="text-6xl font-bold my-4">
+                    ${tier.price}
+                    <span className="text-lg font-normal text-neutral-500">/mo</span>
+                  </div>
+                  <ul className="space-y-3 text-sm text-neutral-300">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-center">
+                        <Check className="h-4 w-4 mr-2 text-[#D4FF4F] flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                      className={cn(
+                        "w-full font-semibold",
+                        tier.isFeatured ? "bg-[#D4FF4F] text-black hover:bg-[#c2ef4a]" : "bg-white text-black hover:bg-neutral-200"
+                      )}
+                      disabled={tier.isCurrent}
+                      onClick={() => initiatePurchase({ plan: tier.name })}
+                  >
+                    {tier.isCurrent ? "Current Plan" : "Upgrade"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          
+          <div className="mt-24">
+            <div className="flex flex-col md:flex-row justify-between md:items-end">
+              <h2 className="text-7xl md:text-8xl font-extrabold tracking-tighter mb-4 md:mb-0">Custom amount</h2>
+              <div className="flex items-center gap-4">
+                  <Input type="number" value={customAmount} onChange={(e) => setCustomAmount(parseInt(e.target.value))} placeholder="eg: 10$" className={`${inputStyles} w-32`} />
+                  <p className="text-2xl text-neutral-400">x 10 =</p>
+                  <p className="text-2xl font-bold">{customAmount * 10} credits</p>
+                  <Button variant="outline" className="bg-white text-black hover:bg-neutral-200 font-semibold" onClick={() => initiatePurchase({ customAmount })}>Purchase Credit</Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

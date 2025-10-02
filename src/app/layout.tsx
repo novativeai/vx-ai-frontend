@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VX AI | AI Video Generator",
+  title: "reelzila | AI Studio",
   description: "Generate stunning videos from text prompts using the power of AI.",
 };
 
@@ -18,13 +16,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    // THE FIX: Add className="dark" to the <html> tag. This will now work.
+    <html lang="en" className="dark h-full">
+      <body className={`flex flex-col h-full`}>
         <AuthProvider>
           <Navbar />
-          <main className="container mx-auto px-4 py-8">{children}</main>
+          <main className="flex-grow">{children}</main>
+          <Footer />
         </AuthProvider>
-        <Footer/>
       </body>
     </html>
   );

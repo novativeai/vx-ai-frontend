@@ -6,15 +6,14 @@ import { Film, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-muted border-t">
+    <footer className="bg-black border-t">
       <div className="container mx-auto py-12 px-4 md:px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           
           {/* Column 1: Branding */}
           <div className="col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <Film className="h-7 w-7" />
-              <span className="text-xl font-bold">VX AI</span>
+              <span className="text-xl font-bold">reelzila</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Transforming your text into stunning, high-definition videos with the power of AI.
@@ -69,7 +68,7 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} VX AI. All Rights Reserved.
+            © {new Date().getFullYear()} reelzila. All Rights Reserved.
           </p>
           <div className="flex space-x-4">
             <Link href="#"><Twitter className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
