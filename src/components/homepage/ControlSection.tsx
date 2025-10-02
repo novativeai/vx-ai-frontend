@@ -3,8 +3,8 @@ import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 
 const controlItems = [
   { title: "Camera", videoSrc: "/videos/control-1.mp4" },
-  { title: "Pose", videoSrc: "/videos/control-2.mp4" },
-  { title: "Details", videoSrc: "/videos/control-3.mp4" },
+  { title: "Pose", videoSrc: "/videos/control-1.mp4" },
+  { title: "Details", videoSrc: "/videos/control-1.mp4" },
 ];
 
 export function ControlSection() {

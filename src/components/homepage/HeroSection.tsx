@@ -5,7 +5,7 @@ export function HeroSection() {
   return (
     <section className="relative h-screen w-full flex items-center justify-center text-center text-white overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full z-0">
-        <video src="/videos/hero-bg.mp4" autoPlay loop muted playsInline className="w-full h-full object-cover" />
+        <video src="/videos/highlight-1.mp4" autoPlay loop muted playsInline className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/50" />
       </div>
       <div className="relative z-10 max-w-4xl mx-auto px-4">
