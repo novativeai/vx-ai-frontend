@@ -11,8 +11,28 @@ import { DynamicBanner, BannerSlide } from "@/components/DynamicBanner";
 import { HistoryCard } from "@/components/HistoryCard";
 import { ModelCard } from "@/components/ModelCard";
 
-// --- Page-Specific Data and Components ---
 
+// --- Page-Specific Data and Components ---
+// --- THE FIX: Define a type for the History items ---
+interface HistoryItem {
+  id: string;
+  outputUrl?: string;
+  outputType?: 'video' | 'image';
+  prompt?: string;
+  status?: 'completed' | 'pending' | 'failed';
+  [key: string]: any;
+}
+
+// --- THE FIX: Define a type for the Model items ---
+interface ModelItem {
+  id: string;
+  displayName: string;
+  description: string;
+  tags: string[];
+  cardVideo: string;
+  outputType: 'video' | 'image';
+  [key: string]: any;
+}
 // Prepare data for the dynamic banner using our model configs
 const modelSlides: BannerSlide[] = Object.values(modelConfigs).map(model => ({
   videoSrc: model.bannerImage,
@@ -35,7 +55,8 @@ function ModelGrid() {
 
 function HistorySection() {
   const { user } = useAuth();
-  const [history, setHistory] = useState<any[]>([]);
+    // --- THE FIX: Use the specific type for state ---
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
     if (!user) return;

@@ -9,7 +9,7 @@ export function EmpoweringSection() {
 
             <div className="bg-white text-black p-8 rounded-xl max-w-md">
               <h3 className="text-4xl font-bold">Are you a student?</h3>
-              <p className="mt-4 text-neutral-700">We believe in making advanced AI tools accessible. That's why we provide dedicated support through free credits, exclusive access, and tailored resources to help students experiment and bring their ideas to life.</p>
+              <p className="mt-4 text-neutral-700">We believe in making advanced AI tools accessible. That&apos;s why we provide dedicated support through free credits, exclusive access, and tailored resources to help students experiment and bring their ideas to life.</p>
               <Button className="mt-6 bg-black text-white hover:bg-neutral-800 font-semibold">
                 Subscribe
               </Button>

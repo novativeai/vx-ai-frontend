@@ -3,15 +3,25 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy, doc } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, doc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card"; // Corrected import from 'CardContent'
 
-// --- Sub-components with Empty States ---
+// --- THE FIX: Define a type for the history items ---
+interface HistoryItem {
+  id: string;
+  createdAt?: { toDate: () => Date };
+  amount?: number;
+  status?: 'paid' | 'pending' | 'failed';
+  [key: string]: any; // Allow other fields
+}
+
+// --- Sub-components for clarity ---
+
 function UsageStats() {
   const { user } = useAuth();
   const [usage, setUsage] = useState<Record<string, number>>({});
@@ -30,7 +40,6 @@ function UsageStats() {
     return () => unsub();
   }, [user]);
 
-  // THE FIX: Production-ready empty state
   if (Object.keys(usage).length === 0) {
     return (
       <Card className="bg-[#1C1C1C] border-neutral-800 p-4 text-center text-neutral-400 text-sm">
@@ -56,18 +65,18 @@ function UsageStats() {
 
 function BillingHistory() {
   const { user } = useAuth();
-  const [history, setHistory] = useState<any[]>([]);
+  // --- THE FIX: Use the specific type for state ---
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
     if (!user) return;
     const q = query(collection(db, "users", user.uid, "payments"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
-      setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HistoryItem)));
     });
     return () => unsub();
   }, [user]);
 
-  // THE FIX: Production-ready empty state
   if (history.length === 0) {
     return (
       <div>
@@ -130,7 +139,6 @@ export default function AccountPage() {
                             </Link>
                         </div>
                     </div>
-                    {/* THE FIX: Made responsive with text alignment and order changes */}
                     <div className="lg:col-span-2 order-1 lg:order-2 flex flex-col justify-between text-center md:text-right">
                        <div>
                             <p className="text-neutral-400">Active Plan</p>
@@ -151,7 +159,6 @@ export default function AccountPage() {
                             <p className="text-sm text-neutral-400">Manage your payment details.</p>
                              <div className="space-y-4 mt-4">
                                 <Input placeholder="Name On Card" className={inputStyles} />
-                                {/* Display other billing info from Firestore if available */}
                              </div>
                          </div>
                          <div>

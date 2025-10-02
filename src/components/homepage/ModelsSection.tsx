@@ -3,6 +3,16 @@
 import { modelConfigs } from "@/lib/modelConfigs"; // Import the single source of truth
 import { ModelCard } from "@/components/ModelCard";   // Import the refactored card component
 
+// --- THE FIX: Define the ModelItem type ---
+interface ModelItem {
+  id: string;
+  displayName: string;
+  description: string;
+  tags: string[];
+  cardVideo: string;
+  outputType: 'video' | 'image';
+  [key: string]: any;
+}
 // Get the first 3 models to display on the homepage
 const modelsToShow = Object.values(modelConfigs).slice(0, 3);
 
