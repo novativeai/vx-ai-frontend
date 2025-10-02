@@ -1,26 +1,19 @@
-// src/app/account/page.tsx
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy, doc, updateDoc } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Card } from "@/components/ui/card"; // Corrected import from 'CardContent'
+import { Card } from "@/components/ui/card";
 
-// --- THE FIX: Define a type for the history items ---
-interface HistoryItem {
-  id: string;
-  createdAt?: { toDate: () => Date };
-  amount?: number;
-  status?: 'paid' | 'pending' | 'failed';
-  [key: string]: any; // Allow other fields
-}
+// --- THE FIX: Import the new, correct type ---
+import { PaymentTransaction } from "@/types/types";
 
-// --- Sub-components for clarity ---
+// --- Sub-components ---
 
 function UsageStats() {
   const { user } = useAuth();
@@ -32,7 +25,8 @@ function UsageStats() {
     const unsub = onSnapshot(q, (snapshot) => {
       const counts: Record<string, number> = {};
       snapshot.forEach(doc => {
-        const modelId = doc.data().modelId || "unknown";
+        const data = doc.data() as { modelId?: string };
+        const modelId = data.modelId || "unknown";
         counts[modelId] = (counts[modelId] || 0) + 1;
       });
       setUsage(counts);
@@ -65,14 +59,15 @@ function UsageStats() {
 
 function BillingHistory() {
   const { user } = useAuth();
-  // --- THE FIX: Use the specific type for state ---
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  // --- THE FIX: Use the correct PaymentTransaction type for state ---
+  const [history, setHistory] = useState<PaymentTransaction[]>([]);
 
   useEffect(() => {
     if (!user) return;
     const q = query(collection(db, "users", user.uid, "payments"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
-      setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HistoryItem)));
+      // --- THE FIX: Cast the Firestore data to the correct type ---
+      setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PaymentTransaction)));
     });
     return () => unsub();
   }, [user]);
@@ -96,6 +91,7 @@ function BillingHistory() {
                 <div key={item.id} className="flex justify-between items-center border-b border-neutral-800 pb-2">
                     <div>
                         <p>{item.createdAt?.toDate().toLocaleDateString()}</p>
+                        {/* This comparison is now valid and the error is gone */}
                         <p className={`text-sm ${item.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
                           {item.amount}€ Purchase - {item.status}
                         </p>
@@ -108,7 +104,7 @@ function BillingHistory() {
   );
 }
 
-// --- Main Page Component ---
+// --- Main Page Component (Unchanged) ---
 export default function AccountPage() {
     const { user, credits } = useAuth();
 

@@ -11,6 +11,18 @@ import { DynamicBanner, BannerSlide } from "@/components/DynamicBanner";
 import { HistoryCard } from "@/components/HistoryCard";
 import { ModelCard } from "@/components/ModelCard";
 
+// --- THE FIX: Define a single, comprehensive Model type ---
+interface Model {
+  id: string;
+  displayName: string;
+  description: string;
+  tags: string[];
+  bannerImage: string;
+  cardVideo: string;
+  outputType: 'video' | 'image';
+  params: any[]; // Keep params as 'any' for simplicity, as it's not directly used here
+  tips?: any[];
+}
 
 // --- Page-Specific Data and Components ---
 // --- THE FIX: Define a type for the History items ---
@@ -56,6 +68,7 @@ function ModelGrid() {
 function HistorySection() {
   const { user } = useAuth();
     // --- THE FIX: Use the specific type for state ---
+  // --- THE FIX: Use the specific HistoryItem type ---
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
