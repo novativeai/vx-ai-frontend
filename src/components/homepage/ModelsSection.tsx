@@ -2,17 +2,9 @@
 
 import { modelConfigs } from "@/lib/modelConfigs"; // Import the single source of truth
 import { ModelCard } from "@/components/ModelCard";   // Import the refactored card component
-
+import { ModelConfig } from "@/types/types";
 // --- THE FIX: Define the ModelItem type ---
-interface ModelItem {
-  id: string;
-  displayName: string;
-  description: string;
-  tags: string[];
-  cardVideo: string;
-  outputType: 'video' | 'image';
-  [key: string]: any;
-}
+
 // Get the first 3 models to display on the homepage
 const modelsToShow = Object.values(modelConfigs).slice(0, 3);
 
@@ -28,7 +20,7 @@ export function ModelsSection() {
           {/* --- THE FIX: Using the refactored ModelCard component --- */}
           {/* This loop is now much cleaner and ensures consistency with the Explore page */}
           {modelsToShow.map((model) => (
-            <ModelCard key={model.id} model={model as any} />
+            <ModelCard key={model.id} model={model as ModelConfig} />
           ))}
         </div>
       </div>

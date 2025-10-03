@@ -21,20 +21,9 @@ import { HistoryCard } from "@/components/HistoryCard";
 import { ModelCard } from "@/components/ModelCard";
 
 // --- THE FIX: Import the shared Generation type ---
-import { Generation } from "@/types/types";
+import { Generation, ModelConfig } from "@/types/types"; // FIX: Import shared types
 
-// --- THE FIX: Define the Model type for consistency ---
-interface Model {
-  id: string;
-  displayName: string;
-  description: string;
-  tags: string[];
-  bannerImage: string;
-  cardVideo: string;
-  outputType: 'video' | 'image';
-  params: any[];
-  tips?: any[];
-}
+
 
 // --- THE FIX: Remove the old, conflicting HistoryItem type ---
 // interface HistoryItem { ... } // REMOVED
@@ -68,10 +57,10 @@ function HeroCarousel() {
           {models.map((model) => (
             <CarouselItem key={model.id}>
               <div className="relative flex items-end h-[500px] text-white overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${(model as Model).bannerImage})` }} />
+                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${(model as ModelConfig).bannerImage})` }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="relative p-6 md:p-8 z-10 container">
-                  <Badge>{(model as Model).outputType === 'video' ? "Image-to-Video" : "Text-to-Image"}</Badge>
+                  <Badge>{(model as ModelConfig).outputType === 'video' ? "Image-to-Video" : "Text-to-Image"}</Badge>
                   <h1 className="text-4xl md:text-6xl font-extrabold mt-4">{model.displayName}</h1>
                   <p className="mt-2 max-w-lg text-lg text-white/80">{model.description}</p>
                   <Link href={`/generator?model=${model.id}`}>
@@ -97,7 +86,7 @@ function ModelGrid() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {models.map((model) => (
-        <ModelCard key={model.id} model={model as Model} />
+        <ModelCard key={model.id} model={model as ModelConfig} />
       ))}
     </div>
   );

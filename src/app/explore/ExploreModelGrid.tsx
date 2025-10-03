@@ -15,7 +15,7 @@ export const ExploreModelGrid = () => {
         <Link key={model.id} href={`/generator?model=${model.id}`} className="group">
           <div className="bg-[#1C1C1C] rounded-2xl p-4 transition-all group-hover:ring-2 group-hover:ring-white/50 h-full flex flex-col">
             <div className="aspect-video rounded-lg overflow-hidden">
-              <HoverVideoPlayer src={model.cardVideo} />
+              <HoverVideoPlayer src={model.cardImage} />
             </div>
             <div className="p-4 flex-grow flex flex-col justify-between">
               <div>
