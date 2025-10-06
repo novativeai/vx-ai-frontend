@@ -10,7 +10,7 @@ const modelsToShow = Object.values(modelConfigs).slice(0, 3);
 
 export function ModelsSection() {
   return (
-    <section className="bg-black text-white py-20 md:py-32 px-4">
+    <section className="bg-black text-white ">
       <div className="container mx-auto">
         <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>
         <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter mt-2">MODELS</h2>

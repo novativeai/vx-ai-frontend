@@ -3,13 +3,13 @@ import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 
 const controlItems = [
   { title: "Camera", videoSrc: "/videos/control-1.mp4" },
-  { title: "Pose", videoSrc: "/videos/control-1.mp4" },
-  { title: "Details", videoSrc: "/videos/control-1.mp4" },
+  { title: "Pose", videoSrc: "/videos/control-2.mp4" },
+  { title: "Transition", videoSrc: "/videos/control-3.mp4" },
 ];
 
 export function ControlSection() {
   return (
-    <section className="bg-black text-white py-20 md:py-32 px-4">
+    <section className="bg-black text-white px-4">
       <div className="container mx-auto">
         <div className="flex justify-between items-end mb-12">
           <div>

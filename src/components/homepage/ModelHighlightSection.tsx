@@ -7,7 +7,7 @@
 
 export function ModelHighlightSection() {
   return (
-    <section className="bg-black text-white py-20 md:py-32 overflow-hidden">
+    <section className="bg-black text-white overflow-hidden">
       {/* 
         This is the main container that establishes the coordinate system.
         It is relative, so all children can be positioned absolutely within it.

@@ -11,42 +11,56 @@ import { AboutUsSection } from "@/components/homepage/AboutUsSection";
 import { ModelsSection } from "@/components/homepage/ModelsSection";
 import { EmpoweringSection } from "@/components/homepage/EmpoweringSection";
 
-// Import the new ParallaxSection wrapper
+// Import the ParallaxSection wrapper, which does not need to be changed
 import { ParallaxSection } from "@/components/homepage/ParallaxSection";
 
-// Put your section components into an array for easy mapping
-const sections = [
+// --- THE FIX: Create an array ONLY for the sections that will have the parallax effect ---
+const parallaxSections = [
   HeroSection,
   ModelHighlightSection,
-  ControlSection,
-  AboutUsSection,
-  ModelsSection,
-  EmpoweringSection
+  ControlSection
 ];
 
 export default function HomePage() {
   const container = useRef(null);
+  
+  // The useScroll hook will now only track the progress within the parallax container
   const { scrollYProgress } = useScroll({
     target: container,
-    offset: ['start start', 'end end'] // Track scroll from the very top to the very bottom
+    offset: ['start start', 'end end']
   });
 
   return (
-    // The main container establishes the scrollable area.
-    // Its height needs to be greater than the sum of its sticky children
-    // to allow for the scroll effect to complete.
-    <main ref={container} className="relative bg-black" style={{ height: `${sections.length * 100}vh` }}>
-      {sections.map((SectionComponent, i) => (
-        <ParallaxSection 
-          key={i} 
-          i={i} 
-          progress={scrollYProgress} 
-          totalSections={sections.length}
-        >
-          {/* The actual section component is passed as children */}
-          <SectionComponent />
-        </ParallaxSection>
-      ))}
+    // The main wrapper remains the same
+    <main className="bg-black space-y-20 md:space-y-32">
+      
+      {/* --- Part 1: The Parallax Container --- */}
+      {/* This container has a fixed height based on the number of parallax sections. */}
+      {/* This is the "runway" for the stacking effect. */}
+      <div ref={container} className="relative" style={{ height: `${parallaxSections.length * 100}vh` }}>
+        {parallaxSections.map((SectionComponent, i) => (
+          <ParallaxSection 
+            key={i} 
+            i={i} 
+            progress={scrollYProgress} 
+            // Pass the correct total number of parallax sections
+            totalSections={parallaxSections.length}
+          >
+            <SectionComponent />
+          </ParallaxSection>
+        ))}
+      </div>
+
+      {/* --- Part 2: The Normal Scroll Container --- */}
+      {/* These sections are rendered after the parallax container and will scroll normally. */}
+      {/* The 'relative z-10' ensures a clean visual transition over the last parallax item. */}
+      <div className="relative z-10 bg-black space-y-20 md:space-y-32">
+        
+        <AboutUsSection />
+        <ModelsSection />
+        <EmpoweringSection />
+      </div>
+
     </main>
   );
 }

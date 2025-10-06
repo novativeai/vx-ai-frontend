@@ -9,7 +9,7 @@ const missionParagraphs = [
 
 export function AboutUsSection() {
   return (
-    <section className="bg-black text-white py-20 md:py-40 px-4">
+    <section className="bg-black text-white px-4">
       <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
         <div>
           <h2 className="text-5xl md:text-7xl font-extrabold tracking-tighter leading-tight">
