@@ -8,14 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 // --- NEW: Define the content for your hero slides ---
 const heroSlides = [
   {
-    videoSrc: "/videos/highlight-1.mp4", // Replace with your first video
+    videoSrc: "/videos/highlight-1-opx.mp4", // Replace with your first video
     title: <>YOUR PERSPECTIVE<br />LIKE NEVER BEFORE</>,
     subtitle: "A platform for filmakers, advertisers & creative teams",
-  },
-  {
-    videoSrc: "/videos/highlight-2.mp4", // Replace with your second video
-    title: <>GENERATIVE CONTROL<br />AT YOUR FINGERTIPS</>,
-    subtitle: "From camera to pose to fine details, everything is in your hand",
   },
 ];
 
@@ -41,6 +36,7 @@ export function HeroSection() {
             src={currentSlide.videoSrc}
             autoPlay
             muted
+            loop
             playsInline
             onEnded={handleVideoEnd}
             className="w-full h-full object-cover"

@@ -7,7 +7,7 @@ import { Film, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
 export default function Footer() {
   return (
     <footer className="bg-black border-t">
-      <div className="container mx-auto py-12 px-4 md:px-6">
+      <div className="container mx-auto py-24 px-4 md:px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           
           {/* Column 1: Branding */}

@@ -46,13 +46,18 @@ export function ModelHighlightSection() {
             </h3>
         </div>
 
-        {/* --- Bottom Left Elements (Container for correct alignment) --- */}
-        <div className="absolute bottom-0 left-0 max-w-sm z-20">
-            <p className="text-sm">
-                <span className="text-white font-bold">We are focused on foundational research and systems engineering to build</span> multimodal general intelligence. We are focused on foundational research and systems engineering to build multimodal general.
-            </p>
-            <h2 className="text-9xl font-extrabold tracking-tighter mt-4">Available Now</h2>
-        </div>
+<div className="absolute bottom-0 left-0 max-w-sm z-20">
+  <p className="text-sm">
+    <span className="text-white font-bold">
+      We are focused on foundational research and systems engineering to build
+    </span>{' '}
+    multimodal general intelligence. We are focused on foundational research and systems engineering to build multimodal general.
+  </p>
+
+  <h2 className="text-8xl font-extrabold tracking-tighter mt-4 whitespace-nowrap overflow-visible">
+    Available Now
+  </h2>
+</div>
       </div>
     </section>
   );

@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 
 const controlItems = [
-  { title: "Camera", videoSrc: "/videos/control-1.mp4" },
-  { title: "Pose", videoSrc: "/videos/control-2.mp4" },
-  { title: "Transition", videoSrc: "/videos/control-3.mp4" },
+  { title: "Camera", videoSrc: "/videos/control-1-optx.mp4" },
+  { title: "Pose", videoSrc: "/videos/control-2-optx.mp4" },
+  { title: "Transition", videoSrc: "/videos/control-3-optx.mp4" },
 ];
 
 export function ControlSection() {
@@ -14,7 +14,7 @@ export function ControlSection() {
         <div className="flex justify-between items-end mb-12">
           <div>
             <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>
-            <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter mt-2">CONTROL</h2>
+            <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">CONTROL</h2>
             <p className="max-w-md text-neutral-300 mt-4">We are focused on full control on output, from motion to pose to camera placement, everything is in your hand.</p>
           </div>
           <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black transition-colors hidden md:inline-flex font-semibold">

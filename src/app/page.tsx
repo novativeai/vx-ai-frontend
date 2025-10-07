@@ -32,7 +32,7 @@ export default function HomePage() {
 
   return (
     // The main wrapper remains the same
-    <main className="bg-black space-y-20 md:space-y-32">
+    <main className="bg-black space-y-12 md:space-y-12">
       
       {/* --- Part 1: The Parallax Container --- */}
       {/* This container has a fixed height based on the number of parallax sections. */}
@@ -55,7 +55,6 @@ export default function HomePage() {
       {/* These sections are rendered after the parallax container and will scroll normally. */}
       {/* The 'relative z-10' ensures a clean visual transition over the last parallax item. */}
       <div className="relative z-10 bg-black space-y-20 md:space-y-32">
-        
         <AboutUsSection />
         <ModelsSection />
         <EmpoweringSection />
