@@ -43,7 +43,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "VEO 3 Fast",
         description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-     cardVideo: "/videos/control-1.mp4", // This is the video that will play on hover    // A more focused, square-like image
+     cardVideo: "/videos/model-1.mp4", // This is the video that will play on hover    // A more focused, square-like image
     tags: ["new", "lora", "personalization"],
 outputType: 'video',
     params: [
@@ -96,7 +96,7 @@ outputType: 'video',
     displayName: "Seedance-1 Pro",
            description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-     cardVideo: "/videos/control-1.mp4", // This is the video that will play on hover
+     cardVideo: "/videos/model-2.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
     outputType: 'video',
     params: [
@@ -177,7 +177,7 @@ outputType: 'video',
     displayName: "WAN 2.2 14B",
            description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-     cardVideo: "/videos/control-1.mp4", // This is the video that will play on hover
+     cardVideo: "/videos/model-3.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
     outputType: 'video',
     params: [
@@ -241,7 +241,7 @@ outputType: 'video',
     displayName: "FLUX Kontext Pro",
            description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-     cardVideo: "/videos/control-1.mp4", // This is the video that will play on hover
+     cardVideo: "/videos/model-.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
     outputType: 'image', // Specify output type
     params: [

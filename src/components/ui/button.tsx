@@ -23,7 +23,7 @@ const buttonVariants = cva(
         
         // --- NEW BRAND VARIANTS ADDED ---
         "brand-solid": 
-          "bg-white text-black shadow-xs hover:bg-neutral-200",
+          "bg-white  text-black shadow-xs text-xl font-medium hover:bg-neutral-200",
         "brand-outline":
           "border border-white bg-transparent text-white shadow-xs hover:bg-white hover:text-black",
       },

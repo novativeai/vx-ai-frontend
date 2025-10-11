@@ -1,8 +1,4 @@
 "use client";
-
-import { useRef } from 'react';
-import { useScroll } from 'framer-motion';
-
 // Import all your section components
 import { HeroSection } from "@/components/homepage/HeroSection";
 import { ModelHighlightSection } from "@/components/homepage/ModelHighlightSection";
@@ -10,55 +6,51 @@ import { ControlSection } from "@/components/homepage/ControlSection";
 import { AboutUsSection } from "@/components/homepage/AboutUsSection";
 import { ModelsSection } from "@/components/homepage/ModelsSection";
 import { EmpoweringSection } from "@/components/homepage/EmpoweringSection";
+import Footer from "@/components/Footer"; // Import the Footer component
 
-// Import the ParallaxSection wrapper, which does not need to be changed
-import { ParallaxSection } from "@/components/homepage/ParallaxSection";
-
-// --- THE FIX: Create an array ONLY for the sections that will have the parallax effect ---
-const parallaxSections = [
-  HeroSection,
-  ModelHighlightSection,
-  ControlSection
-];
 
 export default function HomePage() {
-  const container = useRef(null);
-  
-  // The useScroll hook will now only track the progress within the parallax container
-  const { scrollYProgress } = useScroll({
-    target: container,
-    offset: ['start start', 'end end']
-  });
 
   return (
-    // The main wrapper remains the same
-    <main className="bg-black space-y-12 md:space-y-12">
+    // The main wrapper is the scroll snap container.
+    <main className="bg-black h-screen overflow-y-auto snap-y snap-mandatory snap-always">
       
-      {/* --- Part 1: The Parallax Container --- */}
-      {/* This container has a fixed height based on the number of parallax sections. */}
-      {/* This is the "runway" for the stacking effect. */}
-      <div ref={container} className="relative" style={{ height: `${parallaxSections.length * 100}vh` }}>
-        {parallaxSections.map((SectionComponent, i) => (
-          <ParallaxSection 
-            key={i} 
-            i={i} 
-            progress={scrollYProgress} 
-            // Pass the correct total number of parallax sections
-            totalSections={parallaxSections.length}
-          >
-            <SectionComponent />
-          </ParallaxSection>
-        ))}
-      </div>
+        {/* Section 1: HeroSection */}
+        <section className="snap-start">
+          <HeroSection/>
+        </section>
 
-      {/* --- Part 2: The Normal Scroll Container --- */}
-      {/* These sections are rendered after the parallax container and will scroll normally. */}
-      {/* The 'relative z-10' ensures a clean visual transition over the last parallax item. */}
-      <div className="relative z-10 bg-black space-y-20 md:space-y-32">
-        <AboutUsSection />
-        <ModelsSection />
-        <EmpoweringSection />
-      </div>
+        {/* Section 2: ModelHighlightSection */}
+        <section className="snap-start">
+          <ModelHighlightSection/>
+        </section>
+        
+        {/* Section 3: ControlSection */}
+        <section className="snap-start">
+          <ControlSection/>
+        </section>
+
+        {/* Section 4: AboutUsSection */}
+        <section className="snap-start h-screen flex items-center justify-center">
+          <AboutUsSection />
+        </section>
+
+        {/* Section 5: ModelsSection */}
+        <section className="snap-start h-screen flex items-center justify-center">
+          <ModelsSection />
+        </section>
+
+        {/* Section 6: EmpoweringSection and Footer share this final snap screen. */}
+        {/* This is a full-height flex column. */}
+        <section className="snap-start h-screen flex flex-col">
+            {/* This inner div grows to push the footer to the bottom,
+                while also centering the EmpoweringSection within the available space. */}
+            <div className="flex-grow flex items-center justify-center">
+                <EmpoweringSection />
+            </div>
+            {/* The Footer is now part of the last snap point. */}
+            <Footer />
+        </section>
 
     </main>
   );

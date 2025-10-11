@@ -60,10 +60,10 @@ export function HeroSection() {
             transition={{ duration: 0.7, ease: "circOut" }}
             className="max-w-4xl"
           >
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter leading-tight">
+            <h1 className="text-7xl md:text-7xl lg:text-7xl font-extrabold tracking-tighter leading-tight">
               {currentSlide.title}
             </h1>
-            <p className="mt-4 text-lg md:text-xl text-neutral-300">
+            <p className="mt-0 text-lg md:text-xl text-neutral-300">
               {currentSlide.subtitle}
             </p>
             <Link href="/explore">
