@@ -241,7 +241,7 @@ outputType: 'video',
     displayName: "FLUX Kontext Pro",
            description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-     cardVideo: "/videos/model-.mp4", // This is the video that will play on hover
+     cardVideo: "/videos/model-1.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
     outputType: 'image', // Specify output type
     params: [

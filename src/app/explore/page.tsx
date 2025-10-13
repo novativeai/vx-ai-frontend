@@ -1,85 +1,37 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { modelConfigs } from "@/lib/modelConfigs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  type CarouselApi 
-} from "@/components/ui/carousel";
 import { collection, query, orderBy, onSnapshot, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import Link from "next/link";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Autoplay from "embla-carousel-autoplay";
+import { Sparkles } from "lucide-react";
+
+// --- Component Imports ---
 import { HistoryCard } from "@/components/HistoryCard";
 import { ModelCard } from "@/components/ModelCard";
+import { DynamicBanner, BannerSlide } from "@/components/DynamicBanner";
+import { Card } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// --- THE FIX: Import the shared Generation type ---
-import { Generation, ModelConfig } from "@/types/types"; // FIX: Import shared types
+// --- Shared Type Imports ---
+import { Generation, ModelConfig } from "@/types/types";
 
+// --- Data Transformation for the Banner ---
+const explorePageSlides: BannerSlide[] = Object.values(modelConfigs)
+  .slice(0, 3) // ✅ Take only the first 3 elements
+  .map(model => ({
+    videoSrc: (model as ModelConfig).cardVideo,
+    title: (model as ModelConfig).displayName,
+    subtitle: (model as ModelConfig).description,
+    buttonText: "Try it now!",
+    buttonLink: `/generator?model=${(model as ModelConfig).id}`, // ✅ Fixed template literal
+  }));
 
-
-// --- THE FIX: Remove the old, conflicting HistoryItem type ---
-// interface HistoryItem { ... } // REMOVED
 
 // --- Components ---
-
-function HeroCarousel() {
-  const [api, setApi] = useState<CarouselApi>();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps]      = useState<number[]>([]);
-  const models = Object.values(modelConfigs);
-  const autoplayPlugin = useRef(Autoplay({ delay: 7000, stopOnInteraction: true }));
-
-  useEffect(() => {
-    if (!api) return;
-    setScrollSnaps(api.scrollSnapList());
-    setSelectedIndex(api.selectedScrollSnap());
-    api.on("select", () => { setSelectedIndex(api.selectedScrollSnap()); });
-  }, [api]);
-
-  return (
-    <div className="relative w-full">
-      <Carousel 
-        setApi={setApi} 
-        className="w-full"
-        plugins={[autoplayPlugin.current]}
-        onMouseEnter={() => autoplayPlugin.current.stop()}
-        onMouseLeave={() => autoplayPlugin.current.reset()}
-      >
-        <CarouselContent>
-          {models.map((model) => (
-            <CarouselItem key={model.id}>
-              <div className="relative flex items-end h-[500px] text-white overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${(model as ModelConfig).bannerImage})` }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                <div className="relative p-6 md:p-8 z-10 container">
-                  <Badge>{(model as ModelConfig).outputType === 'video' ? "Image-to-Video" : "Text-to-Image"}</Badge>
-                  <h1 className="text-4xl md:text-6xl font-extrabold mt-4">{model.displayName}</h1>
-                  <p className="mt-2 max-w-lg text-lg text-white/80">{model.description}</p>
-                  <Link href={`/generator?model=${model.id}`}>
-                    <Button className="mt-6" size="lg">Try it now!</Button>
-                  </Link>
-                </div>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2">
-        {scrollSnaps.map((_, index) => (
-          <div key={index} className={`h-1 rounded-full transition-all duration-300 ${index === selectedIndex ? 'bg-white w-8' : 'bg-white/50 w-4'}`} />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function ModelGrid() {
   const models = Object.values(modelConfigs);
@@ -94,26 +46,64 @@ function ModelGrid() {
 
 function HistorySection() {
   const { user } = useAuth();
-  // --- THE FIX: Use the imported, correct Generation type for state ---
   const [history, setHistory] = useState<Generation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    const q = query(collection(db, "users", user.uid, "generations"), orderBy("createdAt", "desc"), limit(10));
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+    const q = query(collection(db, "users", user.uid, "generations"), orderBy("createdAt", "desc"), limit(12));
     const unsub = onSnapshot(q, (snapshot) => {
-      // --- THE FIX: Cast the Firestore data to the shared Generation type ---
       setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Generation)));
+      setIsLoading(false);
     });
     return () => unsub();
   }, [user]);
 
-  if (!user || history.length === 0) return null;
+  const gridContainerClasses = "flex gap-6 overflow-x-auto pb-4 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:overflow-visible";
+
+  if (isLoading) {
+    return (
+      <div className={gridContainerClasses}>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="w-80 flex-shrink-0 lg:w-auto">
+            <Card className="overflow-hidden rounded-2xl bg-transparent">
+              <AspectRatio ratio={1 / 1}>
+                <Skeleton className="w-full h-full bg-[#1C1C1C]" />
+              </AspectRatio>
+            </Card>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (history.length === 0) {
+    // THE FIX: The placeholder is now in a simple flex container that doesn't stretch vertically.
+    // It's no longer trying to be a grid item, which caused the height issue.
+    return (
+      <div className="flex justify-center lg:justify-start w-full">
+        <div className="w-80 flex-shrink-0">
+          <Link href="/generator" className="group block h-full">
+            <Card className="overflow-hidden rounded-2xl h-full border-neutral-800 bg-[#1C1C1C] hover:border-neutral-700 transition-colors">
+              <AspectRatio ratio={1 / 1} className="flex flex-col items-center justify-center text-center text-neutral-500 p-6">
+                <Sparkles className="h-10 w-10 mb-4" />
+                <p className="font-semibold text-neutral-400">No history yet</p>
+                <p className="text-sm">Start generating to see your creations.</p>
+              </AspectRatio>
+            </Card>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-4">
+    <div className={gridContainerClasses}>
       {history.map(item => (
-        <div key={item.id} className="w-64 sm:w-72 md:w-80 flex-shrink-0">
-          {/* This prop passing is now type-safe */}
+        <div key={item.id} className="w-80 flex-shrink-0 sm:w-72 md:w-80 lg:w-auto">
           <HistoryCard item={item} />
         </div>
       ))}
@@ -126,22 +116,30 @@ export default function ExplorePage() {
   
   return (
     <div className="bg-black text-white">
-      <HeroCarousel />
-      <div className="space-y-16 md:space-y-24">
-        <section className="pt-16 md:pt-24">
-          <div className="container px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-left">Models</h2>
-            <ModelGrid />
-          </div>
-        </section>
-        {user && (
-          <section className="pb-16 md:pb-24">
-            <div className="container px-4 sm:px-6 lg:px-8">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-left">History</h2>
-              <HistorySection />
+      <DynamicBanner slides={explorePageSlides} />
+      
+      <div className="container mx-auto px-4">
+        <div className="space-y-16 md:space-y-24 py-16 md:py-24">
+          <section>
+            <div className="mb-12">
+              <p className="text-sm uppercase tracking-widest text-neutral-400">AI MODELS</p>
+              <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">MODELS</h2>
+              <p className="max-w-2xl text-neutral-300 mt-4">Browse our curated collection of foundational models, each designed to empower your creative vision.</p>
             </div>
+            <ModelGrid />
           </section>
-        )}
+          
+          {user && (
+            <section>
+              <div className="mb-12">
+                <p className="text-sm uppercase tracking-widest text-neutral-400">YOUR CREATIONS</p>
+                <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">HISTORY</h2>
+                <p className="max-w-2xl text-neutral-300 mt-4">A gallery of your most recent generations. Revisit your work and continue your creative journey.</p>
+              </div>
+              <HistorySection />
+            </section>
+          )}
+        </div>
       </div>
     </div>
   );

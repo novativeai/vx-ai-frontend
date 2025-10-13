@@ -1,16 +1,17 @@
+// FILE: ./src/components/ModelCard.tsx
 "use client";
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { HoverVideoPlayer } from "@/components/HoverVideoPlayer"; // Make sure this is imported
+import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 
 interface Model {
   id: string;
   displayName: string;
   description: string;
   tags: string[];
-  cardVideo: string; // Expect the video source
+  cardVideo: string;
   outputType: 'video' | 'image';
 }
 
@@ -21,9 +22,14 @@ interface ModelCardProps {
 export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
   return (
     <Link href={`/generator?model=${model.id}`} className="group">
-      <Card className="bg-[#1C1C1C] border-neutral-800 rounded-2xl p-4 transition-all h-full group-hover:ring-2 group-hover:ring-white/50 overflow-hidden">
+      <Card className="bg-[#1C1C1C] border-neutral-800 rounded-2xl p-4 transition-all md:h-full group-hover:ring-2 group-hover:ring-white/50 overflow-hidden min-w-80">
+        {/* 
+          THE FIX: Added `min-w-80` (320px).
+          - This prevents the card from shrinking below a readable width on mobile.
+          - When the parent's `w-4/5` becomes smaller than 320px, this rule takes precedence,
+            forcing the horizontal scroll to activate instead of squishing the card content.
+        */}
         <div className="aspect-video rounded-lg overflow-hidden">
-          {/* --- THE FIX: Replaced <img> with HoverVideoPlayer --- */}
           <HoverVideoPlayer src={model.cardVideo} />
         </div>
         <div className="p-4">

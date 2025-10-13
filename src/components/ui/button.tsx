@@ -1,3 +1,4 @@
+// FILE: ./src/components/ui/button.tsx
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -21,16 +22,20 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         
-        // --- NEW BRAND VARIANTS ADDED ---
         "brand-solid": 
-          "bg-white  text-black shadow-xs text-xl font-medium hover:bg-neutral-200",
+          "bg-white text-black shadow-xs text-xl font-medium hover:bg-neutral-200 tracking-tight h-14",
         "brand-outline":
           "border border-white bg-transparent text-white shadow-xs hover:bg-white hover:text-black",
+        
+        // --- MODIFIED BRAND VARIANT ---
+        "brand-lime":
+          "bg-[#D4FF4F] text-black font-bold hover:bg-[#c2ef4a] transition-colors",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
         sm: "h-8  gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-12 -md px-6 has-[>svg]:px-4",
+        // --- MODIFIED LG SIZE ---
+        lg: "h-14 px-6 has-[>svg]:px-4",
         icon: "size-9",
       },
     },

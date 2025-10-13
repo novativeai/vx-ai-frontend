@@ -1,3 +1,4 @@
+// FILE: ./src/app/contact/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -15,7 +16,7 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
-    email: user?.email || "", // Pre-fill email if user is logged in
+    email: user?.email || "",
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,12 +43,11 @@ export default function ContactPage() {
     try {
       await addDoc(collection(db, "contacts"), {
         ...formData,
-        userId: user?.uid || null, // Add user ID if logged in
+        userId: user?.uid || null,
         submittedAt: serverTimestamp(),
       });
       
       setSubmitStatus({ success: true, message: "Thank you! Your message has been sent." });
-      // Reset form on success
       setFormData({ name: "", surname: "", email: user?.email || "", message: "" });
 
     } catch (error) {
@@ -58,24 +58,23 @@ export default function ContactPage() {
     }
   };
   
-  // Custom classes for the minimalist input style
   const inputStyles = "bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 focus-visible:ring-0 focus-visible:border-b-white transition-colors";
 
   return (
     <div className="bg-black text-white min-h-screen pt-32">
       <div className="container mx-auto py-16 md:py-24">
         <div className="grid md:grid-cols-2 gap-16 items-start">
-          {/* Left Column: Title and Text */}
           <div className="space-y-4">
-            <h1 className="text-7xl md:text-8xl font-extrabold tracking-tighter">
-              Contact Us
+            <p className="text-sm uppercase tracking-widest text-neutral-400">GET IN TOUCH</p>
+            {/* THE FIX: Title is now in all caps */}
+            <h1 className="text-6xl md:text-8xl font-medium tracking-tighter">
+              CONTACT US
             </h1>
             <p className="text-lg text-neutral-400 max-w-md">
               Do you have any questions, suggestions, or complaints? Please contact us via the contact form or email us at <span className="text-white">info@reelzila.com</span>.
             </p>
           </div>
 
-          {/* Right Column: Contact Form */}
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
@@ -130,7 +129,8 @@ export default function ContactPage() {
             <Button
               type="submit"
               size="lg"
-              className="w-full bg-[#D4FF4F] text-black font-bold hover:bg-[#c2ef4a] text-lg transition-colors"
+              variant="brand-lime"
+              className="w-full text-lg"
               disabled={isSubmitting}
             >
               {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Submit'}
