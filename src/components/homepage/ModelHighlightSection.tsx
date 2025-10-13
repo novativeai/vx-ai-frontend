@@ -14,7 +14,7 @@ export function ModelHighlightSection() {
         </div>
 
         <div className="hidden md:block absolute top-28 right-0 max-w-xs text-neutral-400 text-sm z-10 space-y-4">
-          <p>VEO 3 has a sophisticated, nuanced understanding of natural language and cinematic terms like "timelapse" or "aerial shot," allowing for breathtakingly accurate and dynamic video outputs.</p>
+          <p>VEO 3 has a sophisticated, nuanced understanding of natural language and cinematic terms like timelapse or aerial shot, allowing for breathtakingly accurate and dynamic video outputs.</p>
         </div>
         
         <div className="w-full mt-8 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[60vw] max-w-[700px] aspect-[5/4] overflow-hidden">

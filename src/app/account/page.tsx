@@ -131,7 +131,7 @@ export default function AccountPage() {
                         <div>
                             <p className="text-neutral-300">Want to get more done?</p>
                             <Link href="/pricing">
-                              <Button variant="outline" className="mt-2 bg-white text-black font-semibold">Purchase more credits</Button>
+                              <Button variant="brand-outline" className="mt-2 bg-white text-black font-semibold">Purchase more credits</Button>
                             </Link>
                         </div>
                     </div>

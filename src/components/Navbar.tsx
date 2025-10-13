@@ -1,4 +1,3 @@
-// FILE: ./src/components/Navbar.tsx
 "use client";
 
 import Link from 'next/link';
@@ -11,14 +10,12 @@ export default function Navbar() {
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // THE FIX: Effect to prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
     }
-    // Cleanup function to reset overflow when component unmounts
     return () => {
       document.body.style.overflow = 'auto';
     };
@@ -30,6 +27,16 @@ export default function Navbar() {
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact Us" },
   ];
+
+  const getInitial = () => {
+    if (user?.displayName) {
+      return user.displayName.charAt(0).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return '?';
+  };
 
   return (
     <>
@@ -48,8 +55,19 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             <div className="hidden md:block">
               {user ? (
-                 <Link href="/account">
-                    <div className="h-8 w-8 rounded-full border border-white bg-neutral-700" />
+                 <Link href="/account" className="block">
+                   {/* THE FIX: Conditional rendering for the user's profile picture */}
+                   {user.photoURL ? (
+                     <img 
+                       src={user.photoURL} 
+                       alt="User profile picture" 
+                       className="h-8 w-8 rounded-full" 
+                     />
+                   ) : (
+                     <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-sm font-bold text-white">
+                       {getInitial()}
+                     </div>
+                   )}
                  </Link>
               ) : (
                 <Link href="/signin">
@@ -59,7 +77,6 @@ export default function Navbar() {
                 </Link>
               )}
             </div>
-             {/* THE FIX: Hamburger Menu Button */}
             <div className="md:hidden">
               <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                 {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -69,7 +86,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* THE FIX: Mobile Menu Overlay */}
       {isMenuOpen && (
         <div className="md:hidden fixed inset-0 top-20 z-40 bg-black flex flex-col items-center justify-center text-center">
           <nav className="flex flex-col items-center space-y-8">
