@@ -36,6 +36,8 @@ export default function SignUp() {
         await setDoc(userDocRef, {
           email: user.email,
           credits: 10,
+          activePlan: "Starter",
+          isAdmin: false
         });
       }
       router.push('/');

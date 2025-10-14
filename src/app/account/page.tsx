@@ -9,9 +9,9 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-
-// --- THE FIX: Import the new, correct type ---
-import { PaymentTransaction } from "@/types/types";
+import { PaymentTransaction } from "@/types/types"; // Make sure path is correct, e.g., "@/types"
+import { generateTransactionPDF } from "@/lib/pdfGenerator"; // Import the new PDF generator
+import { Download } from "lucide-react"; // Import the Download icon
 
 // --- Sub-components ---
 
@@ -59,14 +59,12 @@ function UsageStats() {
 
 function BillingHistory() {
   const { user } = useAuth();
-  // --- THE FIX: Use the correct PaymentTransaction type for state ---
   const [history, setHistory] = useState<PaymentTransaction[]>([]);
 
   useEffect(() => {
     if (!user) return;
     const q = query(collection(db, "users", user.uid, "payments"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
-      // --- THE FIX: Cast the Firestore data to the correct type ---
       setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PaymentTransaction)));
     });
     return () => unsub();
@@ -91,12 +89,23 @@ function BillingHistory() {
                 <div key={item.id} className="flex justify-between items-center border-b border-neutral-800 pb-2">
                     <div>
                         <p>{item.createdAt?.toDate().toLocaleDateString()}</p>
-                        {/* This comparison is now valid and the error is gone */}
                         <p className={`text-sm ${item.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
-                          {item.amount}€ Purchase - {item.status}
+                          {item.amount}€ {item.type || 'Purchase'} - {item.status}
                         </p>
                     </div>
-                    {item.status === 'paid' && <a href="#" className="text-sm text-white underline">Download PDF</a>}
+                    {/* --- THE FIX: Replaced <a> with a <button> and added the onClick handler --- */}
+                    {item.status === 'paid' && (
+                      <button 
+                        onClick={() => {
+                          if (user) {
+                            generateTransactionPDF(item, user.displayName || user.email!, user.email!);
+                          }
+                        }}
+                        className="text-sm text-white underline flex items-center gap-1.5"
+                      >
+                        <Download className="w-3 h-3"/> Download PDF
+                      </button>
+                    )}
                 </div>
             ))}
         </div>
@@ -104,7 +113,7 @@ function BillingHistory() {
   );
 }
 
-// --- Main Page Component (Unchanged) ---
+// --- Main Page Component ---
 export default function AccountPage() {
     const { user, credits } = useAuth();
 
@@ -131,7 +140,7 @@ export default function AccountPage() {
                         <div>
                             <p className="text-neutral-300">Want to get more done?</p>
                             <Link href="/pricing">
-                              <Button variant="brand-outline" className="mt-2 bg-white text-black font-semibold">Purchase more credits</Button>
+                              <Button variant="brand-solid" className="mt-2 font-semibold">Purchase more credits</Button>
                             </Link>
                         </div>
                     </div>
@@ -164,7 +173,7 @@ export default function AccountPage() {
                                 <Input placeholder="Email" defaultValue={user.email || ""} className={inputStyles} disabled />
                                 <div className="flex justify-end gap-4 pt-4">
                                     <Button variant="ghost">Discard</Button>
-                                    <Button className="bg-white text-black font-semibold">Save changes</Button>
+                                    <Button variant="brand-solid" className="font-semibold">Save changes</Button>
                                 </div>
                              </div>
                          </div>
