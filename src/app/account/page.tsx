@@ -9,16 +9,14 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { PaymentTransaction } from "@/types/types"; // Make sure path is correct, e.g., "@/types"
-import { generateTransactionPDF } from "@/lib/pdfGenerator"; // Import the new PDF generator
-import { Download } from "lucide-react"; // Import the Download icon
+import { PaymentTransaction } from "@/types/types";
+import { generateTransactionPDF } from "@/lib/pdfGenerator";
+import { Download, Loader2 } from "lucide-react";
 
 // --- Sub-components ---
-
 function UsageStats() {
   const { user } = useAuth();
   const [usage, setUsage] = useState<Record<string, number>>({});
-
   useEffect(() => {
     if (!user) return;
     const q = query(collection(db, "users", user.uid, "generations"));
@@ -33,7 +31,6 @@ function UsageStats() {
     });
     return () => unsub();
   }, [user]);
-
   if (Object.keys(usage).length === 0) {
     return (
       <Card className="bg-[#1C1C1C] border-neutral-800 p-4 text-center text-neutral-400 text-sm">
@@ -41,7 +38,6 @@ function UsageStats() {
       </Card>
     );
   }
-
   return (
     <div>
         <h2 className="font-semibold text-lg mb-4">Usage per model</h2>
@@ -60,7 +56,6 @@ function UsageStats() {
 function BillingHistory() {
   const { user } = useAuth();
   const [history, setHistory] = useState<PaymentTransaction[]>([]);
-
   useEffect(() => {
     if (!user) return;
     const q = query(collection(db, "users", user.uid, "payments"), orderBy("createdAt", "desc"));
@@ -69,7 +64,6 @@ function BillingHistory() {
     });
     return () => unsub();
   }, [user]);
-
   if (history.length === 0) {
     return (
       <div>
@@ -80,7 +74,6 @@ function BillingHistory() {
       </div>
     );
   }
-
   return (
      <div>
         <h2 className="font-semibold text-lg mb-4">Billing History</h2>
@@ -93,16 +86,8 @@ function BillingHistory() {
                           {item.amount}€ {item.type || 'Purchase'} - {item.status}
                         </p>
                     </div>
-                    {/* --- THE FIX: Replaced <a> with a <button> and added the onClick handler --- */}
                     {item.status === 'paid' && (
-                      <button 
-                        onClick={() => {
-                          if (user) {
-                            generateTransactionPDF(item, user.displayName || user.email!, user.email!);
-                          }
-                        }}
-                        className="text-sm text-white underline flex items-center gap-1.5"
-                      >
+                      <button onClick={() => { if (user) { generateTransactionPDF(item, user.displayName || user.email!, user.email!); } }} className="text-sm text-white underline flex items-center gap-1.5">
                         <Download className="w-3 h-3"/> Download PDF
                       </button>
                     )}
@@ -116,6 +101,31 @@ function BillingHistory() {
 // --- Main Page Component ---
 export default function AccountPage() {
     const { user, credits } = useAuth();
+    const [isPortalLoading, setIsPortalLoading] = useState(false);
+
+    const redirectToCustomerPortal = async () => {
+        if (!user) {
+            alert("You must be logged in to manage billing.");
+            return;
+        }
+        setIsPortalLoading(true);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/create-customer-portal-session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.uid }),
+            });
+            const data = await response.json();
+            if (data.portalUrl) {
+                window.location.href = data.portalUrl;
+            } else {
+                throw new Error(data.detail || "Could not open billing portal.");
+            }
+        } catch (error) {
+            alert((error as Error).message);
+            setIsPortalLoading(false);
+        }
+    };
 
     if (!user) {
         return <div className="text-white text-center pt-48">Loading user profile...</div>;
@@ -133,7 +143,6 @@ export default function AccountPage() {
                         <p className="text-neutral-400">{user.email}</p>
                     </div>
                 </div>
-
                 <div className="grid lg:grid-cols-3 gap-8 lg:gap-16">
                     <div className="lg:col-span-1 space-y-12 order-2 lg:order-1">
                         <UsageStats />
@@ -153,18 +162,19 @@ export default function AccountPage() {
                        </div>
                     </div>
                 </div>
-
                 <Separator className="my-16 bg-neutral-800" />
-
                 <div className="grid lg:grid-cols-2 gap-16">
                     <BillingHistory />
                     <div className="space-y-12">
                          <div>
                             <h2 className="font-semibold text-lg mb-4">Billing Information</h2>
-                            <p className="text-sm text-neutral-400">Manage your payment details.</p>
-                             <div className="space-y-4 mt-4">
-                                <Input placeholder="Name On Card" className={inputStyles} />
-                             </div>
+                            <p className="text-sm text-neutral-400 mb-4">
+                                Securely manage your payment methods, subscriptions, and view your invoice history through our payment partner's portal.
+                            </p>
+                            <Button onClick={redirectToCustomerPortal} className="bg-white text-black font-semibold" disabled={isPortalLoading}>
+                                {isPortalLoading ? <Loader2 className="animate-spin mr-2" /> : null}
+                                Manage Billing & Invoices
+                            </Button>
                          </div>
                          <div>
                             <h2 className="font-semibold text-lg mb-4">User Setting</h2>
