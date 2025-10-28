@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 // --- NEW: Define the content for your hero slides ---
 const heroSlides = [
   {
-    videoSrc: "/videos/highlight-1-opx.mp4", // Replace with your first video
+    //videoSrc: "/videos/highlight-1-opx.mp4", // Replace with your first video
+    videoSrc: "/videos/full-reel.mp4", // Replace with your first video
     title: <>YOUR PERSPECTIVE<br />LIKE NEVER BEFORE</>,
     subtitle: "A platform for filmakers, advertisers & creative teams",
   },
@@ -27,7 +28,7 @@ export function HeroSection() {
   const videoDuration = 10; // in seconds
 
   return (
-    <section className="relative h-screen w-full flex items-center justify-start text-left text-white overflow-hidden">
+    <section className="relative h-[95vh] w-full flex items-center justify-start text-left text-white overflow-hidden">
       {/* --- Video Background Carousel --- */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
         <AnimatePresence>

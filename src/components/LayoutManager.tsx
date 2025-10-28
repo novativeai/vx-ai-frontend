@@ -27,7 +27,7 @@ export default function LayoutManager({
         Conditionally render the Footer. It will not appear on the homepage
         because the homepage includes it in its final snap-scroll section.
       */}
-      {!isHomePage && <Footer />}
+      {<Footer />}
     </>
   );
 }

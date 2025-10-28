@@ -2,16 +2,18 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF } from "@/lib/pdfGenerator";
-import { Download, Loader2 } from "lucide-react";
+import { Download, CreditCard, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // --- Sub-components ---
 function UsageStats() {
@@ -69,7 +71,7 @@ function BillingHistory() {
       <div>
         <h2 className="font-semibold text-lg mb-4">Billing History</h2>
         <Card className="bg-[#1C1C1C] border-neutral-800 p-4 text-center text-neutral-400 text-sm">
-          No billing history found.
+          No billing history found. <Link href="/pricing" className="text-white underline">Purchase credits</Link> to get started.
         </Card>
       </div>
     );
@@ -81,14 +83,25 @@ function BillingHistory() {
             {history.map(item => (
                 <div key={item.id} className="flex justify-between items-center border-b border-neutral-800 pb-2">
                     <div>
-                        <p>{item.createdAt?.toDate().toLocaleDateString()}</p>
-                        <p className={`text-sm ${item.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>
-                          {item.amount}€ {item.type || 'Purchase'} - {item.status}
-                        </p>
+                        <p className="text-sm text-neutral-300">{item.createdAt?.toDate().toLocaleDateString()}</p>
+                        <p className="font-medium">€{item.amount} - {item.type || 'Purchase'}</p>
+                        <Badge 
+                          variant={item.status === 'paid' ? 'default' : 'secondary'}
+                          className={item.status === 'paid' ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'}
+                        >
+                          {item.status}
+                        </Badge>
                     </div>
                     {item.status === 'paid' && (
-                      <button onClick={() => { if (user) { generateTransactionPDF(item, user.displayName || user.email!, user.email!); } }} className="text-sm text-white underline flex items-center gap-1.5">
-                        <Download className="w-3 h-3"/> Download PDF
+                      <button 
+                        onClick={() => { 
+                          if (user) { 
+                            generateTransactionPDF(item, user.displayName || user.email!, user.email!); 
+                          } 
+                        }} 
+                        className="text-sm text-white hover:text-neutral-300 flex items-center gap-1.5"
+                      >
+                        <Download className="w-4 h-4"/> Invoice
                       </button>
                     )}
                 </div>
@@ -98,33 +111,159 @@ function BillingHistory() {
   );
 }
 
+function SubscriptionStatus() {
+  const { user } = useAuth();
+  const [subscription, setSubscription] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchSubscription = async () => {
+      try {
+        // Get user document to check active plan and subscription status
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userData = userDoc.data();
+        
+        if (userData?.activePlan && userData.activePlan !== "Starter") {
+          setSubscription({
+            planName: userData.activePlan,
+            status: userData.subscriptionStatus || "active",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching subscription:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscription();
+  }, [user]);
+
+  if (loading) return null;
+
+  if (!subscription || subscription.planName === "Starter") {
+    return (
+      <div className="mb-8">
+        <Alert className="bg-neutral-900 border-neutral-800">
+          <CreditCard className="h-4 w-4" />
+          <AlertDescription>
+            You're currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-8">
+      <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-700/50 p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-sm text-neutral-400">Active Subscription</p>
+            <h3 className="text-2xl font-bold text-white">{subscription.planName} Plan</h3>
+          </div>
+          <Badge 
+            variant={subscription.status === 'active' ? 'default' : 'secondary'}
+            className={subscription.status === 'active' ? 'bg-green-600' : 'bg-yellow-600'}
+          >
+            {subscription.status}
+          </Badge>
+        </div>
+        <p className="text-sm text-neutral-300 mb-4">
+          Your subscription renews automatically each month. Credits are added to your account upon successful payment.
+        </p>
+        <div className="flex gap-3">
+          <Link href="/pricing">
+            <Button variant="outline" className="border-neutral-700">
+              Change Plan
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 // --- Main Page Component ---
 export default function AccountPage() {
     const { user, credits } = useAuth();
-    const [isPortalLoading, setIsPortalLoading] = useState(false);
+    const [activePlan, setActivePlan] = useState("Starter");
+    const [displayName, setDisplayName] = useState("");
+    const [email, setEmail] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    const redirectToCustomerPortal = async () => {
-        if (!user) {
-            alert("You must be logged in to manage billing.");
-            return;
+    useEffect(() => {
+      if (!user) return;
+      
+      setDisplayName(user.displayName || "");
+      setEmail(user.email || "");
+      
+      const userDocRef = doc(db, "users", user.uid);
+      const unsubscribe = onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+          const userData = doc.data();
+          setActivePlan(userData?.activePlan || "Starter");
         }
-        setIsPortalLoading(true);
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/create-customer-portal-session`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.uid }),
-            });
-            const data = await response.json();
-            if (data.portalUrl) {
-                window.location.href = data.portalUrl;
-            } else {
-                throw new Error(data.detail || "Could not open billing portal.");
-            }
-        } catch (error) {
-            alert((error as Error).message);
-            setIsPortalLoading(false);
+      });
+
+      return () => unsubscribe();
+    }, [user]);
+
+    const handleSaveChanges = async () => {
+      if (!user) return;
+      
+      setIsSaving(true);
+      setSaveMessage(null);
+      
+      try {
+        const { updateProfile, updateEmail } = await import('firebase/auth');
+        
+        // Update display name if changed
+        if (displayName !== user.displayName) {
+          await updateProfile(user, { displayName });
         }
+        
+        // Update email if changed
+        if (email !== user.email && email) {
+          await updateEmail(user, email);
+        }
+        
+        // Update Firestore user document
+        const userDocRef = doc(db, "users", user.uid);
+        await import('firebase/firestore').then(({ updateDoc }) => 
+          updateDoc(userDocRef, {
+            name: displayName,
+            email: email
+          })
+        );
+        
+        setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
+        setTimeout(() => setSaveMessage(null), 3000);
+      } catch (error: any) {
+        console.error("Error updating account:", error);
+        let errorMessage = "Failed to update account";
+        
+        if (error.code === 'auth/requires-recent-login') {
+          errorMessage = "Please sign out and sign in again to change your email";
+        } else if (error.code === 'auth/email-already-in-use') {
+          errorMessage = "This email is already in use";
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = "Invalid email address";
+        }
+        
+        setSaveMessage({ type: 'error', text: errorMessage });
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    const handleCancel = () => {
+      setDisplayName(user?.displayName || "");
+      setEmail(user?.email || "");
+      setSaveMessage(null);
     };
 
     if (!user) {
@@ -135,58 +274,125 @@ export default function AccountPage() {
 
     return (
         <div className="bg-black text-white min-h-screen pt-32">
-            <div className="container mx-auto py-16">
+            <div className="container mx-auto py-16 px-4">
+                {/* Header */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 mb-16 text-center sm:text-left">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex-shrink-0" />
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex-shrink-0 flex items-center justify-center text-3xl font-bold">
+                      {(user.displayName || user.email || "U")[0].toUpperCase()}
+                    </div>
                     <div>
                         <h1 className="text-4xl font-bold">{user.displayName || "User"}</h1>
                         <p className="text-neutral-400">{user.email}</p>
                     </div>
                 </div>
+
+                {/* Subscription Status */}
+                <SubscriptionStatus />
+
+                {/* Main Grid */}
                 <div className="grid lg:grid-cols-3 gap-8 lg:gap-16">
+                    {/* Left Column - Stats & CTA */}
                     <div className="lg:col-span-1 space-y-12 order-2 lg:order-1">
                         <UsageStats />
                         <div>
-                            <p className="text-neutral-300">Want to get more done?</p>
+                            <p className="text-neutral-300 mb-2">Need more credits?</p>
                             <Link href="/pricing">
-                              <Button variant="brand-solid" className="mt-2 font-semibold">Purchase more credits</Button>
+                              <Button className="bg-[#D4FF4F] text-black hover:bg-[#c2ef4a] font-semibold w-full">
+                                View Pricing Plans
+                              </Button>
                             </Link>
                         </div>
                     </div>
-                    <div className="lg:col-span-2 order-1 lg:order-2 flex flex-col justify-between text-center md:text-right">
-                       <div>
-                            <p className="text-neutral-400">Active Plan</p>
-                            <p className="text-4xl font-bold mb-4">Starter</p>
-                            <p className="text-neutral-400">Remaining credits</p>
-                            <p className="text-6xl font-bold">{credits}</p>
-                       </div>
+
+                    {/* Right Column - Credits Display */}
+                    <div className="lg:col-span-2 order-1 lg:order-2">
+                       <Card className="bg-[#1C1C1C] border-neutral-800 p-8 text-center">
+                            <p className="text-neutral-400 mb-2">Active Plan</p>
+                            <p className="text-4xl font-bold mb-6">{activePlan}</p>
+                            <Separator className="bg-neutral-800 mb-6" />
+                            <p className="text-neutral-400 mb-2">Available Credits</p>
+                            <p className="text-7xl font-bold mb-4">{credits}</p>
+                            <p className="text-sm text-neutral-500">
+                              {activePlan === "Starter" 
+                                ? "One-time credits. Purchase more anytime." 
+                                : "Monthly credits refresh automatically with your subscription."}
+                            </p>
+                       </Card>
                     </div>
                 </div>
+
                 <Separator className="my-16 bg-neutral-800" />
+
+                {/* Bottom Grid - History & Settings */}
                 <div className="grid lg:grid-cols-2 gap-16">
+                    {/* Billing History */}
                     <BillingHistory />
-                    <div className="space-y-12">
-                         <div>
-                            <h2 className="font-semibold text-lg mb-4">Billing Information</h2>
-                            <p className="text-sm text-neutral-400 mb-4">
-                                Securely manage your payment methods, subscriptions, and view your invoice history through our payment partner's portal.
-                            </p>
-                            <Button onClick={redirectToCustomerPortal} className="bg-white text-black font-semibold" disabled={isPortalLoading}>
-                                {isPortalLoading ? <Loader2 className="animate-spin mr-2" /> : null}
-                                Manage Billing & Invoices
-                            </Button>
+
+                    {/* User Settings */}
+                    <div>
+                         <h2 className="font-semibold text-lg mb-4">Account Settings</h2>
+                         
+                         {saveMessage && (
+                           <Alert className={`mb-4 ${saveMessage.type === 'success' ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'}`}>
+                             <AlertDescription className={saveMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+                               {saveMessage.text}
+                             </AlertDescription>
+                           </Alert>
+                         )}
+                         
+                         <div className="space-y-4">
+                            <div>
+                              <label className="text-sm text-neutral-400 mb-1 block">Display Name</label>
+                              <Input 
+                                placeholder="Your name" 
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                className={inputStyles} 
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm text-neutral-400 mb-1 block">Email Address</label>
+                              <Input 
+                                type="email"
+                                placeholder="your@email.com" 
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className={inputStyles}
+                              />
+                              <p className="text-xs text-neutral-500 mt-1">
+                                You may need to sign in again after changing your email
+                              </p>
+                            </div>
+                            <div className="flex justify-end gap-4 pt-4">
+                                <Button 
+                                  variant="ghost" 
+                                  onClick={handleCancel}
+                                  disabled={isSaving}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  className="bg-white text-black hover:bg-neutral-200 font-semibold"
+                                  onClick={handleSaveChanges}
+                                  disabled={isSaving}
+                                >
+                                  {isSaving ? "Saving..." : "Save Changes"}
+                                </Button>
+                            </div>
                          </div>
-                         <div>
-                            <h2 className="font-semibold text-lg mb-4">User Setting</h2>
-                             <div className="space-y-4">
-                                <Input placeholder="Name" defaultValue={user.displayName || ""} className={inputStyles} />
-                                <Input placeholder="Email" defaultValue={user.email || ""} className={inputStyles} disabled />
-                                <div className="flex justify-end gap-4 pt-4">
-                                    <Button variant="ghost">Discard</Button>
-                                    <Button variant="brand-solid" className="font-semibold">Save changes</Button>
-                                </div>
-                             </div>
-                         </div>
+
+                         {/* Payment Info Notice */}
+                         <Card className="bg-neutral-900 border-neutral-800 p-4 mt-8">
+                            <div className="flex gap-3">
+                              <AlertCircle className="h-5 w-5 text-neutral-400 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-sm font-medium mb-1">Payment Management</p>
+                                <p className="text-xs text-neutral-400">
+                                  All payments are securely processed through PayTrust. To update your payment method or view detailed invoices, simply make a new purchase and use your preferred payment method.
+                                </p>
+                              </div>
+                            </div>
+                         </Card>
                     </div>
                 </div>
             </div>
