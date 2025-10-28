@@ -14,7 +14,12 @@ import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF } from "@/lib/pdfGenerator";
 import { Download, CreditCard, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
+import { FirebaseError } from "firebase/app"; 
+// --- THE FIX: Define a specific type for the subscription state ---
+interface SubscriptionState {
+  planName: string;
+  status: 'active' | 'inactive' | 'pending' | string; // Allow for other potential statuses
+}
 // --- Sub-components ---
 function UsageStats() {
   const { user } = useAuth();
@@ -113,7 +118,7 @@ function BillingHistory() {
 
 function SubscriptionStatus() {
   const { user } = useAuth();
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<SubscriptionState|null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -149,7 +154,7 @@ function SubscriptionStatus() {
         <Alert className="bg-neutral-900 border-neutral-800">
           <CreditCard className="h-4 w-4" />
           <AlertDescription>
-            You're currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
+            You&apos;re currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
           </AlertDescription>
         </Alert>
       </div>
@@ -242,16 +247,27 @@ export default function AccountPage() {
         
         setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
         setTimeout(() => setSaveMessage(null), 3000);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error updating account:", error);
         let errorMessage = "Failed to update account";
         
-        if (error.code === 'auth/requires-recent-login') {
-          errorMessage = "Please sign out and sign in again to change your email";
-        } else if (error.code === 'auth/email-already-in-use') {
-          errorMessage = "This email is already in use";
-        } else if (error.code === 'auth/invalid-email') {
-          errorMessage = "Invalid email address";
+        if (error instanceof FirebaseError) {
+          switch (error.code) {
+            case 'auth/requires-recent-login':
+              errorMessage = "Please sign out and sign in again to change your email";
+              break;
+            case 'auth/email-already-in-use':
+              errorMessage = "This email is already in use";
+              break;
+            case 'auth/invalid-email':
+              errorMessage = "Invalid email address";
+              break;
+            default:
+              errorMessage = error.message;
+              break;
+          }
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
         }
         
         setSaveMessage({ type: 'error', text: errorMessage });
