@@ -4,7 +4,7 @@ import Link from "next/link";
 export function ModelHighlightSection() {
   return (
     <section className="bg-black text-white overflow-hidden h-screen">
-      <div className="container mx-auto h-full relative isolate flex flex-col justify-center px-4 md:block">
+      <div className="container mx-auto h-full relative isolate flex flex-col justify-center px-0 md:block">
         
         <div className="relative z-10 md:absolute md:top-0 md:left-0">
           <h2 className="text-7xl md:text-9xl font-extrabold tracking-tighter">New</h2>

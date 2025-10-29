@@ -118,17 +118,17 @@ export default function PricingPage() {
   const inputStyles = "bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 text-xl h-12 focus-visible:ring-0 focus-visible:border-b-white";
 
   return (
-    <div className="bg-black text-white min-h-screen pt-32">
-      <div className="container mx-auto py-16 md:py-24">
+    <div className="bg-black text-white min-h-screen pt-32 w-full">
+      <div className="w-full md:px-28 px-4 py-16  py-16 md:py-24">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto">
+        <div className="text-center mx-auto mb-16">
           <h1 className="text-7xl md:text-8xl font-extrabold tracking-tighter">Get more done</h1>
           <p className="mt-4 text-lg text-neutral-400">Choose the plan that fits your creative needs.</p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="max-w-5xl mx-auto mt-8">
+          <div className="w-full px-4 mt-8">
             <Alert variant="destructive" className="bg-red-900/20 border-red-900">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
@@ -137,7 +137,7 @@ export default function PricingPage() {
         )}
 
         {/* Pricing Tiers */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mt-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full px-4 mt-16">
           {pricingTiers.map((tier) => (
             <Card 
               key={tier.name} 
@@ -197,7 +197,7 @@ export default function PricingPage() {
         </div>
 
         {/* Custom Amount Section */}
-        <div className="mt-24 max-w-5xl mx-auto">
+        <div className="mt-24 w-full px-4">
           <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
             <h2 className="text-7xl md:text-8xl font-extrabold tracking-tighter mb-4 md:mb-0">
               Custom amount
@@ -215,7 +215,7 @@ export default function PricingPage() {
               <p className="text-2xl text-neutral-400">x 10 =</p>
               <p className="text-2xl font-bold">{customAmount * 10} credits</p>
               <Button 
-                variant="outline" 
+                variant="brand-outline" 
                 className="bg-white text-black hover:bg-neutral-200 font-semibold" 
                 onClick={() => processPurchase({ customAmount })} 
                 disabled={isProcessing === 'custom' || customAmount <= 0}

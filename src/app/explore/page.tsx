@@ -89,7 +89,6 @@ function HistorySection() {
           <Link href="/generator" className="group block h-full">
             <Card className="overflow-hidden rounded-2xl h-full border-neutral-800 bg-[#1C1C1C] hover:border-neutral-700 transition-colors">
               <AspectRatio ratio={1 / 1} className="flex flex-col items-center justify-center text-center text-neutral-500 p-6">
-                <Sparkles className="h-10 w-10 mb-4" />
                 <p className="font-semibold text-neutral-400">No history yet</p>
                 <p className="text-sm">Start generating to see your creations.</p>
               </AspectRatio>

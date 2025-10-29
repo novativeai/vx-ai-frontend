@@ -4,7 +4,7 @@ export function EmpoweringSection() {
   return (
     <section className="bg-black text-white h-screen flex flex-col justify-center">
       <div className="container mx-auto">
-        <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-12 px-4">Empowering</h2>
+        <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-12">Empowering</h2>
         
         {/* --- THE MAIN CARD CONTAINER --- */}
         {/* It's now a single flex container with a white background and fixed desktop height. */}

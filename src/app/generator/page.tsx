@@ -57,6 +57,9 @@ function GeneratorComponent() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // New state for toggling between Best Practice and Use Cases
+  const [contentView, setContentView] = useState<'tips' | 'useCases'>('tips');
 
   // Effect to reset state when the model is changed via URL
   useEffect(() => {
@@ -71,6 +74,9 @@ function GeneratorComponent() {
     setError('');
     setGenerating(false);
     setDetectedOutputType(null);
+    
+    // Reset content view to tips when model changes
+    setContentView('tips');
   }, [currentModelConfig]);
 
   const handleParamChange = (name: string, value: string | number) => { setParams(prev => ({ ...prev, [name]: value })); };
@@ -136,9 +142,13 @@ function GeneratorComponent() {
     );
   }
 
+  // Determine which content to display based on contentView
+  const displayContent = contentView === 'tips' ? currentModelConfig.tips : currentModelConfig.useCases;
+  const hasContent = displayContent && displayContent.length > 0;
+
   return (
-    <div className="container mx-auto p-4 sm:p-6 md:p-8">
-      <section className="text-center max-w-4xl mx-auto mb-10">
+    <div className="container mx-auto p-4 sm:p-6 md:py-24">
+      <section className="text-center w-full mx-auto mb-10">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center justify-center gap-3">
           What do you want to create today?
         </h1>
@@ -163,7 +173,7 @@ function GeneratorComponent() {
             </CardContent>
             <CardFooter className="flex-col items-start gap-4">
               <Button onClick={handleGenerate} disabled={generating} size="lg" className="w-full">
-                <Wand2 className="mr-2 h-5 w-5" /> Generate Media ({credits} Credits)
+                 Generate Media ({credits} Credits)
               </Button>
               {error && <p className="text-red-500 text-sm flex items-center"><Frown className="mr-2 h-4 w-4" />{error}</p>}
             </CardFooter>
@@ -210,7 +220,33 @@ function GeneratorComponent() {
         </div>
       </div>
       <Separator className="my-16" />
-      <TipsSection tips={currentModelConfig.tips} />
+      
+
+      {/* Display selected content */}
+      {hasContent ? (
+        <TipsSection tips={displayContent} />
+      ) : (
+        <div className="text-center text-muted-foreground p-8">
+          <p>No {contentView === 'tips' ? 'best practices' : 'use cases'} available for this model.</p>
+        </div>
+      )}
+            {/* Toggle Buttons for Best Practice and Use Cases */}
+      <div className="flex justify-center gap-4 mb-8">
+        <Button
+          variant={contentView === 'tips' ? 'default' : 'outline'}
+          onClick={() => setContentView('tips')}
+          size="lg"
+        >
+          Best Practice
+        </Button>
+        <Button
+          variant={contentView === 'useCases' ? 'default' : 'outline'}
+          onClick={() => setContentView('useCases')}
+          size="lg"
+        >
+          Use Cases
+        </Button>
+      </div>
     </div>
   );
 }

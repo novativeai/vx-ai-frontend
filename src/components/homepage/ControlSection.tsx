@@ -8,11 +8,11 @@ const controlItems = [
   { title: "Pose", videoSrc: "/videos/control-2-optx.mp4" },
   { title: "Transition", videoSrc: "/videos/control-3-optx.mp4" },
 ];
-
+//
 export function ControlSection() {
   return (
     <section className="bg-black text-white h-screen flex flex-col justify-center">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between md:items-end mb-12">
           <div>
             <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>

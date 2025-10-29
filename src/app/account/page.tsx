@@ -12,14 +12,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF } from "@/lib/pdfGenerator";
-import { Download, CreditCard, AlertCircle } from "lucide-react";
+import { Download, CreditCard, AlertCircle, LogOut } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app"; 
 // --- THE FIX: Define a specific type for the subscription state ---
 interface SubscriptionState {
   planName: string;
   status: 'active' | 'inactive' | 'pending' | string; // Allow for other potential statuses
 }
+
 // --- Sub-components ---
 function UsageStats() {
   const { user } = useAuth();
@@ -154,7 +156,7 @@ function SubscriptionStatus() {
         <Alert className="bg-neutral-900 border-neutral-800">
           <CreditCard className="h-4 w-4" />
           <AlertDescription>
-            You&apos;re currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
+            You're currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
           </AlertDescription>
         </Alert>
       </div>
@@ -194,10 +196,15 @@ function SubscriptionStatus() {
 // --- Main Page Component ---
 export default function AccountPage() {
     const { user, credits } = useAuth();
+    const router = useRouter();
     const [activePlan, setActivePlan] = useState("Starter");
     const [displayName, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     useEffect(() => {
@@ -224,7 +231,30 @@ export default function AccountPage() {
       setSaveMessage(null);
       
       try {
-        const { updateProfile, updateEmail } = await import('firebase/auth');
+        const { updateProfile, updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } = await import('firebase/auth');
+        
+        // If changing password, validate
+        if (newPassword || confirmPassword || currentPassword) {
+          if (!currentPassword) {
+            throw new Error("Current password is required to change password");
+          }
+          if (newPassword !== confirmPassword) {
+            throw new Error("New passwords do not match");
+          }
+          if (newPassword.length < 6) {
+            throw new Error("New password must be at least 6 characters");
+          }
+          
+          // Re-authenticate before password change
+          const credential = EmailAuthProvider.credential(
+            user.email!,
+            currentPassword
+          );
+          await reauthenticateWithCredential(user, credential);
+          
+          // Update password
+          await updatePassword(user, newPassword);
+        }
         
         // Update display name if changed
         if (displayName !== user.displayName) {
@@ -233,6 +263,19 @@ export default function AccountPage() {
         
         // Update email if changed
         if (email !== user.email && email) {
+          // Re-authenticate if not already done
+          if (!currentPassword && !newPassword) {
+            throw new Error("Please enter your current password to change your email");
+          }
+          
+          if (!newPassword) {
+            const credential = EmailAuthProvider.credential(
+              user.email!,
+              currentPassword
+            );
+            await reauthenticateWithCredential(user, credential);
+          }
+          
           await updateEmail(user, email);
         }
         
@@ -244,6 +287,11 @@ export default function AccountPage() {
             email: email
           })
         );
+        
+        // Clear password fields
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
         
         setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
         setTimeout(() => setSaveMessage(null), 3000);
@@ -279,7 +327,23 @@ export default function AccountPage() {
     const handleCancel = () => {
       setDisplayName(user?.displayName || "");
       setEmail(user?.email || "");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
       setSaveMessage(null);
+    };
+
+    const handleLogout = async () => {
+      setIsLoggingOut(true);
+      try {
+        const { signOut } = await import('firebase/auth');
+        const { auth } = await import('@/lib/firebase');
+        await signOut(auth);
+        router.push('/signin');
+      } catch (error) {
+        console.error("Error logging out:", error);
+        setIsLoggingOut(false);
+      }
     };
 
     if (!user) {
@@ -366,6 +430,7 @@ export default function AccountPage() {
                                 className={inputStyles} 
                               />
                             </div>
+                            
                             <div>
                               <label className="text-sm text-neutral-400 mb-1 block">Email Address</label>
                               <Input 
@@ -379,6 +444,51 @@ export default function AccountPage() {
                                 You may need to sign in again after changing your email
                               </p>
                             </div>
+
+                            <Separator className="bg-neutral-800 my-6" />
+
+                            <div>
+                              <h3 className="text-sm font-medium mb-3">Change Password</h3>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-sm text-neutral-400 mb-1 block">Current Password</label>
+                                  <Input 
+                                    type="password"
+                                    placeholder="Enter current password" 
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className={inputStyles}
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label className="text-sm text-neutral-400 mb-1 block">New Password</label>
+                                  <Input 
+                                    type="password"
+                                    placeholder="Enter new password" 
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className={inputStyles}
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <label className="text-sm text-neutral-400 mb-1 block">Confirm New Password</label>
+                                  <Input 
+                                    type="password"
+                                    placeholder="Confirm new password" 
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className={inputStyles}
+                                  />
+                                </div>
+                                
+                                <p className="text-xs text-neutral-500">
+                                  Password must be at least 6 characters. Leave blank to keep current password.
+                                </p>
+                              </div>
+                            </div>
+
                             <div className="flex justify-end gap-4 pt-4">
                                 <Button 
                                   variant="ghost" 
@@ -409,6 +519,31 @@ export default function AccountPage() {
                               </div>
                             </div>
                          </Card>
+
+                         {/* Logout Section */}
+                         <Separator className="bg-neutral-800 my-8" />
+                         
+                         <div>
+                            <h3 className="text-sm font-medium mb-2">Danger Zone</h3>
+                            <p className="text-xs text-neutral-400 mb-4">
+                              Sign out of your account on this device
+                            </p>
+                            <Button 
+                              variant="destructive"
+                              onClick={handleLogout}
+                              disabled={isLoggingOut}
+                              className="w-full sm:w-auto"
+                            >
+                              {isLoggingOut ? (
+                                "Signing out..."
+                              ) : (
+                                <>
+                                  <LogOut className="mr-2 h-4 w-4" />
+                                  Sign Out
+                                </>
+                              )}
+                            </Button>
+                         </div>
                     </div>
                 </div>
             </div>

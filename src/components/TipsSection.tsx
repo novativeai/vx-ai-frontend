@@ -29,11 +29,12 @@ export function TipsSection({ tips }: TipsSectionProps) {
     <section className="w-full mx-auto">
       {tips.map((section, sectionIndex) => (
         <div key={sectionIndex} className="mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-6">{section.title}</h2>
-          
-          {/* THE FIX: A single card now wraps all the tip items for this section. */}
           <Card>
             <CardContent className="p-6">
+          <h2 className="text-8xl font-bold tracking-tight mb-6">{section.title}</h2>
+          
+          {/* THE FIX: A single card now wraps all the tip items for this section. */}
+          
               {section.content.map((item, itemIndex) => (
                 <div key={itemIndex}>
                   {/* Replicating the previous CardHeader style */}
