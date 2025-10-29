@@ -42,7 +42,7 @@ function UsageStats() {
   }, [user]);
   if (Object.keys(usage).length === 0) {
     return (
-      <Card className="bg-[#1C1C1C] border-neutral-800 p-4 text-center text-neutral-400 text-sm">
+      <Card className="bg-[#111111FF] border-neutral-800 p-4 text-center text-neutral-400 text-sm">
         No usage data yet. <Link href="/explore" className="text-white underline">Start creating</Link> to see your stats.
       </Card>
     );
@@ -152,14 +152,9 @@ function SubscriptionStatus() {
 
   if (!subscription || subscription.planName === "Starter") {
     return (
-      <div className="mb-8">
-        <Alert className="bg-neutral-900 border-neutral-800">
-          <CreditCard className="h-4 w-4" />
-          <AlertDescription>
-            You&apos;re currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
-          </AlertDescription>
-        </Alert>
-      </div>
+<div className="mb-8">
+</div>
+
     );
   }
 
@@ -361,7 +356,7 @@ export default function AccountPage() {
                       {(user.displayName || user.email || "U")[0].toUpperCase()}
                     </div>
                     <div>
-                        <h1 className="text-4xl font-bold">{user.displayName || "User"}</h1>
+                        <h1 className="text-8xl font-bold">{user.displayName || "User"}</h1>
                         <p className="text-neutral-400">{user.email}</p>
                     </div>
                 </div>
@@ -386,7 +381,7 @@ export default function AccountPage() {
 
                     {/* Right Column - Credits Display */}
                     <div className="lg:col-span-2 order-1 lg:order-2">
-                       <Card className="bg-[#1C1C1C] border-neutral-800 p-8 text-center">
+                       <Card className="bg-[#111111FF] border-neutral-800 p-8 text-center">
                             <p className="text-neutral-400 mb-2">Active Plan</p>
                             <p className="text-4xl font-bold mb-6">{activePlan}</p>
                             <Separator className="bg-neutral-800 mb-6" />
