@@ -249,7 +249,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "WAN 2.2 14B",
     description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-    cardVideo: "/videos/model-3.mp4", // This is the video that will play on hover
+    cardVideo: "/videos/tron-1.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
     outputType: 'video',
     params: [
@@ -349,7 +349,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "FLUX Kontext Pro",
     description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-    cardVideo: "/videos/tron-1.mp4", // This is the video that will play on hover
+    cardVideo: "/videos/model-3.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
     outputType: 'image', // Specify output type
     params: [

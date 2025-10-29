@@ -156,7 +156,7 @@ function SubscriptionStatus() {
         <Alert className="bg-neutral-900 border-neutral-800">
           <CreditCard className="h-4 w-4" />
           <AlertDescription>
-            You're currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
+            You&apos;re currently on the <strong>Starter</strong> plan. <Link href="/pricing" className="underline">Upgrade to unlock more credits</Link> and premium features.
           </AlertDescription>
         </Alert>
       </div>
