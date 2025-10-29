@@ -27,11 +27,9 @@ export default function SignUp() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      // Check if user already exists in Firestore
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
-      // If user doesn't exist, create a new document with welcome credits
       if (!userDoc.exists()) {
         await setDoc(userDocRef, {
           email: user.email,
@@ -42,7 +40,7 @@ export default function SignUp() {
       }
       router.push('/');
     } catch (err) {
-      setError((err as Error).message);;
+      setError((err as Error).message);
     }
   };
 
@@ -55,33 +53,90 @@ export default function SignUp() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      // Initialize user document with a welcome credit balance
       await setDoc(doc(db, 'users', user.uid), {
         email: user.email,
         credits: 10,
+        activePlan: "Starter",
+        isAdmin: false
       });
       router.push('/');
-    } catch (err)
-    {
+    } catch (err) {
       setError((err as Error).message);
     }
   };
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-muted lg:flex lg:flex-col lg:items-center lg:justify-center p-10 text-center">
-        <div className="flex items-center text-primary mb-4">
-          <Film className="h-12 w-12" />
-          <h1 className="ml-4 text-4xl font-bold">VX AI</h1>
-        </div>
-        <p className="text-xl text-muted-foreground mt-2">
-          Transform your creative ideas into stunning videos with the power of AI.
-        </p>
-        <div className="mt-8 w-full max-w-md h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-          <p className="text-gray-500">Illustrative Video/Graphic Here</p>
+      {/* Left side with video background */}
+      <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center p-10 text-center relative overflow-hidden bg-black">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        >
+          <source src="/videos/full-reel.mp4" type="video/mp4" />
+          {/* Fallback for browsers that don't support video */}
+        </video>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/60" />
+        
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="flex items-center text-white mb-4">
+            <h1 className="ml-4 text-8xl font-bold">reelzila</h1>
+          </div>
+          <p className="text-xl text-white/90 mt-2 max-w-md">
+            A platform for filmakers, advertisers & creative teams.
+          </p>
+          
+          {/* Feature highlights */}
+          <div className="mt-12 space-y-6 text-left max-w-md">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">✨</span>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold mb-1">Get 10 Free Credits</h3>
+                <p className="text-sm text-white/70">Start creating immediately with your welcome bonus</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold mb-1">Multiple AI Models</h3>
+                <p className="text-sm text-white/70">Access cutting-edge video generation technology</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">💼</span>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold mb-1">Flexible Plans</h3>
+                <p className="text-sm text-white/70">Choose the plan that fits your creative needs</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🎯</span>
+              </div>
+              <div>
+                <h3 className="text-white font-semibold mb-1">Easy to Use</h3>
+                <p className="text-sm text-white/70">No technical skills required - just your imagination</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="flex items-center justify-center py-12">
+      
+      {/* Right side with form */}
+      <div className="flex items-center justify-center py-12 bg-background">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Create an account</h1>

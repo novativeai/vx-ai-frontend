@@ -34,6 +34,8 @@ export default function SignIn() {
         await setDoc(userDocRef, {
           email: user.email,
           credits: 10,
+          activePlan: "Starter",
+          isAdmin: false
         });
       }
       router.push('/');
@@ -54,7 +56,7 @@ export default function SignIn() {
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12 bg-background">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Welcome Back</h1>
@@ -119,23 +121,71 @@ export default function SignIn() {
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline">
               Sign up
             </Link>
           </div>
         </div>
       </div>
-      <div className="hidden bg-muted lg:flex lg:flex-col lg:items-center lg:justify-center p-10 text-center">
-        <div className="flex items-center text-primary mb-4">
-          <Film className="h-12 w-12" />
-          <h1 className="ml-4 text-4xl font-bold">VX AI</h1>
-        </div>
-        <p className="text-xl text-muted-foreground mt-2">
-          Where your text-based concepts blossom into vibrant, visual realities.
-        </p>
-        <div className="mt-8 w-full max-w-md h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-          <p className="text-gray-500">Illustrative Video/Graphic Here</p>
+      
+      {/* Right side with video background */}
+      <div className="hidden lg:flex lg:flex-col lg:items-center lg:justify-center p-10 text-center relative overflow-hidden bg-black">
+        {/* Video Background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+        >
+          <source src="/videos/full-reel.mp4" type="video/mp4" />
+          {/* Fallback for browsers that don't support video */}
+        </video>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/60" />
+        
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="flex items-center text-white mb-4">
+            <h1 className="ml-4 text-8xl font-bold">reelzila</h1>
+          </div>
+          <p className="text-xl text-white/90 mt-2 max-w-md">
+            A platform for filmakers, advertisers & creative teams.
+          </p>
+          
+          {/* Feature highlights */}
+          <div className="mt-12 grid grid-cols-2 gap-6 text-left max-w-md">
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center mb-2">
+                <span className="text-2xl">🎬</span>
+              </div>
+              <h3 className="text-white font-semibold">AI-Powered</h3>
+              <p className="text-sm text-white/70">Create stunning videos with advanced AI models</p>
+            </div>
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center mb-2">
+                <span className="text-2xl">⚡</span>
+              </div>
+              <h3 className="text-white font-semibold">Lightning Fast</h3>
+              <p className="text-sm text-white/70">Generate videos in seconds, not hours</p>
+            </div>
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center mb-2">
+                <span className="text-2xl">🎨</span>
+              </div>
+              <h3 className="text-white font-semibold">Creative Freedom</h3>
+              <p className="text-sm text-white/70">Multiple models for every style</p>
+            </div>
+            <div className="space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center mb-2">
+                <span className="text-2xl">💎</span>
+              </div>
+              <h3 className="text-white font-semibold">Pro Quality</h3>
+              <p className="text-sm text-white/70">Professional-grade results every time</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
