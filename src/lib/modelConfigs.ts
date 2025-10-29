@@ -42,7 +42,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "veo-3-fast": {
     id: "veo-3-fast",
     displayName: "VEO 3 Fast",
-    description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
+    description: "A production-oriented variant of Google’s Veo family: optimized for fast, cost-efficient text→video and image→video generation with native audio support and strong prompt-following. Best for quick ad prototypes, short product demos, mobile/social vertical videos, and workflows that need many iterations with good visual fidelity.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
     cardVideo: "/videos/f1-speeding.mp4", // This is the video that will play on hover    // A more focused, square-like image
     tags: ["new", "lora", "personalization"],
@@ -130,7 +130,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "seedance-1-pro": {
     id: "seedance-1-pro",
     displayName: "Seedance-1 Pro",
-    description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
+    description: "ByteDance’s Seedance pro model focused on fluid image→video and multi-shot generation. Excels at generating natural, continuous motion from stills, cinematic camera moves, and multi-shot sequences while remaining tuned for faster inference and lower compute than heavier cinematic models.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
     cardVideo: "/videos/robot-3.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
@@ -247,7 +247,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "wan-2.2": {
     id: "wan-2.2",
     displayName: "WAN 2.2 14B",
-    description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
+    description: "A 14B multimodal video model built for high-quality image→video and text→video outputs with an emphasis on cinematic sequences and efficient HD throughput. Strong at preserving photographic detail while adding controlled motion; suitable when image fidelity and audio synchronization matter more than ultra-low latency.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
     cardVideo: "/videos/tron-1.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
@@ -347,7 +347,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "flux-kontext-pro": {
     id: "flux-kontext-pro",
     displayName: "FLUX Kontext Pro",
-    description: "Use Wan 2.2 text to image LoRA trainer. Fine-tune Wan 2.2 for subjects and styles.",
+    description: "An image editing / image→image transformer tuned for precise, text-guided local edits while preserving overall scene context. Excels at selective changes (color swaps, local retouching, object replacement), consistent character/brand preservation across variants, and fast iterative editing workflows.",
     bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
     cardVideo: "/videos/model-3.mp4", // This is the video that will play on hover
     tags: ["new", "lora", "personalization"],
