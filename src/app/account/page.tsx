@@ -451,7 +451,7 @@ export default function AccountPage() {
                               <h3 className="text-sm font-medium mb-3">Change Password</h3>
                               <div className="space-y-3">
                                 <div>
-                                  <label className="text-sm text-neutral-400 mb-1 block">Current Password</label>
+                                  
                                   <Input 
                                     type="password"
                                     placeholder="Enter current password" 
@@ -462,7 +462,7 @@ export default function AccountPage() {
                                 </div>
                                 
                                 <div>
-                                  <label className="text-sm text-neutral-400 mb-1 block">New Password</label>
+                                  
                                   <Input 
                                     type="password"
                                     placeholder="Enter new password" 
@@ -473,7 +473,7 @@ export default function AccountPage() {
                                 </div>
                                 
                                 <div>
-                                  <label className="text-sm text-neutral-400 mb-1 block">Confirm New Password</label>
+                                  
                                   <Input 
                                     type="password"
                                     placeholder="Confirm new password" 
