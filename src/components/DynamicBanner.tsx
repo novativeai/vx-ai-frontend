@@ -20,6 +20,7 @@ interface DynamicBannerProps {
 export const DynamicBanner: React.FC<DynamicBannerProps> = ({ slides }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentSlide = slides[currentIndex];
+  const isSingleSlide = slides.length === 1;
 
   const handleVideoEnd = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
@@ -34,7 +35,8 @@ export const DynamicBanner: React.FC<DynamicBannerProps> = ({ slides }) => {
           autoPlay
           muted
           playsInline
-          onEnded={handleVideoEnd}
+          loop={isSingleSlide}
+          onEnded={!isSingleSlide ? handleVideoEnd : undefined}
           className="absolute top-0 left-0 w-full h-full object-cover z-0"
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -68,20 +70,22 @@ export const DynamicBanner: React.FC<DynamicBannerProps> = ({ slides }) => {
       </div>
       
       {/* Dynamic Page Indicator Bars */}
-      <div className="absolute bottom-0 left-0 w-full h-1.5 z-20 flex">
-        {slides.map((_, index) => (
-          <div key={index} className="flex-1 h-full bg-white/20">
-            {index === currentIndex && (
-              <motion.div
-                className="h-full bg-white"
-                initial={{ width: '0%' }}
-                animate={{ width: '100%' }}
-                transition={{ duration: 7, ease: 'linear' }} // Match your longest video duration
-              />
-            )}
-          </div>
-        ))}
-      </div>
+      {!isSingleSlide && (
+        <div className="absolute bottom-0 left-0 w-full h-1.5 z-20 flex">
+          {slides.map((_, index) => (
+            <div key={index} className="flex-1 h-full bg-white/20">
+              {index === currentIndex && (
+                <motion.div
+                  className="h-full bg-white"
+                  initial={{ width: '0%' }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 7, ease: 'linear' }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 };
