@@ -21,13 +21,14 @@ import { Generation, ModelConfig } from "@/types/types";
 
 // --- Data Transformation for the Banner ---
 const explorePageSlides: BannerSlide[] = Object.values(modelConfigs)
-  .slice(0, 3) // ✅ Take only the first 3 elements
+  .slice(0, 3)
   .map(model => ({
     videoSrc: (model as ModelConfig).cardVideo,
     title: (model as ModelConfig).displayName,
     subtitle: (model as ModelConfig).description,
     buttonText: "Try it now!",
-    buttonLink: `/generator?model=${(model as ModelConfig).id}`, // ✅ Fixed template literal
+    buttonLink: `/generator?model=${(model as ModelConfig).id}`,
+    // posterSrc: (model as ModelConfig).posterImage, // Add this if you have poster images
   }));
 
 
@@ -81,8 +82,6 @@ function HistorySection() {
   }
 
   if (history.length === 0) {
-    // THE FIX: The placeholder is now in a simple flex container that doesn't stretch vertically.
-    // It's no longer trying to be a grid item, which caused the height issue.
     return (
       <div className="flex justify-center lg:justify-start w-full">
         <div className="w-80 flex-shrink-0">
