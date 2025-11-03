@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function EmpoweringSection() {
   return (
@@ -20,9 +21,11 @@ export function EmpoweringSection() {
               <p className="mt-4 text-neutral-700">
                 We believe in making advanced AI tools accessible. That&apos;s why we provide dedicated support through free credits, exclusive access, and tailored resources to help students experiment and bring their ideas to life.
               </p>
-              <Button className="mt-6 bg-black text-white hover:bg-neutral-800 font-semibold">
-                Subscribe
-              </Button>
+              <Link href="/student-verify">
+                <Button className="mt-6 bg-black text-white hover:bg-neutral-800 font-semibold">
+                  Subscribe
+                </Button>
+              </Link>
             </div>
           </div>
 

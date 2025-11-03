@@ -364,6 +364,25 @@ export default function AccountPage() {
                 {/* Subscription Status */}
                 <SubscriptionStatus />
 
+                {/* Student Verification Card */}
+                <div className="mb-8">
+                  <Card className="bg-gradient-to-br from-[#D4FF4F]/10 to-transparent border-[#D4FF4F]/30 p-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm text-neutral-400 mb-2">✨ SPECIAL OFFER</p>
+                        <h3 className="text-2xl font-bold text-white mb-2">Verify Your Student Status</h3>
+                        <p className="text-neutral-400 mb-4">Get 100 free credits + 25% discount on all plans</p>
+                        <p className="text-xs text-neutral-500">Upload your student ID and school details to get instant credits</p>
+                      </div>
+                      <Link href="/student-verify">
+                        <Button className="bg-[#D4FF4F] text-black hover:bg-[#D4FF4F]/90 font-semibold whitespace-nowrap">
+                          Verify Now
+                        </Button>
+                      </Link>
+                    </div>
+                  </Card>
+                </div>
+
                 {/* Main Grid */}
                 <div className="grid lg:grid-cols-3 gap-8 lg:gap-16">
                     {/* Left Column - Stats & CTA */}

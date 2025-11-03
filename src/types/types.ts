@@ -1,4 +1,5 @@
 // This file is the single source of truth for all shared types in the application.
+import { collection, doc, getDoc, addDoc, serverTimestamp, type FieldValue, type Timestamp } from "firebase/firestore";
 
 // Type for a single parameter within a model's configuration
 export interface ModelParameter {
@@ -59,4 +60,76 @@ export interface PaymentTransaction {
   amount: number;
   status: 'paid' | 'pending' | 'failed';
   type?: string;
+}
+
+// Marketplace Product Type
+export interface MarketplaceProduct {
+  id: string;
+  sellerId: string;
+  sellerName: string;
+  title: string;
+  description: string;
+  videoUrl: string;
+  generationId: string;
+  prompt: string;
+  price: number; // EUR
+  tags: string[];
+  hasAudio: boolean;
+  useCases: string[];
+  thumbnailUrl?: string;
+  status: 'draft' | 'published' | 'delisted';
+  createdAt?: Timestamp | FieldValue;   // <- updated
+  updatedAt?: Timestamp | FieldValue;
+  sold: number;
+}
+
+// Marketplace Purchase Order Type
+export interface MarketplacePurchase {
+  id: string;
+  itemId: string;
+  sellerId: string;
+  sellerName: string;
+  buyerId: string;
+  price: number;
+  status: 'pending' | 'paid' | 'delivered';
+  purchasedAt: {
+    toDate: () => Date;
+  };
+  deliveryEmail: string;
+  videoUrl: string;
+  downloadCount: number;
+  expiresAt: {
+    toDate: () => Date;
+  };
+  rights: {
+    commercialUse: boolean;
+    redistribution: boolean;
+    modification: boolean;
+  };
+}
+
+// Seller Profile Type
+export interface SellerProfile {
+  shopName: string;
+  shopDescription: string;
+  isSeller: boolean;
+  verified: boolean;
+  totalSales: number;
+  rating: number;
+  totalEarnings: number;
+}
+
+// Student Verification Type
+export interface StudentVerification {
+  isAStudent: boolean;
+  studentCardUrl?: string; // URL to uploaded student card image
+  schoolName: string;
+  schoolCountry: string;
+  schoolEmail?: string;
+  graduationYear?: number;
+  verificationStatus: 'pending' | 'approved' | 'rejected';
+  verifiedAt?: {
+    toDate: () => Date;
+  };
+  rejectionReason?: string;
 }
