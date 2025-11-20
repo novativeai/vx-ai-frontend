@@ -33,12 +33,6 @@ export const DynamicBanner: React.FC<DynamicBannerProps> = ({ slides }) => {
     setIsVideoLoaded(true);
   };
 
-  // Reset loading state when slide changes
-  const handleSlideChange = (newIndex: number) => {
-    setIsVideoLoaded(false);
-    setCurrentIndex(newIndex);
-  };
-
   return (
     <section className="relative h-[70vh] w-full flex items-center justify-start text-left text-white overflow-hidden">
       {/* Loading Skeleton */}

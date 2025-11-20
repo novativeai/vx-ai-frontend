@@ -1,5 +1,5 @@
 // This file is the single source of truth for all shared types in the application.
-import { collection, doc, getDoc, addDoc, serverTimestamp, type FieldValue, type Timestamp } from "firebase/firestore";
+import { type FieldValue, type Timestamp } from "firebase/firestore";
 
 // Type for a single parameter within a model's configuration
 export interface ModelParameter {

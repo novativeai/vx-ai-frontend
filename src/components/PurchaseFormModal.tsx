@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { MarketplaceProduct } from "@/types/types";
-import { X, Download, AlertCircle } from "lucide-react";
+import { X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VideoWithWatermark } from "@/components/VideoWithWatermark";
 import { useAuth } from "@/context/AuthContext";
@@ -47,9 +47,12 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
           body: JSON.stringify({
             userId: user.uid,
             productId: product.id,
+            title: product.title,
+            videoUrl: product.videoUrl,
+            thumbnailUrl: product.thumbnailUrl,
+            price: product.price,
+            sellerName: product.sellerName,
             sellerId: product.sellerId,
-            amount: product.price,
-            itemTitle: product.title,
           }),
         }
       );

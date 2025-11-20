@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { DollarSign } from "lucide-react";
@@ -27,7 +28,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({ item }) => {
           {item.outputType === 'video' ? (
             <video src={item.outputUrl} muted loop autoPlay className="w-full h-full object-cover" />
           ) : (
-            <img src={item.outputUrl} alt={item.prompt || "Generated image"} className="w-full h-full object-cover" />
+            <Image src={item.outputUrl} alt={item.prompt || "Generated image"} fill className="object-cover" />
           )}
         </AspectRatio>
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

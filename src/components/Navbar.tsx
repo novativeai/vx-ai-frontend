@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
@@ -59,10 +60,12 @@ export default function Navbar() {
                  <Link href="/account" className="block">
                    {/* THE FIX: Conditional rendering for the user's profile picture */}
                    {user.photoURL ? (
-                     <img 
-                       src={user.photoURL} 
-                       alt="User profile picture" 
-                       className="h-8 w-8 rounded-full" 
+                     <Image
+                       src={user.photoURL}
+                       alt="User profile picture"
+                       width={32}
+                       height={32}
+                       className="h-8 w-8 rounded-full"
                      />
                    ) : (
                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-sm font-bold text-white">

@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { modelConfigs } from "@/lib/modelConfigs";
 import { collection, query, orderBy, onSnapshot, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Sparkles } from "lucide-react";
 
 // --- Component Imports ---
 import { HistoryCard } from "@/components/HistoryCard";

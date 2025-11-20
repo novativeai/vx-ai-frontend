@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
@@ -219,7 +220,7 @@ export default function StudentVerifyPage() {
                 Verification Submitted!
               </p>
               <p className="text-sm text-green-100 mt-1">
-                Your student status is being verified. You've received 100 free
+                Your student status is being verified. You&apos;ve received 100 free
                 credits and will be redirected to your account shortly.
               </p>
             </div>
@@ -255,11 +256,14 @@ export default function StudentVerifyPage() {
                 />
                 {cardPreview ? (
                   <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={cardPreview}
-                      alt="Student card preview"
-                      className="max-w-xs max-h-48 rounded-lg mb-4"
-                    />
+                    <div className="relative w-full max-w-xs h-48 mb-4">
+                      <Image
+                        src={cardPreview}
+                        alt="Student card preview"
+                        fill
+                        className="object-contain rounded-lg"
+                      />
+                    </div>
                     <p className="text-sm text-neutral-400">
                       Click to change the image
                     </p>

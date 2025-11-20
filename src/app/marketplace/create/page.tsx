@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { collection, doc, getDoc, addDoc, serverTimestamp, type FieldValue, type Timestamp } from "firebase/firestore";
+import { collection, doc, getDoc, addDoc, serverTimestamp, type FieldValue } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Generation, MarketplaceProduct } from "@/types/types";
 
-export default function ProductCreationPage() {
+function ProductCreationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -177,10 +178,11 @@ export default function ProductCreationPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <img
+                        <Image
                           src={generation.outputUrl}
                           alt="Preview"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       )}
                     </AspectRatio>
@@ -298,7 +300,7 @@ export default function ProductCreationPage() {
                 </Button>
 
                 <p className="text-xs text-neutral-500 text-center">
-                  You'll earn 80% of the sale price. reelzila takes 20%.
+                  You&apos;ll earn 80% of the sale price. reelzila takes 20%.
                 </p>
               </form>
             </div>
@@ -306,5 +308,13 @@ export default function ProductCreationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductCreationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ProductCreationContent />
+    </Suspense>
   );
 }

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Film, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/Googleicon';
 
 export default function SignUp() {
@@ -90,7 +90,7 @@ export default function SignUp() {
             <h1 className="ml-4 text-8xl font-bold">reelzila</h1>
           </div>
           <p className="text-xl text-white/90 mt-2 max-w-md">
-            A platform for filmakers, advertisers & creative teams.
+            A platform for filmmakers, advertisers & creative teams.
           </p>
           
           {/* Feature highlights */}

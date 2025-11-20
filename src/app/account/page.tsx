@@ -10,12 +10,22 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF } from "@/lib/pdfGenerator";
-import { Download, CreditCard, AlertCircle, LogOut } from "lucide-react";
+import { Download, AlertCircle, LogOut } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
-import { FirebaseError } from "firebase/app"; 
+import { FirebaseError } from "firebase/app";
+import { AccountNav, AccountNavMobile, type AccountTab } from "@/components/AccountNav";
+import { HistoryCard } from "@/components/HistoryCard";
+import { PurchasedVideos } from "@/components/PurchasedVideos";
+import { SellerEarningsCard } from "@/components/SellerEarningsCard";
+import { SellerTransactions } from "@/components/SellerTransactions";
+import { PayoutRequestsTable } from "@/components/PayoutRequestsTable";
+import { WithdrawalRequestModal } from "@/components/WithdrawalRequestModal";
+import { SellerSettingsCard } from "@/components/SellerSettingsCard";
+import { Generation } from "@/types/types"; 
 // --- THE FIX: Define a specific type for the subscription state ---
 interface SubscriptionState {
   planName: string;
@@ -192,6 +202,7 @@ function SubscriptionStatus() {
 export default function AccountPage() {
     const { user, credits } = useAuth();
     const router = useRouter();
+    const [activeTab, setActiveTab] = useState<AccountTab>("account");
     const [activePlan, setActivePlan] = useState("Starter");
     const [displayName, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
@@ -201,13 +212,17 @@ export default function AccountPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [history, setHistory] = useState<Generation[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+    const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
+    const [sellerBalance, setSellerBalance] = useState(0);
 
     useEffect(() => {
       if (!user) return;
-      
+
       setDisplayName(user.displayName || "");
       setEmail(user.email || "");
-      
+
       const userDocRef = doc(db, "users", user.uid);
       const unsubscribe = onSnapshot(userDocRef, (doc) => {
         if (doc.exists()) {
@@ -217,6 +232,32 @@ export default function AccountPage() {
       });
 
       return () => unsubscribe();
+    }, [user]);
+
+    // Load history for History tab
+    useEffect(() => {
+      if (!user) {
+        setIsLoadingHistory(false);
+        return;
+      }
+      const q = query(collection(db, "users", user.uid, "generations"), orderBy("createdAt", "desc"));
+      const unsub = onSnapshot(q, (snapshot) => {
+        setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Generation)));
+        setIsLoadingHistory(false);
+      });
+      return () => unsub();
+    }, [user]);
+
+    // Load seller balance for Seller tab
+    useEffect(() => {
+      if (!user) return;
+      const balanceRef = doc(db, "users", user.uid, "seller_balance", "current");
+      const unsub = onSnapshot(balanceRef, (doc) => {
+        if (doc.exists()) {
+          setSellerBalance(doc.data().pendingBalance || 0);
+        }
+      });
+      return () => unsub();
     }, [user]);
 
     const handleSaveChanges = async () => {
@@ -361,206 +402,305 @@ export default function AccountPage() {
                     </div>
                 </div>
 
-                {/* Subscription Status */}
-                <SubscriptionStatus />
+                {/* Mobile Navigation */}
+                <AccountNavMobile activeTab={activeTab} onTabChange={setActiveTab} />
 
-                {/* Student Verification Card */}
-                <div className="mb-8">
-                  <Card className="bg-gradient-to-br from-[#D4FF4F]/10 to-transparent border-[#D4FF4F]/30 p-6">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm text-neutral-400 mb-2">✨ SPECIAL OFFER</p>
-                        <h3 className="text-2xl font-bold text-white mb-2">Verify Your Student Status</h3>
-                        <p className="text-neutral-400 mb-4">Get 100 free credits + 25% discount on all plans</p>
-                        <p className="text-xs text-neutral-500">Upload your student ID and school details to get instant credits</p>
-                      </div>
-                      <Link href="/student-verify">
-                        <Button className="bg-[#D4FF4F] text-black hover:bg-[#D4FF4F]/90 font-semibold whitespace-nowrap">
-                          Verify Now
-                        </Button>
-                      </Link>
-                    </div>
-                  </Card>
-                </div>
+                {/* Main Content with Sidebar */}
+                <div className="flex gap-8 lg:gap-12">
+                    {/* Sidebar Navigation */}
+                    <AccountNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-                {/* Main Grid */}
-                <div className="grid lg:grid-cols-3 gap-8 lg:gap-16">
-                    {/* Left Column - Stats & CTA */}
-                    <div className="lg:col-span-1 space-y-12 order-2 lg:order-1">
-                        <UsageStats />
-                        <div>
-                            <p className="text-neutral-300 mb-2">Need more credits?</p>
-                            <Link href="/pricing">
-                              <Button className="bg-[#D4FF4F] text-black hover:bg-[#c2ef4a] font-semibold w-full">
-                                View Pricing Plans
-                              </Button>
-                            </Link>
-                        </div>
-                    </div>
+                    {/* Tab Content */}
+                    <div className="flex-1">
+                        {activeTab === "account" && (
+                            <div className="space-y-8">
+                                {/* Subscription Status */}
+                                <SubscriptionStatus />
 
-                    {/* Right Column - Credits Display */}
-                    <div className="lg:col-span-2 order-1 lg:order-2">
-                       <Card className="bg-[#111111FF] border-neutral-800 p-8 text-center">
-                            <p className="text-neutral-400 mb-2">Active Plan</p>
-                            <p className="text-4xl font-bold mb-6">{activePlan}</p>
-                            <Separator className="bg-neutral-800 mb-6" />
-                            <p className="text-neutral-400 mb-2">Available Credits</p>
-                            <p className="text-7xl font-bold mb-4">{credits}</p>
-                            <p className="text-sm text-neutral-500">
-                              {activePlan === "Starter" 
-                                ? "One-time credits. Purchase more anytime." 
-                                : "Monthly credits refresh automatically with your subscription."}
-                            </p>
-                       </Card>
-                    </div>
-                </div>
+                                {/* Student Verification Card */}
+                                <Card className="bg-gradient-to-br from-[#D4FF4F]/10 to-transparent border-[#D4FF4F]/30 p-6">
+                                    <div className="flex items-start justify-between">
+                                      <div>
+                                        <p className="text-sm text-neutral-400 mb-2">✨ SPECIAL OFFER</p>
+                                        <h3 className="text-2xl font-bold text-white mb-2">Verify Your Student Status</h3>
+                                        <p className="text-neutral-400 mb-4">Get 100 free credits + 25% discount on all plans</p>
+                                        <p className="text-xs text-neutral-500">Upload your student ID and school details to get instant credits</p>
+                                      </div>
+                                      <Link href="/student-verify">
+                                        <Button className="bg-[#D4FF4F] text-black hover:bg-[#D4FF4F]/90 font-semibold whitespace-nowrap">
+                                          Verify Now
+                                        </Button>
+                                      </Link>
+                                    </div>
+                                </Card>
 
-                <Separator className="my-16 bg-neutral-800" />
+                                {/* Main Grid */}
+                                <div className="grid lg:grid-cols-2 gap-8">
+                                    {/* Left Column - Stats & CTA */}
+                                    <div className="space-y-12">
+                                        <UsageStats />
+                                        <div>
+                                            <p className="text-neutral-300 mb-2">Need more credits?</p>
+                                            <Link href="/pricing">
+                                              <Button className="bg-[#D4FF4F] text-black hover:bg-[#c2ef4a] font-semibold w-full">
+                                                View Pricing Plans
+                                              </Button>
+                                            </Link>
+                                        </div>
+                                    </div>
 
-                {/* Bottom Grid - History & Settings */}
-                <div className="grid lg:grid-cols-2 gap-16">
-                    {/* Billing History */}
-                    <BillingHistory />
-
-                    {/* User Settings */}
-                    <div>
-                         <h2 className="font-semibold text-lg mb-4">Account Settings</h2>
-                         
-                         {saveMessage && (
-                           <Alert className={`mb-4 ${saveMessage.type === 'success' ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'}`}>
-                             <AlertDescription className={saveMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>
-                               {saveMessage.text}
-                             </AlertDescription>
-                           </Alert>
-                         )}
-                         
-                         <div className="space-y-4">
-                            <div>
-                              <label className="text-sm text-neutral-400 mb-1 block">Display Name</label>
-                              <Input 
-                                placeholder="Your name" 
-                                value={displayName}
-                                onChange={(e) => setDisplayName(e.target.value)}
-                                className={inputStyles} 
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm text-neutral-400 mb-1 block">Email Address</label>
-                              <Input 
-                                type="email"
-                                placeholder="your@email.com" 
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className={inputStyles}
-                              />
-                              <p className="text-xs text-neutral-500 mt-1">
-                                You may need to sign in again after changing your email
-                              </p>
-                            </div>
-
-                            <Separator className="bg-neutral-800 my-6" />
-
-                            <div>
-                              <h3 className="text-sm font-medium mb-3">Change Password</h3>
-                              <div className="space-y-3">
-                                <div>
-                                  
-                                  <Input 
-                                    type="password"
-                                    placeholder="Enter current password" 
-                                    value={currentPassword}
-                                    onChange={(e) => setCurrentPassword(e.target.value)}
-                                    className={inputStyles}
-                                  />
+                                    {/* Right Column - Credits Display */}
+                                    <Card className="bg-[#111111FF] border-neutral-800 p-8 text-center h-fit">
+                                        <p className="text-neutral-400 mb-2">Active Plan</p>
+                                        <p className="text-4xl font-bold mb-6">{activePlan}</p>
+                                        <Separator className="bg-neutral-800 mb-6" />
+                                        <p className="text-neutral-400 mb-2">Available Credits</p>
+                                        <p className="text-7xl font-bold mb-4">{credits}</p>
+                                        <p className="text-sm text-neutral-500">
+                                          {activePlan === "Starter"
+                                            ? "One-time credits. Purchase more anytime."
+                                            : "Monthly credits refresh automatically with your subscription."}
+                                        </p>
+                                    </Card>
                                 </div>
-                                
+
+                                <Separator className="bg-neutral-800" />
+
+                                {/* Billing History */}
+                                <BillingHistory />
+
+                                <Separator className="bg-neutral-800" />
+
+                                {/* User Settings */}
                                 <div>
-                                  
-                                  <Input 
-                                    type="password"
-                                    placeholder="Enter new password" 
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className={inputStyles}
-                                  />
+                                     <h2 className="font-semibold text-lg mb-4">Account Settings</h2>
+
+                                     {saveMessage && (
+                                       <Alert className={`mb-4 ${saveMessage.type === 'success' ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'}`}>
+                                         <AlertDescription className={saveMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+                                           {saveMessage.text}
+                                         </AlertDescription>
+                                       </Alert>
+                                     )}
+
+                                     <div className="space-y-4">
+                                        <div>
+                                          <label className="text-sm text-neutral-400 mb-1 block">Display Name</label>
+                                          <Input
+                                            placeholder="Your name"
+                                            value={displayName}
+                                            onChange={(e) => setDisplayName(e.target.value)}
+                                            className={inputStyles}
+                                          />
+                                        </div>
+
+                                        <div>
+                                          <label className="text-sm text-neutral-400 mb-1 block">Email Address</label>
+                                          <Input
+                                            type="email"
+                                            placeholder="your@email.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className={inputStyles}
+                                          />
+                                          <p className="text-xs text-neutral-500 mt-1">
+                                            You may need to sign in again after changing your email
+                                          </p>
+                                        </div>
+
+                                        <Separator className="bg-neutral-800 my-6" />
+
+                                        <div>
+                                          <h3 className="text-sm font-medium mb-3">Change Password</h3>
+                                          <div className="space-y-3">
+                                            <div>
+                                              <Input
+                                                type="password"
+                                                placeholder="Enter current password"
+                                                value={currentPassword}
+                                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                                className={inputStyles}
+                                              />
+                                            </div>
+
+                                            <div>
+                                              <Input
+                                                type="password"
+                                                placeholder="Enter new password"
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className={inputStyles}
+                                              />
+                                            </div>
+
+                                            <div>
+                                              <Input
+                                                type="password"
+                                                placeholder="Confirm new password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className={inputStyles}
+                                              />
+                                            </div>
+
+                                            <p className="text-xs text-neutral-500">
+                                              Password must be at least 6 characters. Leave blank to keep current password.
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        <div className="flex justify-end gap-4 pt-4">
+                                            <Button
+                                              variant="ghost"
+                                              onClick={handleCancel}
+                                              disabled={isSaving}
+                                            >
+                                              Cancel
+                                            </Button>
+                                            <Button
+                                              className="bg-white text-black hover:bg-neutral-200 font-semibold"
+                                              onClick={handleSaveChanges}
+                                              disabled={isSaving}
+                                            >
+                                              {isSaving ? "Saving..." : "Save Changes"}
+                                            </Button>
+                                        </div>
+                                     </div>
+
+                                     {/* Payment Info Notice */}
+                                     <Card className="bg-neutral-900 border-neutral-800 p-4 mt-8">
+                                        <div className="flex gap-3">
+                                          <AlertCircle className="h-5 w-5 text-neutral-400 flex-shrink-0 mt-0.5" />
+                                          <div>
+                                            <p className="text-sm font-medium mb-1">Payment Management</p>
+                                            <p className="text-xs text-neutral-400">
+                                              All payments are securely processed through PayTrust. To update your payment method or view detailed invoices, simply make a new purchase and use your preferred payment method.
+                                            </p>
+                                          </div>
+                                        </div>
+                                     </Card>
+
+                                     {/* Logout Section */}
+                                     <Separator className="bg-neutral-800 my-8" />
+
+                                     <div>
+                                        <h3 className="text-sm font-medium mb-2">Danger Zone</h3>
+                                        <p className="text-xs text-neutral-400 mb-4">
+                                          Sign out of your account on this device
+                                        </p>
+                                        <Button
+                                          variant="destructive"
+                                          onClick={handleLogout}
+                                          disabled={isLoggingOut}
+                                          className="w-full sm:w-auto"
+                                        >
+                                          {isLoggingOut ? (
+                                            "Signing out..."
+                                          ) : (
+                                            <>
+                                              <LogOut className="mr-2 h-4 w-4" />
+                                              Sign Out
+                                            </>
+                                          )}
+                                        </Button>
+                                     </div>
                                 </div>
-                                
+                            </div>
+                        )}
+
+                        {activeTab === "history" && (
+                            <div className="space-y-6">
                                 <div>
-                                  
-                                  <Input 
-                                    type="password"
-                                    placeholder="Confirm new password" 
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className={inputStyles}
-                                  />
+                                    <h2 className="font-semibold text-lg mb-4">History</h2>
+                                    <p className="text-neutral-400 mb-6">Your created videos and generations</p>
                                 </div>
-                                
-                                <p className="text-xs text-neutral-500">
-                                  Password must be at least 6 characters. Leave blank to keep current password.
-                                </p>
-                              </div>
-                            </div>
 
-                            <div className="flex justify-end gap-4 pt-4">
-                                <Button 
-                                  variant="ghost" 
-                                  onClick={handleCancel}
-                                  disabled={isSaving}
-                                >
-                                  Cancel
-                                </Button>
-                                <Button 
-                                  className="bg-white text-black hover:bg-neutral-200 font-semibold"
-                                  onClick={handleSaveChanges}
-                                  disabled={isSaving}
-                                >
-                                  {isSaving ? "Saving..." : "Save Changes"}
-                                </Button>
+                                {isLoadingHistory ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {[...Array(3)].map((_, i) => (
+                                            <div key={i} className="space-y-2">
+                                                <Card className="overflow-hidden rounded-2xl bg-transparent">
+                                                    <Skeleton className="w-full h-48 bg-[#1C1C1C]" />
+                                                </Card>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : history.length === 0 ? (
+                                    <Card className="bg-[#1C1C1C] border-neutral-800 p-12 text-center">
+                                        <p className="text-neutral-400 mb-2">No history yet</p>
+                                        <p className="text-sm text-neutral-500">
+                                            Start generating to see your creations
+                                        </p>
+                                        <Link href="/generator">
+                                            <Button className="mt-4 bg-[#D4FF4F] text-black hover:bg-[#c2ef4a]">
+                                                Go to Generator
+                                            </Button>
+                                        </Link>
+                                    </Card>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {history.map(item => (
+                                            <div key={item.id} className="w-full">
+                                                <HistoryCard item={item} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                         </div>
+                        )}
 
-                         {/* Payment Info Notice */}
-                         <Card className="bg-neutral-900 border-neutral-800 p-4 mt-8">
-                            <div className="flex gap-3">
-                              <AlertCircle className="h-5 w-5 text-neutral-400 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="text-sm font-medium mb-1">Payment Management</p>
-                                <p className="text-xs text-neutral-400">
-                                  All payments are securely processed through PayTrust. To update your payment method or view detailed invoices, simply make a new purchase and use your preferred payment method.
-                                </p>
-                              </div>
+                        {activeTab === "purchased" && (
+                            <PurchasedVideos />
+                        )}
+
+                        {activeTab === "seller" && (
+                            <div className="space-y-8">
+                                <div>
+                                    <h2 className="text-3xl font-bold mb-2">Seller Dashboard</h2>
+                                    <p className="text-neutral-400">
+                                        Manage your earnings and withdrawals from marketplace sales
+                                    </p>
+                                </div>
+
+                                {/* Earnings Cards */}
+                                <SellerEarningsCard
+                                    onWithdrawClick={() => setIsWithdrawalModalOpen(true)}
+                                />
+
+                                <Separator className="bg-neutral-800" />
+
+                                {/* Sales History */}
+                                <div>
+                                    <h3 className="text-xl font-bold mb-4">Sales History</h3>
+                                    <SellerTransactions />
+                                </div>
+
+                                <Separator className="bg-neutral-800" />
+
+                                {/* Withdrawal Requests */}
+                                <div>
+                                    <h3 className="text-xl font-bold mb-4">Withdrawal Requests</h3>
+                                    <PayoutRequestsTable />
+                                </div>
+
+                                {/* Seller Settings */}
+                                <Separator className="bg-neutral-800" />
+                                <div>
+                                    <h3 className="text-xl font-bold mb-4">Seller Settings</h3>
+                                    <SellerSettingsCard />
+                                </div>
                             </div>
-                         </Card>
-
-                         {/* Logout Section */}
-                         <Separator className="bg-neutral-800 my-8" />
-                         
-                         <div>
-                            <h3 className="text-sm font-medium mb-2">Danger Zone</h3>
-                            <p className="text-xs text-neutral-400 mb-4">
-                              Sign out of your account on this device
-                            </p>
-                            <Button 
-                              variant="destructive"
-                              onClick={handleLogout}
-                              disabled={isLoggingOut}
-                              className="w-full sm:w-auto"
-                            >
-                              {isLoggingOut ? (
-                                "Signing out..."
-                              ) : (
-                                <>
-                                  <LogOut className="mr-2 h-4 w-4" />
-                                  Sign Out
-                                </>
-                              )}
-                            </Button>
-                         </div>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* Withdrawal Request Modal */}
+            <WithdrawalRequestModal
+                isOpen={isWithdrawalModalOpen}
+                onClose={() => setIsWithdrawalModalOpen(false)}
+                pendingBalance={sellerBalance}
+            />
         </div>
     );
 }

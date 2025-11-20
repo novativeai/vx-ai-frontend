@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 export function EmpoweringSection() {
   return (
@@ -32,11 +33,12 @@ export function EmpoweringSection() {
           {/* --- Image Div --- */}
           {/* This div has a fixed width of 65% on desktop. */}
           {/* 'flex-shrink-0' prevents it from shrinking. */}
-          <div className="w-full md:w-[65%] h-64 md:h-full flex-shrink-0">
-            <img 
-              src="/images/empowering-1.png" 
-              alt="Student using AI tools" 
-              className="w-full h-full object-cover"
+          <div className="w-full md:w-[65%] h-64 md:h-full flex-shrink-0 relative">
+            <Image
+              src="/images/empowering-1.png"
+              alt="Student using AI tools"
+              fill
+              className="object-cover"
             />
           </div>
 

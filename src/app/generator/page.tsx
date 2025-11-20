@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense, useEffect, ChangeEvent } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
 import { modelConfigs } from '@/lib/modelConfigs';
@@ -19,7 +20,7 @@ import { TipsSection } from "@/components/TipsSection";
 import { Separator } from "@/components/ui/separator";
 
 // Lucide React Icon Imports
-import { Wand2, Frown, Video, Image as ImageIcon } from 'lucide-react';
+import { Frown } from 'lucide-react';
 
 // Define the possible types for parameters state
 type ParamValues = string | number | null;
@@ -166,7 +167,7 @@ function GeneratorComponent() {
                   <Label htmlFor={param.name} className="font-semibold">{param.label}</Label>
                   {param.type === 'textarea' && <Textarea id={param.name} value={params[param.name] as string || ''} onChange={(e) => handleParamChange(param.name, e.target.value)} rows={5} disabled={generating} />}
                   {param.type === 'slider' && <div className="flex items-center gap-4 pt-1"><Slider id={param.name} value={[params[param.name] as number || 0]} onValueChange={([value]) => handleParamChange(param.name, value)} min={param.min} max={param.max} step={param.step} disabled={generating} /><span className="font-mono text-sm w-12 text-center rounded-md border p-2">{params[param.name] as number}</span></div>}
-                  {param.type === 'image' && <div className='grid gap-3'><Input id={param.name} type="file" onChange={handleImageChange} accept="image/*" disabled={generating} />{imagePreview && <AspectRatio ratio={16 / 9} className="bg-muted rounded-md border"><img src={imagePreview} alt="Image preview" className="object-contain w-full h-full rounded-md" /></AspectRatio>}</div>}
+                  {param.type === 'image' && <div className='grid gap-3'><Input id={param.name} type="file" onChange={handleImageChange} accept="image/*" disabled={generating} />{imagePreview && <AspectRatio ratio={16 / 9} className="bg-muted rounded-md border"><Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-md" /></AspectRatio>}</div>}
                   {param.type === 'dropdown' && <Select value={params[param.name] as string || ''} onValueChange={(value) => handleParamChange(param.name, value)} disabled={generating}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{param.options?.map(option => <SelectItem key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>}
                 </div>
               ))}
@@ -202,7 +203,7 @@ function GeneratorComponent() {
                       <video src={outputUrl} controls autoPlay loop className="w-full h-full rounded-md" />
                     )}
                     {detectedOutputType === 'image' && (
-                      <img src={outputUrl} alt="Generated result" className="object-contain w-full h-full rounded-md" />
+                      <Image src={outputUrl} alt="Generated result" fill className="object-contain rounded-md" />
                     )}
                     {detectedOutputType === null && (
                         <div className="text-center text-muted-foreground p-4">

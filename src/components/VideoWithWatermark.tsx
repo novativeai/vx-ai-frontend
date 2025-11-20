@@ -88,6 +88,7 @@ export const VideoWithWatermark: React.FC<VideoWithWatermarkProps> = ({
       video.removeEventListener("pause", handlePause);
       cancelAnimationFrame(animationId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watermarkText]);
 
   return (

@@ -11,7 +11,7 @@ const heroSlides = [
     //videoSrc: "/videos/highlight-1-opx.mp4", // Replace with your first video
     videoSrc: "/videos/full-reel.mp4", // Replace with your first video
     title: <>YOUR PERSPECTIVE<br />LIKE NEVER BEFORE</>,
-    subtitle: "A platform for filmakers, advertisers & creative teams",
+    subtitle: "A platform for filmmakers, advertisers & creative teams",
   },
 ];
 

@@ -69,9 +69,9 @@ export default function Footer() {
             © {new Date().getFullYear()} reelzila. All Rights Reserved.
           </p>
           <div className="flex space-x-4">
-            <Link href="#"><Twitter className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
-            <Link href="#"><Instagram className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
-            <Link href="#"><Linkedin className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
+            <Link href="https://twitter.com/reelzila" target="_blank" rel="noopener noreferrer"><Twitter className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
+            <Link href="https://instagram.com/reelzila" target="_blank" rel="noopener noreferrer"><Instagram className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
+            <Link href="https://linkedin.com/company/reelzila" target="_blank" rel="noopener noreferrer"><Linkedin className="h-5 w-5 text-muted-foreground hover:text-primary" /></Link>
           </div>
         </div>
       </div>

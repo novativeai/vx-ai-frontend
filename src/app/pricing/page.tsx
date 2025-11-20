@@ -113,7 +113,7 @@ export default function PricingPage() {
     }
   };
 
-  const isValidCustomAmount = customAmount > 0 && customAmount <= 1000; // Max €1000
+  // const isValidCustomAmount = customAmount > 0 && customAmount <= 1000; // Max €1000
 
   const inputStyles = "bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 text-xl h-12 focus-visible:ring-0 focus-visible:border-b-white";
 

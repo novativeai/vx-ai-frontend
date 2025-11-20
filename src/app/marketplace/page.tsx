@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where, orderBy } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { DynamicBanner, BannerSlide } from "@/components/DynamicBanner";
 import { MarketplaceSidebar } from "@/components/MarketplaceSidebar";
@@ -10,6 +12,21 @@ import { MarketplaceGrid } from "@/components/MarketplaceGrid";
 import { PurchaseFormModal } from "@/components/PurchaseFormModal";
 import { MarketplaceProduct } from "@/types/types";
 import { CheckCircle, AlertCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+interface PurchasedVideo {
+  id: string;
+  title: string;
+  videoUrl: string;
+  thumbnailUrl?: string;
+  price: number;
+  sellerName: string;
+  purchasedAt: {
+    toDate: () => Date;
+  };
+}
 
 const bannerSlides: BannerSlide[] = [
   {
@@ -21,9 +38,10 @@ const bannerSlides: BannerSlide[] = [
   },
 ];
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
   const searchParams = useSearchParams();
   const purchaseStatus = searchParams.get("purchase");
+  const { user } = useAuth();
 
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +50,7 @@ export default function MarketplacePage() {
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showStatusMessage, setShowStatusMessage] = useState(!!purchaseStatus);
+  const [purchased, setPurchased] = useState<PurchasedVideo[]>([]);
 
   // Fetch all published marketplace products
   useEffect(() => {
@@ -49,8 +68,8 @@ export default function MarketplacePage() {
 
         // Sort by createdAt descending
         productsData.sort((a, b) => {
-          const dateA = a.createdAt?.toDate?.() || new Date(0);
-          const dateB = b.createdAt?.toDate?.() || new Date(0);
+          const dateA = a.createdAt && typeof a.createdAt === 'object' && 'toDate' in a.createdAt ? a.createdAt.toDate() : new Date(0);
+          const dateB = b.createdAt && typeof b.createdAt === 'object' && 'toDate' in b.createdAt ? b.createdAt.toDate() : new Date(0);
           return dateB.getTime() - dateA.getTime();
         });
 
@@ -64,6 +83,32 @@ export default function MarketplacePage() {
       setIsLoading(false);
     }
   }, []);
+
+  // Fetch user's purchased videos
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    try {
+      const q = query(
+        collection(db, "users", user.uid, "purchased_videos"),
+        orderBy("purchasedAt", "desc")
+      );
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const purchasedData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        } as PurchasedVideo));
+        setPurchased(purchasedData);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching purchased videos:", error);
+    }
+  }, [user]);
 
   // Get all unique tags from products
   const allTags = useMemo(() => {
@@ -164,6 +209,72 @@ export default function MarketplacePage() {
         )}
 
         <div className="space-y-12">
+          {/* Your Purchases Section - Only show if user is logged in and has purchases */}
+          {user && purchased.length > 0 && (
+            <section className="pb-12 border-b border-neutral-800">
+              <div className="mb-8">
+                <p className="text-sm uppercase tracking-widest text-neutral-400">My Library</p>
+                <h2 className="text-3xl md:text-4xl font-regular tracking-tighter mt-2">Your Purchases</h2>
+                <p className="max-w-2xl text-neutral-300 mt-2 text-sm">
+                  {purchased.length} {purchased.length === 1 ? "video" : "videos"} in your library
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {purchased.map((video) => (
+                  <div key={video.id} className="group cursor-pointer">
+                    <Card className="overflow-hidden rounded-lg border-neutral-800 hover:border-neutral-700 transition-colors bg-neutral-900/30">
+                      <div className="aspect-video bg-neutral-800 relative overflow-hidden">
+                        {video.videoUrl ? (
+                          <video
+                            src={video.videoUrl}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            muted
+                            loop
+                          />
+                        ) : video.thumbnailUrl ? (
+                          <Image
+                            src={video.thumbnailUrl}
+                            alt={video.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : null}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-medium text-white line-clamp-2 text-sm group-hover:text-[#D4FF4F] transition-colors">
+                          {video.title}
+                        </h3>
+                        <p className="text-xs text-neutral-400 mt-1">by {video.sellerName}</p>
+                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-neutral-700/30">
+                          <p className="text-xs text-neutral-400">
+                            {video.purchasedAt?.toDate().toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </p>
+                          <p className="text-xs font-medium text-[#D4FF4F]">
+                            €{video.price.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* See all purchases link */}
+          {user && purchased.length > 0 && (
+            <div className="flex justify-end mb-4">
+              <Link href="/account?tab=purchased">
+                <Button variant="outline" className="border-neutral-700 text-white hover:bg-neutral-900">
+                  View All Purchases
+                </Button>
+              </Link>
+            </div>
+          )}
           {/* Section Title */}
           <section>
             <div className="mb-12">
@@ -223,5 +334,13 @@ export default function MarketplacePage() {
         />
       )}
     </div>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-black text-white">Loading...</div>}>
+      <MarketplaceContent />
+    </Suspense>
   );
 }
