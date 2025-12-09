@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { doc, setDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import {
   getStorage,
   ref,
@@ -27,6 +27,7 @@ export default function StudentVerifyPage() {
   const [success, setSuccess] = useState(false);
   const [studentCardFile, setStudentCardFile] = useState<File | null>(null);
   const [cardPreview, setCardPreview] = useState<string | null>(null);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -34,6 +35,15 @@ export default function StudentVerifyPage() {
     schoolEmail: "",
     graduationYear: new Date().getFullYear() + 4,
   });
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Redirect if not logged in
   if (!user) {
@@ -119,6 +129,22 @@ export default function StudentVerifyPage() {
         throw new Error("Graduation year must be in the future");
       }
 
+      // CHECK: If verification already exists
+      const studentVerificationRef = doc(
+        db,
+        "users",
+        user.uid,
+        "studentVerification",
+        "profile"
+      );
+
+      const existingVerification = await getDoc(studentVerificationRef);
+      if (existingVerification.exists()) {
+        setError('You have already submitted a verification request. Please wait for admin approval.');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Upload student card to Firebase Storage
       const storage = getStorage();
       const fileRef = ref(
@@ -132,31 +158,23 @@ export default function StudentVerifyPage() {
       // Save student verification to Firestore
       const userDocRef = doc(db, "users", user.uid);
 
-      // Create/update student verification document
-      const studentVerificationRef = doc(
-        db,
-        "users",
-        user.uid,
-        "studentVerification",
-        "profile"
-      );
-
+      // Create student verification document with pending status
+      // DO NOT grant credits until admin approves
       await setDoc(studentVerificationRef, {
-        isAStudent: true,
+        isAStudent: false, // Will be set to true after admin approval
         studentCardUrl: downloadURL,
         schoolName: formData.schoolName,
         schoolCountry: formData.schoolCountry,
         schoolEmail: formData.schoolEmail || null,
         graduationYear: formData.graduationYear || null,
-        verificationStatus: "pending",
+        verificationStatus: "pending", // Pending admin approval
         createdAt: new Date(),
       });
 
-      // Grant 100 free credits to the student
+      // Update user document but DON'T add credits yet
       await updateDoc(userDocRef, {
-        credits: increment(100),
-        isAStudent: true,
-        studentVerifiedAt: new Date(),
+        isAStudent: false, // Only true after verification
+        studentVerificationPending: true,
       });
 
       setSuccess(true);
@@ -169,10 +187,10 @@ export default function StudentVerifyPage() {
         graduationYear: new Date().getFullYear() + 4,
       });
 
-      // Redirect to account page after 2 seconds
-      setTimeout(() => {
+      // Redirect to account page after 3 seconds with cleanup
+      timeoutRef.current = setTimeout(() => {
         router.push("/account");
-      }, 2000);
+      }, 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to verify student");
       console.error(err);
@@ -193,7 +211,7 @@ export default function StudentVerifyPage() {
             Student Verification
           </h1>
           <p className="text-neutral-400 text-lg">
-            Get 100 free credits by verifying your student status. All you need
+            Submit your student verification to receive 100 free credits after admin approval. All you need
             is a valid student ID or enrollment document.
           </p>
         </div>
@@ -204,7 +222,7 @@ export default function StudentVerifyPage() {
             Student Benefits
           </h3>
           <ul className="space-y-2 text-neutral-300">
-            <li>✓ 100 free credits immediately</li>
+            <li>✓ 100 free credits after verification</li>
             <li>✓ 25% discount on all subscription plans</li>
             <li>✓ Early access to new features</li>
             <li>✓ Student-exclusive content library</li>
@@ -220,8 +238,9 @@ export default function StudentVerifyPage() {
                 Verification Submitted!
               </p>
               <p className="text-sm text-green-100 mt-1">
-                Your student status is being verified. You&apos;ve received 100 free
-                credits and will be redirected to your account shortly.
+                Your verification request has been submitted successfully.
+                An admin will review your submission within 24-48 hours.
+                You will receive 100 free credits once approved.
               </p>
             </div>
           </div>

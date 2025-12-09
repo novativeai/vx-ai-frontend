@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, Suspense } from "react";
+import { CreateProductSkeleton } from "@/components/ui/premium-skeleton";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -313,7 +314,7 @@ function ProductCreationContent() {
 
 export default function ProductCreationPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<CreateProductSkeleton />}>
       <ProductCreationContent />
     </Suspense>
   );

@@ -133,3 +133,22 @@ export interface StudentVerification {
   };
   rejectionReason?: string;
 }
+
+// User Profile Type - represents all user data in Firestore
+export interface UserProfile {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postCode?: string;
+  country?: string;
+  credits: number;
+  activePlan: string;
+  isAdmin: boolean;
+  emailVerified: boolean;
+  profileComplete: boolean;
+  createdAt: Timestamp | FieldValue | Date;
+  updatedAt?: Timestamp | FieldValue | Date;
+}

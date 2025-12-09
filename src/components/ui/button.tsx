@@ -32,11 +32,11 @@ const buttonVariants = cva(
           "bg-[#D4FF4F] text-black font-bold hover:bg-[#c2ef4a] transition-colors",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8  gap-1.5 px-3 has-[>svg]:px-2.5",
+        default: "h-12 px-4 py-2 has-[>svg]:px-3",
+        sm: "h-10 gap-1.5 px-3 has-[>svg]:px-2.5",
         // --- MODIFIED LG SIZE ---
         lg: "h-14 px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        icon: "size-12",
       },
     },
     defaultVariants: {

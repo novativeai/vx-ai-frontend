@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
+import { memo } from "react";
 
 interface Model {
   id: string;
@@ -19,7 +20,7 @@ interface ModelCardProps {
   model: Model;
 }
 
-export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
+export const ModelCard: React.FC<ModelCardProps> = memo(function ModelCard({ model }) {
   return (
     <Link href={`/generator?model=${model.id}`} className="group">
       <Card className="bg-[#1C1C1C] border-neutral-800 rounded-2xl p-4 transition-all md:h-full group-hover:ring-2 group-hover:ring-white/50 overflow-hidden min-w-80">
@@ -43,4 +44,4 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
       </Card>
     </Link>
   );
-};
+});

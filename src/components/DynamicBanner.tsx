@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -80,9 +81,11 @@ export const DynamicBanner: React.FC<DynamicBannerProps> = ({ slides }) => {
             <p className="mt-4 text-lg md:text-xl text-neutral-300">
               {currentSlide.subtitle}
             </p>
-            <Button size="lg" className="mt-8 bg-white text-black hover:bg-neutral-200 font-semibold">
-              {currentSlide.buttonText}
-            </Button>
+            <Link href={currentSlide.buttonLink}>
+              <Button size="lg" className="mt-8 bg-white text-black hover:bg-neutral-200 font-semibold">
+                {currentSlide.buttonText}
+              </Button>
+            </Link>
           </motion.div>
         </AnimatePresence>
       </div>

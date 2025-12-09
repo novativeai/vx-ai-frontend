@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ export function SellerSettingsCard() {
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -54,6 +55,15 @@ export function SellerSettingsCard() {
 
     return () => unsub();
   }, [user]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const validateEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -90,7 +100,7 @@ export function SellerSettingsCard() {
 
       setMessage({ type: "success", text: "PayPal email updated successfully!" });
       setIsEditing(false);
-      setTimeout(() => setMessage(null), 3000);
+      timeoutRef.current = setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       console.error("Error updating profile:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to update PayPal email";

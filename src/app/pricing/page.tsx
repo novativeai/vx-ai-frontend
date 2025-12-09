@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Loader2, AlertCircle } from "lucide-react";
+import { Check, Star, Loader2, AlertCircle, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -104,18 +104,12 @@ export default function PricingPage() {
     }
   };
 
-  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 0) {
-      setCustomAmount(value);
-    } else if (e.target.value === '') {
-      setCustomAmount(0);
-    }
+  const handleSliderChange = (value: number[]) => {
+    setCustomAmount(value[0]);
   };
 
-  // const isValidCustomAmount = customAmount > 0 && customAmount <= 1000; // Max €1000
-
-  const inputStyles = "bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 text-xl h-12 focus-visible:ring-0 focus-visible:border-b-white";
+  // Preset amounts for quick selection
+  const presetAmounts = [5, 10, 25, 50, 100];
 
   return (
     <div className="bg-black text-white min-h-screen pt-32 w-full">
@@ -198,41 +192,87 @@ export default function PricingPage() {
 
         {/* Custom Amount Section */}
         <div className="mt-24 w-full px-4">
-          <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
-            <h2 className="text-7xl md:text-8xl font-extrabold tracking-tighter mb-4 md:mb-0">
-              Custom amount
+          <div className="mb-12">
+            <h2 className="text-5xl md:text-7xl font-extrabold tracking-tighter">
+              Need more credits?
             </h2>
-            
-            <div className="flex flex-wrap items-center gap-4">
-              <Input 
-                type="number" 
-                value={customAmount || ''} 
-                onChange={handleCustomAmountChange}
-                placeholder="eg: 10$" 
-                className={`${inputStyles} w-32`}
-                min="1"
-              />
-              <p className="text-2xl text-neutral-400">x 10 =</p>
-              <p className="text-2xl font-bold">{customAmount * 10} credits</p>
-              <Button 
-                variant="brand-outline" 
-                className="bg-white text-black hover:bg-neutral-200 font-semibold" 
-                onClick={() => processPurchase({ customAmount })} 
-                disabled={isProcessing === 'custom' || customAmount <= 0}
-              >
-                {isProcessing === 'custom' ? (
-                  <Loader2 className="animate-spin h-5 w-5" />
-                ) : (
-                  "Purchase Credits"
-                )}
-              </Button>
-            </div>
+            <p className="text-lg text-neutral-400 mt-4">
+              Purchase exactly what you need. No subscriptions, no commitments.
+            </p>
           </div>
-          
-          {/* Info text */}
-          <p className="text-sm text-neutral-500 mt-6 text-center md:text-right">
-            Purchase any amount of credits at $1 = 10 credits
-          </p>
+
+          <Card className="bg-[#1C1C1C] border-neutral-800 overflow-hidden">
+            <CardContent className="p-8 md:p-12">
+              {/* Credits Display */}
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-3 bg-[#D4FF4F]/10 px-6 py-3 rounded-full mb-6">
+                  <Zap className="h-6 w-6 text-[#D4FF4F]" />
+                  <span className="text-[#D4FF4F] font-semibold text-lg">You will receive</span>
+                </div>
+                <div className="text-8xl md:text-9xl font-extrabold tracking-tighter text-white">
+                  {customAmount * 10}
+                </div>
+                <div className="text-2xl text-neutral-400 mt-2">credits</div>
+              </div>
+
+              {/* Slider */}
+              <div className="max-w-2xl mx-auto mb-8">
+                <Slider
+                  value={[customAmount]}
+                  onValueChange={handleSliderChange}
+                  min={1}
+                  max={100}
+                  step={1}
+                  className="w-full [&_[data-slot=slider-track]]:h-3 [&_[data-slot=slider-track]]:bg-neutral-700 [&_[data-slot=slider-range]]:bg-[#D4FF4F] [&_[data-slot=slider-thumb]]:h-6 [&_[data-slot=slider-thumb]]:w-6 [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-[#D4FF4F] [&_[data-slot=slider-thumb]]:bg-black"
+                />
+                <div className="flex justify-between mt-3 text-sm text-neutral-500">
+                  <span>$1</span>
+                  <span>$100</span>
+                </div>
+              </div>
+
+              {/* Preset Amounts */}
+              <div className="flex flex-wrap justify-center gap-3 mb-10">
+                {presetAmounts.map((amount) => (
+                  <Button
+                    key={amount}
+                    onClick={() => setCustomAmount(amount)}
+                    variant={customAmount === amount ? "brand-lime" : "outline"}
+                    className={cn(
+                      "min-w-[80px]",
+                      customAmount === amount
+                        ? ""
+                        : "border-neutral-700 bg-neutral-800/50 text-white hover:bg-neutral-700 hover:text-white"
+                    )}
+                  >
+                    ${amount}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Price and Purchase */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <div className="text-center sm:text-left">
+                  <div className="text-sm text-neutral-400 uppercase tracking-wider">Total</div>
+                  <div className="text-4xl font-bold text-white">${customAmount}</div>
+                </div>
+                <Button
+                  size="lg"
+                  variant="brand-lime"
+                  className="px-12 text-lg"
+                  onClick={() => processPurchase({ customAmount })}
+                  disabled={isProcessing === 'custom' || customAmount <= 0}
+                >
+                  {isProcessing === 'custom' ? (
+                    <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  ) : (
+                    <Zap className="h-5 w-5 mr-2" />
+                  )}
+                  {isProcessing === 'custom' ? "Processing..." : "Purchase Credits"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

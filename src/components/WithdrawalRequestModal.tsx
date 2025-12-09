@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, addDoc } from "firebase/firestore";
@@ -29,6 +29,7 @@ export function WithdrawalRequestModal({
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [savedEmail, setSavedEmail] = useState("");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load saved PayPal email from seller profile
   const loadSellerProfile = async () => {
@@ -43,6 +44,15 @@ export function WithdrawalRequestModal({
       console.error("Error loading seller profile:", error);
     }
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -129,8 +139,8 @@ export function WithdrawalRequestModal({
       setAmount(pendingBalance.toFixed(2));
       setPaypalEmail("");
 
-      // Close modal after 2 seconds
-      setTimeout(() => {
+      // Close modal after 2 seconds with cleanup
+      timeoutRef.current = setTimeout(() => {
         onClose();
         onSuccess?.();
       }, 2000);

@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, onSnapshot, orderBy, doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
@@ -216,6 +216,7 @@ export default function AccountPage() {
     const [isLoadingHistory, setIsLoadingHistory] = useState(true);
     const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
     const [sellerBalance, setSellerBalance] = useState(0);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
       if (!user) return;
@@ -259,6 +260,15 @@ export default function AccountPage() {
       });
       return () => unsub();
     }, [user]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }, []);
 
     const handleSaveChanges = async () => {
       if (!user) return;
@@ -328,9 +338,9 @@ export default function AccountPage() {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        
+
         setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
-        setTimeout(() => setSaveMessage(null), 3000);
+        timeoutRef.current = setTimeout(() => setSaveMessage(null), 3000);
       } catch (error) {
         console.error("Error updating account:", error);
         let errorMessage = "Failed to update account";

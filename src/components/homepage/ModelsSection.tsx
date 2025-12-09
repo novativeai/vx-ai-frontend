@@ -11,7 +11,7 @@ const modelsToShow = Object.values(modelConfigs).slice(0, 3);
 
 export function ModelsSection() {
   return (
-    <section className="bg-black text-white h-screen flex flex-col justify-center">
+    <section className="bg-black text-white h-full flex flex-col justify-center">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between md:items-end mb-12">
           <div>        <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>

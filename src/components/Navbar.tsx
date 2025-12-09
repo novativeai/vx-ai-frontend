@@ -5,9 +5,9 @@ import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useMemo, useCallback } from 'react';
 
-export default function Navbar() {
+function Navbar() {
   const { user } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -22,15 +22,20 @@ export default function Navbar() {
     };
   }, [isMenuOpen]);
 
-  const navLinks = [
-    { href: "/explore", label: "Explore" },
-    { href: "/marketplace", label: "Marketplace" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/about", label: "About Us" },
-    { href: "/contact", label: "Contact Us" },
-  ];
+  // Memoize navigation links
+  const navLinks = useMemo(
+    () => [
+      { href: "/explore", label: "Explore" },
+      { href: "/marketplace", label: "Marketplace" },
+      { href: "/pricing", label: "Pricing" },
+      { href: "/about", label: "About Us" },
+      { href: "/contact", label: "Contact Us" },
+    ],
+    []
+  );
 
-  const getInitial = () => {
+  // Memoize user initial
+  const getInitial = useCallback(() => {
     if (user?.displayName) {
       return user.displayName.charAt(0).toUpperCase();
     }
@@ -38,7 +43,7 @@ export default function Navbar() {
       return user.email.charAt(0).toUpperCase();
     }
     return '?';
-  };
+  }, [user?.displayName, user?.email]);
 
   return (
     <>
@@ -82,8 +87,18 @@ export default function Navbar() {
               )}
             </div>
             <div className="md:hidden">
-              <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
+              >
+                {isMenuOpen ?
+                  <X className="h-6 w-6" aria-hidden="true" /> :
+                  <Menu className="h-6 w-6" aria-hidden="true" />
+                }
               </Button>
             </div>
           </div>
@@ -91,7 +106,10 @@ export default function Navbar() {
       </header>
 
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-20 z-40 bg-black flex flex-col items-center justify-center text-center">
+        <div
+          id="mobile-menu"
+          className="md:hidden fixed inset-0 top-20 z-40 bg-black flex flex-col items-center justify-center text-center"
+        >
           <nav className="flex flex-col items-center space-y-8">
             {navLinks.map(link => (
               <Link key={link.href} href={link.href} className="text-3xl font-semibold hover:text-neutral-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
@@ -117,3 +135,5 @@ export default function Navbar() {
     </>
   );
 }
+
+export default memo(Navbar);

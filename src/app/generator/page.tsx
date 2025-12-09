@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, useEffect, ChangeEvent } from 'react';
+import { useState, Suspense, useEffect, ChangeEvent, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
@@ -49,7 +49,12 @@ function GeneratorComponent() {
   const { user, credits, setCredits } = useAuth();
   const searchParams = useSearchParams();
   const modelId = searchParams.get('model') || 'veo-3-fast';
-  const currentModelConfig = modelConfigs[modelId];
+
+  // Memoize model config
+  const currentModelConfig = useMemo(
+    () => modelConfigs[modelId],
+    [modelId]
+  );
 
   // State Management
   const [params, setParams] = useState<{[key: string]: ParamValues}>({});
@@ -80,9 +85,12 @@ function GeneratorComponent() {
     setContentView('tips');
   }, [currentModelConfig]);
 
-  const handleParamChange = (name: string, value: string | number) => { setParams(prev => ({ ...prev, [name]: value })); };
-  
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Memoize event handlers
+  const handleParamChange = useCallback((name: string, value: string | number) => {
+    setParams(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  const handleImageChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -93,11 +101,16 @@ function GeneratorComponent() {
       };
       reader.readAsDataURL(file);
     }
-  };
+  }, [handleParamChange]);
 
-  const handleGenerate = async () => {
-    if (!user || credits <= 0) {
-      setError(user ? "You don't have enough credits." : "Please sign in.");
+  const handleGenerate = useCallback(async () => {
+    if (!user) {
+      setError('Please sign in to generate videos');
+      return;
+    }
+
+    if (credits <= 0) {
+      setError('Insufficient credits');
       return;
     }
     setGenerating(true);
@@ -106,9 +119,9 @@ function GeneratorComponent() {
     setDetectedOutputType(null);
 
     try {
-
-           // const apiURL = 'https://aivideogenerator-production.up.railway.app/generate-video';
-      const apiUrl = `http://0.0.0.0:8000/generate-video`;
+      const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate-video`
+        : 'http://localhost:8000/generate-video';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,7 +146,7 @@ function GeneratorComponent() {
     } finally {
       setGenerating(false);
     }
-  };
+  }, [user, credits, modelId, params, setCredits]);
 
   if (!currentModelConfig) {
     return (

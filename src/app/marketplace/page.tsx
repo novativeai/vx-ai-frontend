@@ -110,35 +110,29 @@ function MarketplaceContent() {
     }
   }, [user]);
 
-  // Get all unique tags from products
-  const allTags = useMemo(() => {
+  // Combine tag extraction and filtering into single memoized operation
+  const { allTags, allUseCases, filteredProducts } = useMemo(() => {
     const tagSet = new Set<string>();
-    products.forEach(product => {
-      product.tags?.forEach(tag => tagSet.add(tag));
-    });
-    return Array.from(tagSet).sort();
-  }, [products]);
-
-  // Get all unique use cases from products
-  const allUseCases = useMemo(() => {
     const useCaseSet = new Set<string>();
-    products.forEach(product => {
-      product.useCases?.forEach(useCase => useCaseSet.add(useCase));
-    });
-    return Array.from(useCaseSet).sort();
-  }, [products]);
 
-  // Filter products based on selected tags and use cases
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+    const filtered = products.filter(product => {
+      // Collect tags and use cases while filtering
+      product.tags?.forEach(tag => tagSet.add(tag));
+      product.useCases?.forEach(useCase => useCaseSet.add(useCase));
+
       const tagMatch = selectedTags.length === 0 ||
         selectedTags.some(tag => product.tags?.includes(tag));
-
       const useCaseMatch = selectedUseCases.length === 0 ||
         selectedUseCases.some(useCase => product.useCases?.includes(useCase));
 
       return tagMatch && useCaseMatch;
     });
+
+    return {
+      allTags: Array.from(tagSet).sort(),
+      allUseCases: Array.from(useCaseSet).sort(),
+      filteredProducts: filtered
+    };
   }, [products, selectedTags, selectedUseCases]);
 
   const handleTagToggle = (tag: string) => {

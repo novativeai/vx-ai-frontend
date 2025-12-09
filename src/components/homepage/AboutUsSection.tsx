@@ -11,7 +11,7 @@ const missionParagraphs = [
 
 export function AboutUsSection() {
   return (
-    <section className="bg-black text-white h-screen flex flex-col justify-center">
+    <section className="bg-black text-white h-full flex flex-col justify-center">
       {/* THE FIX: Responsive gap between columns */}
       <div className="container mx-auto grid md:grid-cols-2 gap-16 md:gap-32">
         {/* Left Column: Title and Button */}

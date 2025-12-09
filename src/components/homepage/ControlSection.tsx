@@ -11,7 +11,7 @@ const controlItems = [
 //
 export function ControlSection() {
   return (
-    <section className="bg-black text-white h-screen flex flex-col justify-center">
+    <section className="bg-black text-white h-full flex flex-col justify-center">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between md:items-end mb-12">
           <div>
