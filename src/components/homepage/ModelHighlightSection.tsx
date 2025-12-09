@@ -94,7 +94,7 @@ export function ModelHighlightSection() {
              producing coherent, believable videos with stunning detail.
           </p>
 
-          <Link href="/generator?model=veo-3-fast" className="block mt-4">
+          <Link href="/generator?model=veo-3.1" className="block mt-4">
             <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter whitespace-nowrap overflow-visible hover:text-neutral-300 transition-colors">
               Available Now
             </h2>

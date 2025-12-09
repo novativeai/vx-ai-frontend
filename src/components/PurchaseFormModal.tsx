@@ -37,7 +37,7 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
     try {
       // Create payment for marketplace purchase
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/marketplace/create-purchase-payment`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/marketplace/create-purchase-payment`,
         {
           method: "POST",
           headers: {
@@ -95,7 +95,7 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
             {/* Video Preview */}
             <div className="space-y-4">
               <h3 className="text-sm uppercase tracking-widest text-neutral-400">Preview</h3>
-              <div className="aspect-square rounded-xl overflow-hidden bg-black">
+              <div className="rounded-xl overflow-hidden bg-black">
                 <VideoWithWatermark
                   videoUrl={product.videoUrl}
                   watermarkText="reelzila"

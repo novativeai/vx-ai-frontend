@@ -2,7 +2,6 @@
 "use client";
 
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 import { memo } from "react";
@@ -34,11 +33,20 @@ export const ModelCard: React.FC<ModelCardProps> = memo(function ModelCard({ mod
           <HoverVideoPlayer src={model.cardVideo} />
         </div>
         <div className="p-4">
-          <Badge variant="outline" className="border-neutral-500 text-neutral-300 capitalize">{model.outputType}</Badge>
+          <span className="inline-block text-[10px] uppercase tracking-wider text-neutral-500 px-2.5 py-1 rounded border border-neutral-700/60 bg-neutral-900/80">
+            {model.outputType}
+          </span>
           <h3 className="text-xl font-bold mt-4 text-white">{model.displayName}</h3>
           <p className="text-neutral-400 mt-2 text-sm line-clamp-2">{model.description}</p>
-          <div className="flex gap-2 mt-4">
-            {model.tags.map(tag => <Badge key={tag} className="bg-neutral-700 text-neutral-200 hover:bg-neutral-600">{tag}</Badge>)}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {model.tags.map(tag => (
+              <span
+                key={tag}
+                className="inline-block text-[10px] uppercase tracking-wider text-neutral-400 px-2.5 py-1 rounded border border-neutral-700/60 bg-neutral-900/80"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         </div>
       </Card>

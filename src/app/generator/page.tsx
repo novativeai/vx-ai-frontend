@@ -48,7 +48,7 @@ const getOutputTypeFromUrl = (url: string): OutputType => {
 function GeneratorComponent() {
   const { user, credits, setCredits } = useAuth();
   const searchParams = useSearchParams();
-  const modelId = searchParams.get('model') || 'veo-3-fast';
+  const modelId = searchParams.get('model') || 'veo-3.1';
 
   // Memoize model config
   const currentModelConfig = useMemo(
@@ -226,7 +226,7 @@ function GeneratorComponent() {
                     )}
                   </>
                 ) : (
-                  <video src="/warrior.mp4" autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  <video src={currentModelConfig.exampleVideo} autoPlay loop muted playsInline className="w-full h-full object-cover" />
                 )}
               </AspectRatio>
             </CardContent>

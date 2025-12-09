@@ -29,6 +29,7 @@ interface ModelConfig {
   description: string;
   bannerImage: string;
   cardVideo: string;
+  exampleVideo: string; // Video shown as example on the generator page
   tags: string[];
   params: ModelParameter[];
   tips?: TipSection[];
@@ -44,7 +45,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "Kling 2.5 Turbo Pro",
     description: "Kuaishou's flagship video generation model released November 2025, featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements. Consistently ranked #1 in video generation benchmarks.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${STORAGE_BASE}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    cardVideo: "/videos/f1-speeding.mp4",
+    exampleVideo: `${STORAGE_BASE}/049_Cinematic_Train_Sunset_Window.mp4`,
     tags: ["top-rated", "motion", "cinematic"],
     outputType: 'video',
     params: [
@@ -156,7 +158,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "VEO 3.1",
     description: "Google's cutting-edge video generation model released October 2025, featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${STORAGE_BASE}/052_Asian_Girl_Subway_Orange_Headphones.mp4`,
+    cardVideo: "/videos/robot-3.mp4",
+    exampleVideo: `${STORAGE_BASE}/050_Dance_Home_Living_Room.mp4`,
     tags: ["new", "audio", "reference-images"],
     outputType: 'video',
     params: [
@@ -290,7 +293,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "Seedance-1 Pro",
     description: "ByteDance's award-winning model released June 2025, specializing in multi-shot storytelling with seamless subject consistency. Generates 1080p videos at 24fps with sophisticated motion dynamics and cinema-grade aesthetic control. Tops leaderboards for T2V and I2V performance.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${STORAGE_BASE}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    cardVideo: "/videos/tron-1.mp4",
+    exampleVideo: `${STORAGE_BASE}/051_Warrior_Meditation_Dunes.mp4`,
     tags: ["motion", "cinematic", "multi-shot"],
     outputType: 'video',
     params: [
@@ -394,6 +398,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     description: "ByteDance's efficient Mixture-of-Experts model released July 2025 with 27B parameters (14B active). Enhanced training on 65.6% more images and 83.2% more videos. Supports 480p/720p at 24fps with reduced flickering and excellent T2V, I2V, and hybrid modes.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${STORAGE_BASE}/055_Motorcycle_Highway_Speed.mp4`,
+    exampleVideo: `${STORAGE_BASE}/052_Film_Noir_Detective_Alley.mp4`,
     tags: ["image-to-video", "photorealistic"],
     outputType: 'video',
     params: [
@@ -489,6 +494,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     description: "Black Forest Labs&apos; flagship text-to-image model generating ultra high-resolution images up to 4 megapixels. Features exceptional prompt adherence, output diversity, and blazing fast generation. Supports raw mode for natural, less processed aesthetics.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${STORAGE_BASE}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
+    exampleVideo: `${STORAGE_BASE}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
     tags: ["image", "4MP", "ultra-fast"],
     outputType: 'image',
     params: [

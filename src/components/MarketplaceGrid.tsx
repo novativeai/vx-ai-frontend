@@ -76,24 +76,24 @@ const ProductCard = memo(function ProductCard({
 
         {/* Product Info */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="font-semibold text-white line-clamp-1">{product.title}</h3>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-lg font-bold text-[#D4FF4F]">€{product.price.toFixed(2)}</span>
-            <span className="text-xs text-neutral-400">{product.sold} sold</span>
+          <h3 className="text-sm font-medium text-white line-clamp-1">{product.title}</h3>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-sm font-medium text-[#D4FF4F]">€{product.price.toFixed(2)}</span>
+            <span className="text-[10px] text-neutral-500">{product.sold} sold</span>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1 mt-3">
+          {/* Tags - Premium Style */}
+          <div className="flex flex-wrap gap-2 mt-3">
             {product.tags.slice(0, 2).map(tag => (
               <span
                 key={tag}
-                className="inline-block text-xs bg-neutral-800/80 text-neutral-200 px-2 py-1 rounded-full"
+                className="inline-block text-[10px] uppercase tracking-wider text-neutral-400 px-2.5 py-1 rounded border border-neutral-700/60 bg-neutral-900/80"
               >
                 {tag}
               </span>
             ))}
             {product.tags.length > 2 && (
-              <span className="inline-block text-xs text-neutral-400">+{product.tags.length - 2}</span>
+              <span className="inline-block text-[10px] text-neutral-600 uppercase tracking-wider self-center">+{product.tags.length - 2}</span>
             )}
           </div>
         </div>

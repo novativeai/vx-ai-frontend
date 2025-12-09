@@ -120,7 +120,20 @@ export default function SignIn() {
           router.push('/onboarding');
         }
       } else {
-        router.push('/');
+        // User exists in Auth but not in Firestore - create document
+        await setDoc(userDocRef, {
+          email: user.email,
+          firstName: user.displayName?.split(' ')[0] || '',
+          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+          credits: 10,
+          activePlan: "Starter",
+          isAdmin: false,
+          emailVerified: user.emailVerified,
+          profileComplete: false,
+          createdAt: new Date(),
+        });
+        // Redirect to onboarding to complete profile
+        router.push('/onboarding');
       }
     } catch {
       setError('Invalid email or password. Please try again.');
