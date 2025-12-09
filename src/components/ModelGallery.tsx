@@ -10,15 +10,21 @@ import {
 import { Button } from "@/components/ui/button"
 
 const models = [
-    {
-    id: "flux-kontext-pro",
-    name: "FLUX Kontext Pro",
-    tag: "image-to-image",
+  {
+    id: "kling-2.5",
+    name: "Kling 2.5 Turbo Pro",
+    tag: "text-to-video",
+    imageUrl: "/texture-01.avif",
+  },
+  {
+    id: "flux-1.1-pro-ultra",
+    name: "FLUX 1.1 Pro Ultra",
+    tag: "text-to-image",
     imageUrl: "/texture-02.avif",
   },
   {
-    id: "veo-3-fast",
-    name: "Veo 3",
+    id: "veo-3.1",
+    name: "Veo 3.1",
     tag: "text-to-video",
     imageUrl: "/texture-01.avif",
   },
@@ -30,7 +36,7 @@ const models = [
   },
   {
     id: "wan-2.2",
-    name: "Wan-2.2",
+    name: "WAN 2.2 14B",
     tag: "image-to-video",
     imageUrl: "/texture-01.avif",
   },

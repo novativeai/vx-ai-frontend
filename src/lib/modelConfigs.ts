@@ -4,7 +4,6 @@ interface ModelParameter {
   name: string;
   label: string;
   type: 'textarea' | 'image' | 'slider' | 'dropdown';
-  // --- THE FIX: Replace 'any' with the specific types you are using ---
   defaultValue: string | number | null;
   min?: number;
   max?: number;
@@ -12,7 +11,6 @@ interface ModelParameter {
   options?: string[];
 }
 
-// Add this interface to define the structure of our new tips content
 interface TipContent {
   subtitle: string;
   text: string;
@@ -30,62 +28,222 @@ interface ModelConfig {
   outputType: 'video' | 'image';
   description: string;
   bannerImage: string;
-  // THE FIX: Use a dedicated property for the card's hover video
-  cardVideo: string; 
+  cardVideo: string;
   tags: string[];
   params: ModelParameter[];
   tips?: TipSection[];
   useCases?: TipSection[];
 }
 
+// Firebase Storage base URL for marketplace videos
+const STORAGE_BASE = "https://storage.googleapis.com/reelzila.firebasestorage.app/marketplace/videos";
+
 export const modelConfigs: { [key: string]: ModelConfig } = {
-  "veo-3-fast": {
-    id: "veo-3-fast",
-    displayName: "VEO 3 Fast",
-    description: "A production-oriented variant of Google’s Veo family: optimized for fast, cost-efficient text-to-video and image-to-video generation with native audio support and strong prompt-following.",
-    bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-    cardVideo: "/videos/f1-speeding.mp4", // This is the video that will play on hover    // A more focused, square-like image
-    tags: ["new", "lora", "personalization"],
+  "kling-2.5": {
+    id: "kling-2.5",
+    displayName: "Kling 2.5 Turbo Pro",
+    description: "Kuaishou's flagship video generation model released November 2025, featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements. Consistently ranked #1 in video generation benchmarks.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${STORAGE_BASE}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    tags: ["top-rated", "motion", "cinematic"],
     outputType: 'video',
     params: [
-      {
-        name: "image",
-        label: "Image",
-        type: "image",
-        defaultValue: null,
-      },
       {
         name: "prompt",
         label: "Prompt",
         type: "textarea",
-        defaultValue: "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
+        defaultValue: "A cinematic shot of a woman walking through a neon-lit city at night, reflections on wet pavement, shallow depth of field, 35mm film aesthetic.",
+      },
+      {
+        name: "start_image",
+        label: "Starting Image (optional)",
+        type: "image",
+        defaultValue: null,
       },
       {
         name: "negative_prompt",
-        label: "Negative prompt",
+        label: "Negative Prompt",
         type: "textarea",
         defaultValue: "",
+      },
+      {
+        name: "duration",
+        label: "Duration (seconds)",
+        type: "dropdown",
+        defaultValue: "5",
+        options: ["5", "10"],
+      },
+      {
+        name: "aspect_ratio",
+        label: "Aspect Ratio",
+        type: "dropdown",
+        defaultValue: "16:9",
+        options: ["16:9", "9:16", "1:1"],
       },
     ],
     tips: [
       {
-        title: "Guideline",
+        title: "Prompting Guide",
         content: [
           {
-            subtitle: "Be Descriptive and Specific",
-            text: "Instead of 'a car', try 'a vintage red sports car driving through a neon-lit city at night'. The more detail you provide, the better the AI can interpret your vision."
-          },
-          {
-            subtitle: "Describe the Camera Work",
-            text: "Incorporate cinematic terms to guide the camera. Use phrases like 'cinematic shot', 'dolly zoom', 'aerial drone shot', or 'close-up shot' to control the perspective and movement.",
+            subtitle: "Cinematic Language",
+            text: "Kling 2.5 excels with cinematic terminology. Use terms like 'dolly shot', 'tracking shot', 'crane movement', 'shallow depth of field', and specific lens references (35mm, 85mm) for professional results.",
             list: [
-              "Example: 'An aerial drone shot flying over a dense, foggy forest.'",
-              "Example: 'Close-up on a chef's hands artfully plating a gourmet dish.'"
+              "Example: 'Tracking shot following a runner through city streets, shallow DOF, golden hour'",
+              "Example: 'Slow dolly push-in on subject's face, dramatic lighting, film grain'"
             ]
           },
           {
-            subtitle: "Specify the Mood and Lighting",
-            text: "Words like 'dramatic lighting', 'golden hour', 'moody atmosphere', or 'vibrant and colorful' can drastically change the feel of your generated video."
+            subtitle: "Motion Descriptions",
+            text: "Be specific about movement. Describe both subject motion and camera motion separately for best results. Kling 2.5 handles complex multi-subject scenes with ease."
+          },
+          {
+            subtitle: "Lighting and Atmosphere",
+            text: "Specify lighting conditions clearly: 'golden hour', 'blue hour', 'neon-lit', 'candlelit', 'overcast diffused light'. The model responds exceptionally well to atmospheric descriptions."
+          }
+        ]
+      },
+      {
+        title: "Technical Excellence",
+        content: [
+          {
+            subtitle: "Superior Motion Quality",
+            text: "Kling 2.5 is recognized for industry-leading motion coherence. Complex movements like dancing, sports, and multi-character interactions are handled with exceptional stability.",
+            list: [
+              "Natural physics simulation for realistic object interactions",
+              "Consistent subject identity throughout the video",
+              "Smooth transitions and camera movements"
+            ]
+          },
+          {
+            subtitle: "Image-to-Video Mode",
+            text: "Upload a starting image to animate it. The model preserves facial features and clothing details while adding natural, fluid motion. Perfect for bringing portraits to life."
+          }
+        ]
+      }
+    ],
+    useCases: [
+      {
+        title: "Primary Use Cases",
+        content: [
+          {
+            subtitle: "Commercial Production",
+            text: "Create broadcast-quality video content for advertising, social media campaigns, and brand storytelling. The exceptional motion quality rivals professional footage."
+          },
+          {
+            subtitle: "Creative Content",
+            text: "Perfect for music videos, short films, and artistic projects. The cinematic control and consistent quality enable professional-grade creative expression."
+          },
+          {
+            subtitle: "Portrait Animation",
+            text: "Transform static portraits into dynamic videos with natural expressions and movements. Ideal for social media content creators and digital marketing."
+          }
+        ]
+      },
+      {
+        title: "Benchmark Performance",
+        content: [
+          {
+            subtitle: "Industry Leader",
+            text: "Consistently ranks first in VBench and other video generation benchmarks. Outperforms competitors in motion quality, temporal consistency, and overall video coherence."
+          }
+        ]
+      }
+    ]
+  },
+  "veo-3.1": {
+    id: "veo-3.1",
+    displayName: "VEO 3.1",
+    description: "Google's cutting-edge video generation model released October 2025, featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${STORAGE_BASE}/052_Asian_Girl_Subway_Orange_Headphones.mp4`,
+    tags: ["new", "audio", "reference-images"],
+    outputType: 'video',
+    params: [
+      {
+        name: "prompt",
+        label: "Prompt",
+        type: "textarea",
+        defaultValue: "A cinematic shot of a woman walking through a neon-lit Tokyo street at night, rain glistening on the pavement, reflections everywhere. Shot on 35mm film, shallow depth of field.",
+      },
+      {
+        name: "image",
+        label: "Starting Image (optional)",
+        type: "image",
+        defaultValue: null,
+      },
+      {
+        name: "negative_prompt",
+        label: "Negative Prompt",
+        type: "textarea",
+        defaultValue: "",
+      },
+      {
+        name: "duration",
+        label: "Duration (seconds)",
+        type: "dropdown",
+        defaultValue: "8",
+        options: ["4", "6", "8"],
+      },
+      {
+        name: "aspect_ratio",
+        label: "Aspect Ratio",
+        type: "dropdown",
+        defaultValue: "16:9",
+        options: ["16:9", "9:16"],
+      },
+      {
+        name: "resolution",
+        label: "Resolution",
+        type: "dropdown",
+        defaultValue: "1080p",
+        options: ["720p", "1080p"],
+      },
+      {
+        name: "generate_audio",
+        label: "Generate Audio",
+        type: "dropdown",
+        defaultValue: "true",
+        options: ["true", "false"],
+      },
+    ],
+    tips: [
+      {
+        title: "Prompting Guide",
+        content: [
+          {
+            subtitle: "Specify Shot Composition",
+            text: "Use cinematic terms to guide the camera. Include phrases like 'single shot', 'two shot', 'close-up', 'wide angle', or 'macro lens' to control framing and perspective.",
+            list: [
+              "Example: 'Close-up shot of hands crafting pottery, shallow depth of field'",
+              "Example: 'Wide establishing shot of a mountain village at dawn'"
+            ]
+          },
+          {
+            subtitle: "Describe Camera Movement",
+            text: "Veo 3.1 excels at camera motion. Specify movements like 'dolly shot', 'pan shot', 'tracking shot', 'crane shot', or 'handheld' for dynamic results."
+          },
+          {
+            subtitle: "Set the Mood with Lighting",
+            text: "Describe lighting conditions: 'golden hour', 'blue hour', 'harsh midday sun', 'soft diffused light', 'neon-lit', or 'candlelit' to establish atmosphere."
+          }
+        ]
+      },
+      {
+        title: "Audio Generation & Physics",
+        content: [
+          {
+            subtitle: "Native Audio Synthesis",
+            text: "Veo 3.1 generates synchronized audio automatically - from dialogue and sound effects to ambient soundscapes and realistic Foley. Describe sounds in your prompt for better results.",
+            list: [
+              "Include audio cues: 'the sound of waves crashing', 'footsteps on gravel', 'distant thunder'",
+              "For dialogue scenes, describe the conversation tone and setting",
+              "Foley effects are automatically synchronized with visuals"
+            ]
+          },
+          {
+            subtitle: "Physics Simulation",
+            text: "Realistic object behavior with accurate lighting and shadows. The model understands gravity, collisions, and material properties for believable motion."
           }
         ]
       }
@@ -96,32 +254,32 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Marketing & Advertising",
-            text: "Create high-quality promotional videos and product visualizations quickly. Generate short video ads with synchronized dialogue and sound effects for social media campaigns, product launches, and brand storytelling."
+            text: "Create high-quality promotional videos with synchronized audio. Generate short video ads with dialogue and sound effects for social media campaigns, product launches, and brand storytelling."
           },
           {
-            subtitle: "Film & Entertainment Production",
-            text: "Use VEO 3 for previsualization, storyboarding, and concept development. Generate cinematic sequences for director-driven storytelling, create B-roll footage, and develop visual concepts before full production."
+            subtitle: "Film & Entertainment",
+            text: "Use for previsualization, storyboarding, and concept development. Generate cinematic sequences with natural audio for director-driven storytelling and B-roll footage."
           },
           {
-            subtitle: "Content Creation at Scale",
-            text: "Perfect for rapid prototyping and A/B testing of creative concepts. Generate multiple video variations quickly for campaigns, social media content, and digital marketing materials with consistent quality."
+            subtitle: "Content Creation",
+            text: "Perfect for rapid prototyping and A/B testing of creative concepts. Generate multiple video variations with audio for campaigns and social media content."
           }
         ]
       },
       {
-        title: "Educational & Creative Uses",
+        title: "Advanced Features",
         content: [
           {
-            subtitle: "Educational Content",
-            text: "Create engaging educational videos with clear narration and visual demonstrations. Generate virtual tours of museums, historical sites, and cultural institutions with immersive voiceovers and atmospheric audio."
+            subtitle: "Reference Image Composition",
+            text: "Combine up to 3 reference images to control characters, objects, and style within a single scene. Perfect for maintaining consistency across video sequences."
           },
           {
-            subtitle: "Short Film & Storytelling",
-            text: "Transform scripts into cinematic short films with character dialogue, environmental sounds, and narrative sequences. Ideal for indie filmmakers and storytellers exploring AI-powered production workflows."
+            subtitle: "Frame-to-Video Interpolation",
+            text: "Specify both starting and ending frames to create seamless transitions. The model generates intermediate frames based on your prompt for precise cinematic control."
           },
           {
-            subtitle: "Social Media & Personal Projects",
-            text: "Bring static photos to life with motion, create dynamic presentations, and generate animated content for personal creative projects and social media engagement."
+            subtitle: "SynthID Watermarking",
+            text: "Videos are automatically watermarked with Google's SynthID technology for authenticity verification."
           }
         ]
       }
@@ -130,34 +288,28 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "seedance-1-pro": {
     id: "seedance-1-pro",
     displayName: "Seedance-1 Pro",
-    description: "ByteDance’s Seedance pro model focused on fluid image-to-video and multi-shot generation. Excels at generating natural, continuous motion from stills.",
-    bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-    cardVideo: "/videos/robot-3.mp4", // This is the video that will play on hover
-    tags: ["new", "lora", "personalization"],
+    description: "ByteDance's award-winning model released June 2025, specializing in multi-shot storytelling with seamless subject consistency. Generates 1080p videos at 24fps with sophisticated motion dynamics and cinema-grade aesthetic control. Tops leaderboards for T2V and I2V performance.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${STORAGE_BASE}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    tags: ["motion", "cinematic", "multi-shot"],
     outputType: 'video',
     params: [
-      /*{
-        name: "image",
-        label: "Input Image",
-        type: "image",
-        defaultValue: null,
-      },*/
       {
         name: "prompt",
         label: "Prompt",
         type: "textarea",
-        defaultValue: "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
+        defaultValue: "A dancer performs fluid contemporary movements in an abandoned warehouse, dust particles floating in shafts of light. Cinematic, 35mm film grain.",
       },
       {
         name: "resolution",
         label: "Resolution",
         type: "dropdown",
-        defaultValue: "480p",
+        defaultValue: "720p",
         options: ["480p", "720p", "1080p"],
       },
       {
         name: "duration",
-        label: "Duration",
+        label: "Duration (seconds)",
         type: "slider",
         defaultValue: 5,
         min: 1,
@@ -167,40 +319,41 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     ],
     tips: [
       {
-        title: "Guideline",
+        title: "Technical Innovations",
         content: [
           {
-            subtitle: "Cinema-Grade Aesthetic Control",
-            text: "Integration of professional cinematography principles—including lighting, color, and cinematic language—allows for precise aesthetic control through multi-faceted keywords, resulting in visuals that are both stylistically diverse and rich in nuanced detail."
+            subtitle: "Multi-Shot Storytelling",
+            text: "Seedance 1.0 Pro excels at seamless 2-3 shot transitions while maintaining perfect subject consistency. Create coherent narrative sequences without breaking character continuity."
           },
           {
-            subtitle: "Greatly Improved Complex Motion Generation",
-            text: "Dynamic generation capabilities now enable precise control and stable generation of highly complex movements. This includes nuanced body motion, athletic actions, and detailed facial expressions. The resulting motion is exceptionally fluid, with details rendered in a natural and realistic manner."
+            subtitle: "Advanced Motion Architecture",
+            text: "Combines Temporally-Causal VAE for frame coherence with Decoupled Spatio-Temporal Diffusion Transformer. Handles nuanced body motion, athletic actions, and detailed facial expressions with exceptional stability."
           },
           {
-            subtitle: "Enhanced Real-World Replication",
-            text: "Featuring significantly more powerful semantic control and instruction-following capabilities. This update brings remarkable improvements in multi-subject generation, the depiction of interactions, and spatial accuracy within complex scenes. As a result, users can now reliably replicate real-world scenarios through text prompts."
+            subtitle: "Wide Dynamic Range",
+            text: "Supports large-scale movements with comprehensive semantic control. Exceptional at generating complex scenes with multiple subjects and accurate spatial relationships."
           }
         ]
       },
       {
-        title: "Prompt Recipe Guide",
+        title: "Prompting Strategy",
         content: [
           {
             subtitle: "Basic Formula",
-            text: "For new users trying AI video for the first time or seeking creative inspiration. Simple, open-ended prompts can generate more imaginative videos.",
+            text: "For new users: Simple, clear prompts work well. Focus on what you want to see happen.",
             list: [
-              "Formula: Prompt = Subject + Scene + Motion",
-              "Subject: The main focus of the video (person, animal, object, etc.).",
-              "Scene: The environment where the subject is situated.",
-              "Motion: The subject's specific movements and general scene dynamics."
+              "Formula: Subject + Scene + Motion",
+              "Subject: The main character or focus (person, animal, object)",
+              "Scene: The environment and setting",
+              "Motion: Specific actions and movements"
             ]
           },
           {
-            subtitle: "Advanced Formula",
-            text: "For users with some experience in AI video creation. Adding richer, more detailed descriptions enhances video quality, vividness, and storytelling.",
+            subtitle: "Pro Formula",
+            text: "For experienced users: Enhance with cinematography details for award-quality results.",
             list: [
-              "Formula: Prompt = Subject (Subject Description) + Scene (Scene Description) + Motion (Motion Description) + Aesthetic Control + Stylization"
+              "Formula: Subject (details) + Scene (lighting/mood) + Motion (style) + Cinematic language",
+              "Example: 'A dancer in flowing white dress, warm golden hour light, performing graceful contemporary movements across a desert landscape, cinematic, 35mm'"
             ]
           }
         ]
@@ -208,49 +361,40 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     ],
     useCases: [
       {
-        title: "Use Cases",
+        title: "Primary Use Cases",
         content: [
           {
-            subtitle: "Character-Driven Storytelling",
-            text: "Excel at generating videos with complex human movements, athletic actions, and detailed facial expressions. Perfect for creating character-focused narratives, animated sequences, and story-driven content with recurring characters."
+            subtitle: "Multi-Shot Narrative Production",
+            text: "Create coherent short films and stories with 2-3 shot transitions while maintaining character consistency. Perfect for narrative-driven content and commercials."
           },
           {
-            subtitle: "Cinematic Sequences",
-            text: "Leverage cinema-grade aesthetic control to create professional-looking sequences with precise lighting, color grading, and camera movements. Ideal for short films, music videos, and artistic projects requiring stylistic consistency."
+            subtitle: "Performance & Dance Content",
+            text: "Exceptional at capturing nuanced body movements, athletic actions, and facial expressions. Ideal for dance videos, sports highlights, and performance documentation."
           },
           {
-            subtitle: "Multi-Subject Scenes",
-            text: "Generate complex scenes with multiple subjects and accurate spatial relationships. Perfect for crowd scenes, group interactions, and scenarios requiring precise depiction of character interactions and movements."
+            subtitle: "Commercial & Advertising",
+            text: "Cinema-grade aesthetic control produces professional-quality ads. 41-second generation time for 5-second 1080p videos enables rapid iteration and testing."
           }
         ]
       },
       {
-        title: "Practical Applications",
+        title: "Performance Metrics",
         content: [
           {
-            subtitle: "Sports & Fitness Content",
-            text: "Generate athletic movements and exercise demonstrations with fluid, natural motion. Create training videos, fitness content, and sports visualization with exceptional movement accuracy."
-          },
-          {
-            subtitle: "Real-World Scenario Replication",
-            text: "Replicate real-world scenarios through detailed text prompts. Perfect for simulation training, architectural walkthroughs, and visualizing concepts that require high spatial accuracy and realistic interactions."
-          },
-          {
-            subtitle: "Artistic Exploration",
-            text: "Experiment with different visual styles, from photorealistic to stylized artistic interpretations. Explore diverse aesthetics for concept art, visual development, and creative experimentation."
+            subtitle: "Leaderboard Rankings",
+            text: "Consistently ranks first in Text-to-Video and Image-to-Video benchmarks, outperforming VEO 3.1 and Kling 2.0 across multiple evaluation metrics."
           }
         ]
       }
     ]
   },
-  // --- NEW MODEL CONFIGURATION ---
   "wan-2.2": {
     id: "wan-2.2",
     displayName: "WAN 2.2 14B",
-    description: "A 14B multimodal video model built for high-quality image-to-video and text-to-video outputs with an emphasis on cinematic sequences and efficient HD throughput.",
-    bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-    cardVideo: "/videos/tron-1.mp4", // This is the video that will play on hover
-    tags: ["new", "lora", "personalization"],
+    description: "ByteDance's efficient Mixture-of-Experts model released July 2025 with 27B parameters (14B active). Enhanced training on 65.6% more images and 83.2% more videos. Supports 480p/720p at 24fps with reduced flickering and excellent T2V, I2V, and hybrid modes.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${STORAGE_BASE}/055_Motorcycle_Highway_Speed.mp4`,
+    tags: ["image-to-video", "photorealistic"],
     outputType: 'video',
     params: [
       {
@@ -263,7 +407,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         name: "prompt",
         label: "Prompt",
         type: "textarea",
-        defaultValue: "Commercial video photoshoot of a pair of shoes with tons of effect.",
+        defaultValue: "Commercial video of a luxury watch rotating slowly, dramatic lighting highlighting the craftsmanship and details.",
       },
       {
         name: "resolution",
@@ -293,146 +437,141 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     ],
     tips: [
       {
-        title: "Guideline",
+        title: "Model Architecture",
         content: [
           {
-            subtitle: "Image to Video with Controlled Motion",
-            text: "This model excels at bringing a still image to life. Upload your source image and describe the scene you want to create. Use the 'Camera Motion' and 'Motion Strength' controls to guide the animation precisely."
+            subtitle: "Mixture-of-Experts Design",
+            text: "WAN 2.2's MoE architecture uses two specialized experts: a high-noise expert for spatial layout and composition, and a low-noise expert for fine details and quality. This enables efficient 14B active parameters from a 27B total model."
           },
           {
-            subtitle: "Fine-Tuning Your Output",
-            text: "Higher 'Sample Steps' can lead to more detailed videos but will take longer to generate. 'Motion Strength' controls how dynamic the camera movement is."
+            subtitle: "Enhanced Training Data",
+            text: "Trained on 65.6% more images and 83.2% more videos compared to WAN 2.1. Supports three modes: Text-to-Video (T2V), Image-to-Video (I2V), and hybrid Text+Image-to-Video (TI2V)."
+          },
+          {
+            subtitle: "Reduced Frame Flickering",
+            text: "Significant improvements in temporal consistency eliminate the flickering artifacts from previous versions, resulting in smoother, more natural video output."
           }
         ]
       }
     ],
     useCases: [
       {
-        title: "Use Cases",
+        title: "Primary Use Cases",
         content: [
           {
-            subtitle: "Product Visualization",
-            text: "Transform static product photos into engaging video content. Perfect for e-commerce, creating dynamic product showcases with smooth camera movements highlighting features and details. Ideal for fashion items, electronics, and commercial products."
+            subtitle: "Product Visualization & E-Commerce",
+            text: "Transform static product photos into engaging video content with smooth camera movements. Perfect for product showcases, 360-degree rotations, and e-commerce platforms."
           },
           {
             subtitle: "Photorealistic Animation",
-            text: "Bring still photographs to life with natural, fluid motion. Excels at maintaining visual quality and detail from the source image while adding realistic movement - perfect for human subjects, animals, and nature photography."
+            text: "Bring still photographs to life with natural, fluid motion. Excels at maintaining visual quality and preserving fine details from the source image."
           },
           {
-            subtitle: "Scene Transitions & Motion Graphics",
-            text: "Create smooth transitions and animated sequences from design mockups or concept art. Ideal for architectural visualization, interior design presentations, and creative motion graphics projects."
+            subtitle: "Content Variety",
+            text: "Supports T2V for generating videos from prompts alone, I2V for animating images, and hybrid TI2V combining both for maximum flexibility."
           }
         ]
       },
       {
-        title: "Creative Applications",
+        title: "Technical Advantages",
         content: [
           {
-            subtitle: "Social Media Content",
-            text: "Convert static posts into eye-catching video content for Instagram, TikTok, and other platforms. Generate dynamic visuals from photos to increase engagement and viewer retention."
-          },
-          {
-            subtitle: "Character Consistency",
-            text: "Maintain character identity and visual consistency across animated sequences. Perfect for storyboarding, creating character animations, and developing visual narratives with recurring subjects."
-          },
-          {
-            subtitle: "High-Detail Rendering",
-            text: "Generate high-quality videos with exceptional texture detail, smooth motion fluidity, and natural rendering. Best suited for projects where minor imperfections won't impact the final product and when processing time allows for quality over speed."
+            subtitle: "Generation Speed",
+            text: "39 seconds to generate 480p videos, 150 seconds for 720p on Replicate. Fast iteration suitable for rapid prototyping and A/B testing."
           }
         ]
       }
     ]
   },
-  // --- NEW IMAGE MODEL CONFIGURATION ---
-  "flux-kontext-pro": {
-    id: "flux-kontext-pro",
-    displayName: "FLUX Kontext Pro",
-    description: "An image editing / image-to-image transformer tuned for precise, text-guided local edits while preserving overall scene context.",
-    bannerImage: "/banners/wan-banner.jpg", // A wide, cinematic image
-    cardVideo: "/videos/model-3.mp4", // This is the video that will play on hover
-    tags: ["new", "lora", "personalization"],
-    outputType: 'image', // Specify output type
+  "flux-1.1-pro-ultra": {
+    id: "flux-1.1-pro-ultra",
+    displayName: "FLUX 1.1 Pro Ultra",
+    description: "Black Forest Labs&apos; flagship text-to-image model generating ultra high-resolution images up to 4 megapixels. Features exceptional prompt adherence, output diversity, and blazing fast generation. Supports raw mode for natural, less processed aesthetics.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${STORAGE_BASE}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
+    tags: ["image", "4MP", "ultra-fast"],
+    outputType: 'image',
     params: [
-      {
-        name: "input_image", 
-        label: "Image",
-        type: "image",
-        defaultValue: null,
-      },
       {
         name: "prompt",
         label: "Prompt",
         type: "textarea",
-        defaultValue: "Make the shoes and the full set white.",
+        defaultValue: "A stunning portrait of a woman with emerald eyes, soft golden hour lighting, ultra detailed skin texture, 85mm lens, shallow depth of field, professional photography.",
       },
       {
         name: "aspect_ratio",
         label: "Aspect Ratio",
         type: "dropdown",
-        defaultValue: "match_input_image",
-        options: ["match_input_image","1:1", "16:9", "9:16", "4:3", "3:4"],
+        defaultValue: "16:9",
+        options: ["21:9", "16:9", "4:3", "3:2", "1:1", "2:3", "3:4", "9:16", "9:21"],
+      },
+      {
+        name: "output_format",
+        label: "Output Format",
+        type: "dropdown",
+        defaultValue: "jpg",
+        options: ["jpg", "png"],
+      },
+      {
+        name: "raw",
+        label: "Raw Mode",
+        type: "dropdown",
+        defaultValue: "false",
+        options: ["true", "false"],
       },
     ],
     tips: [
       {
-        title: "Guideline",
+        title: "Prompting Guide",
         content: [
           {
-            subtitle: "Mastering the Prompt",
-            text: "FLUX excels at interpreting detailed, photorealistic prompts. Describe the subject, setting, lighting, and camera angle for best results."
+            subtitle: "Detailed Descriptions",
+            text: "FLUX 1.1 Pro Ultra excels with detailed, descriptive prompts. Include specific details about lighting, composition, style, and atmosphere for best results.",
+            list: [
+              "Specify camera settings: &apos;85mm lens&apos;, &apos;f/1.4 aperture&apos;, &apos;shallow DOF&apos;",
+              "Include lighting details: &apos;golden hour&apos;, &apos;soft diffused light&apos;, &apos;dramatic shadows&apos;",
+              "Add style references: &apos;cinematic&apos;, &apos;editorial photography&apos;, &apos;fine art&apos;"
+            ]
+          },
+          {
+            subtitle: "Raw Mode",
+            text: "Enable raw mode for more natural, less processed images. Perfect for realistic scenes and photography where you want organic, authentic results."
+          },
+          {
+            subtitle: "Aspect Ratio Selection",
+            text: "Choose aspect ratios that match your intended use: 16:9 for desktop wallpapers, 9:16 for mobile, 1:1 for social media, 21:9 for cinematic widescreen."
           }
         ]
       }
     ],
     useCases: [
       {
-        title: "Use Cases",
+        title: "Primary Use Cases",
         content: [
           {
-            subtitle: "Targeted Image Editing",
-            text: "FLUX Kontext Pro handles both text and reference images as inputs, enabling precise, local edits and complete scene transformations. Perfect for modifying specific elements while preserving the overall composition."
+            subtitle: "Professional Photography",
+            text: "Generate photorealistic portraits, product shots, and editorial imagery at unprecedented resolution. 4MP output enables large-format prints and professional use."
           },
           {
-            subtitle: "Product Customization",
-            text: "Quickly visualize product variations by changing colors, materials, or styles. Ideal for e-commerce businesses testing different product presentations, interior designers showing room variations, and fashion brands showcasing multiple colorways."
+            subtitle: "Marketing & Advertising",
+            text: "Create high-resolution marketing assets, social media content, and advertising visuals with exceptional quality and fast turnaround."
           },
           {
-            subtitle: "Style Transfer & Transformation",
-            text: "Transform existing images using text prompts to apply different artistic styles, lighting conditions, or atmospheric effects. Perfect for creative exploration and generating multiple variations from a single source image."
+            subtitle: "Creative Exploration",
+            text: "Rapid ideation and concept development for artists, designers, and creative professionals. Fast generation enables extensive exploration."
           }
         ]
       },
       {
-        title: "Professional Design",
+        title: "Technical Advantages",
         content: [
           {
-            subtitle: "Marketing Materials",
-            text: "Create high-quality marketing visuals with exceptional text rendering and precise color control. Generate logos, promotional materials, social media content, and brand assets with photorealistic quality and accurate typography."
+            subtitle: "4 Megapixel Output",
+            text: "Generate images up to 4MP resolution, perfect for print materials, large displays, and professional applications requiring high-resolution assets."
           },
           {
-            subtitle: "UI/UX Design Mockups",
-            text: "Generate professional website layouts, app interfaces, and design mockups quickly. Perfect for rapid prototyping, presenting multiple design concepts, and creating polished visual presentations for clients."
-          },
-          {
-            subtitle: "Architectural Visualization",
-            text: "Create detailed architectural renderings, interior design concepts, and property visualizations. Excellent for presenting design ideas, exploring different material choices, and generating client-ready presentations."
-          }
-        ]
-      },
-      {
-        title: "Creative & Artistic",
-        content: [
-          {
-            subtitle: "Digital Art Creation",
-            text: "Generate high-quality digital artwork with 12 billion parameters delivering exceptional detail and clarity. Perfect for concept art, character design, fantasy illustrations, and creating portfolio-worthy pieces."
-          },
-          {
-            subtitle: "Photography Enhancement",
-            text: "Enhance existing photographs with AI-powered edits - adjust lighting, change backgrounds, add or remove elements, and apply creative effects while maintaining photorealistic quality."
-          },
-          {
-            subtitle: "Brand Identity Development",
-            text: "Develop consistent brand visuals using custom LoRA training. Teach FLUX your brand's style, ensuring every generated image aligns with your brand identity across all marketing materials."
+            subtitle: "Generation Speed",
+            text: "Industry-leading generation speed enables rapid iteration and exploration without long wait times."
           }
         ]
       }
