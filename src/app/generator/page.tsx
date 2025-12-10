@@ -47,7 +47,7 @@ const getOutputTypeFromUrl = (url: string): OutputType => {
 };
 
 function GeneratorComponent() {
-  const { user, credits, setCredits } = useAuth();
+  const { user, credits } = useAuth();
   const searchParams = useSearchParams();
   const modelId = searchParams.get('model') || 'veo-3.1';
 
@@ -189,13 +189,16 @@ function GeneratorComponent() {
       } else {
         throw new Error("The model did not return a valid output.");
       }
-      setCredits(credits - calculatedCredits);
+      // NOTE: Credit deduction is handled by the backend using atomic Firestore transactions.
+      // The real-time Firestore listener in AuthContext will automatically update the
+      // credits state when the database changes, ensuring the frontend always shows
+      // the accurate balance from the database.
     } catch (err) {
       toast.error('Generation failed', (err as Error).message);
     } finally {
       setGenerating(false);
     }
-  }, [user, credits, modelId, params, setCredits, currentModelConfig, calculatedCredits]);
+  }, [user, credits, modelId, params, currentModelConfig, calculatedCredits]);
 
   if (!currentModelConfig) {
     return (
