@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/Googleicon';
 import { isProfileComplete } from '@/lib/profileUtils';
+import { toast } from '@/hooks/use-toast';
 
 // Country list for the dropdown
 const COUNTRIES = [
@@ -145,7 +146,6 @@ export default function SignUp() {
     phone: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -165,7 +165,6 @@ export default function SignUp() {
     if (fieldErrors[field]) {
       setFieldErrors(prev => ({ ...prev, [field]: undefined }));
     }
-    setError('');
   };
 
   const handleBlur = (field: keyof FormData) => {
@@ -214,7 +213,6 @@ export default function SignUp() {
   };
 
   const handleGoogleSignIn = async () => {
-    setError('');
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -251,7 +249,7 @@ export default function SignUp() {
         }
       }
     } catch (err) {
-      setError((err as Error).message);
+      toast.error('Sign up failed', (err as Error).message);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -259,7 +257,6 @@ export default function SignUp() {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!validateForm()) {
       return;
@@ -296,11 +293,11 @@ export default function SignUp() {
     } catch (err) {
       const errorCode = (err as { code?: string }).code;
       if (errorCode === 'auth/email-already-in-use') {
-        setError('An account with this email already exists.');
+        toast.error('Sign up failed', 'An account with this email already exists.');
       } else if (errorCode === 'auth/weak-password') {
-        setError('Password is too weak. Please use a stronger password.');
+        toast.error('Sign up failed', 'Password is too weak. Please use a stronger password.');
       } else {
-        setError((err as Error).message);
+        toast.error('Sign up failed', (err as Error).message);
       }
     } finally {
       setIsLoading(false);
@@ -688,15 +685,6 @@ export default function SignUp() {
                   )}
                 </div>
               </div>
-
-              {error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg" role="alert">
-                  <p className="text-red-500 text-sm flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                    {error}
-                  </p>
-                </div>
-              )}
 
               <Button
                 type="submit"

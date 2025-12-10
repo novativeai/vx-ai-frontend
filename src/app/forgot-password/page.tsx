@@ -8,20 +8,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     if (!email) {
-      setError('Please enter your email address.');
+      toast.error('Email required', 'Please enter your email address.');
       setIsLoading(false);
       return;
     }
@@ -32,11 +31,11 @@ export default function ForgotPassword() {
     } catch (err) {
       const errorMessage = (err as { code?: string }).code;
       if (errorMessage === 'auth/user-not-found') {
-        setError('No account found with this email address.');
+        toast.error('Not found', 'No account found with this email address.');
       } else if (errorMessage === 'auth/invalid-email') {
-        setError('Please enter a valid email address.');
+        toast.error('Invalid email', 'Please enter a valid email address.');
       } else {
-        setError('Failed to send reset email. Please try again.');
+        toast.error('Failed', 'Failed to send reset email. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -95,10 +94,6 @@ export default function ForgotPassword() {
                   disabled={isLoading}
                 />
               </div>
-
-              {error && (
-                <p className="text-red-500 text-sm">{error}</p>
-              )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (

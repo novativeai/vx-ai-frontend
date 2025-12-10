@@ -15,15 +15,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Loader2, Upload, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, Upload, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
+import { toast } from "@/hooks/use-toast";
 
 export default function StudentVerifyPage() {
   const router = useRouter();
   const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [studentCardFile, setStudentCardFile] = useState<File | null>(null);
   const [cardPreview, setCardPreview] = useState<string | null>(null);
@@ -69,18 +70,17 @@ export default function StudentVerifyPage() {
     if (file) {
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        setError("Please upload an image file (JPG, PNG, etc.)");
+        toast.error("Invalid file", "Please upload an image file (JPG, PNG, etc.)");
         return;
       }
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError("File size must be less than 5MB");
+        toast.error("File too large", "File size must be less than 5MB");
         return;
       }
 
       setStudentCardFile(file);
-      setError(null);
 
       // Show preview
       const reader = new FileReader();
@@ -104,7 +104,6 @@ export default function StudentVerifyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSuccess(false);
     setIsSubmitting(true);
 
@@ -140,7 +139,7 @@ export default function StudentVerifyPage() {
 
       const existingVerification = await getDoc(studentVerificationRef);
       if (existingVerification.exists()) {
-        setError('You have already submitted a verification request. Please wait for admin approval.');
+        toast.warning('Already submitted', 'You have already submitted a verification request. Please wait for admin approval.');
         setIsSubmitting(false);
         return;
       }
@@ -192,8 +191,8 @@ export default function StudentVerifyPage() {
         router.push("/account");
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to verify student");
-      console.error(err);
+      toast.error("Verification failed", err instanceof Error ? err.message : "Failed to verify student");
+      logger.error("Student verification failed", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -242,17 +241,6 @@ export default function StudentVerifyPage() {
                 An admin will review your submission within 24-48 hours.
                 You will receive 100 free credits once approved.
               </p>
-            </div>
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-3">
-            <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-red-200">Error</p>
-              <p className="text-sm text-red-100 mt-1">{error}</p>
             </div>
           </div>
         )}

@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { logger } from "@/lib/logger";
+import { toast } from "@/hooks/use-toast";
 
 export default function ContactPage() {
   const { user } = useAuth();
@@ -20,10 +22,6 @@ export default function ContactPage() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -33,12 +31,11 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
-      setSubmitStatus({ success: false, message: "Please fill out all required fields." });
+      toast.error("Missing fields", "Please fill out all required fields.");
       return;
     }
-    
+
     setIsSubmitting(true);
-    setSubmitStatus(null);
 
     try {
       await addDoc(collection(db, "contacts"), {
@@ -46,18 +43,18 @@ export default function ContactPage() {
         userId: user?.uid || null,
         submittedAt: serverTimestamp(),
       });
-      
-      setSubmitStatus({ success: true, message: "Thank you! Your message has been sent." });
+
+      toast.success("Message sent", "Thank you! Your message has been sent.");
       setFormData({ name: "", surname: "", email: user?.email || "", message: "" });
 
     } catch (error) {
-      console.error("Error submitting contact form:", error);
-      setSubmitStatus({ success: false, message: "Something went wrong. Please try again." });
+      logger.error("Error submitting contact form", error);
+      toast.error("Failed to send", "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const inputStyles = "bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 focus-visible:ring-0 focus-visible:border-b-white transition-colors";
 
   return (
@@ -125,7 +122,7 @@ export default function ContactPage() {
                 disabled={isSubmitting}
               />
             </div>
-            
+
             <Button
               type="submit"
               size="lg"
@@ -135,13 +132,6 @@ export default function ContactPage() {
             >
               {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Submit'}
             </Button>
-            
-            {submitStatus && (
-              <div className={`mt-4 text-center p-2 rounded-md text-sm flex items-center justify-center gap-2 ${submitStatus.success ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                {submitStatus.success && <CheckCircle className="h-4 w-4" />}
-                {submitStatus.message}
-              </div>
-            )}
           </form>
         </div>
       </div>

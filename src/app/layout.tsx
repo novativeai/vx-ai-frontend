@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import LayoutManager from "@/components/LayoutManager"; // Import the new client component
+import { Toaster } from "@/components/ui/toaster";
 
 
 export const metadata: Metadata = {
@@ -64,6 +65,7 @@ export default function RootLayout({
             for handling the navbar and conditional footer.
           */}
           <LayoutManager>{children}</LayoutManager>
+          <Toaster />
         </AuthProvider>
       </body>
     </html>

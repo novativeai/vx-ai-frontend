@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import { MarketplaceProduct } from "@/types/types";
-import { X, AlertCircle } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VideoWithWatermark } from "@/components/VideoWithWatermark";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { toast } from "@/hooks/use-toast";
 
 interface PurchaseFormModalProps {
   product: MarketplaceProduct;
@@ -21,18 +22,16 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handlePurchase = async () => {
     if (!user) {
-      setError("Please sign in to purchase");
+      toast.error("Sign in required", "Please sign in to purchase");
       return;
     }
 
     setIsProcessing(true);
-    setError(null);
 
     try {
       // Create payment for marketplace purchase
@@ -70,7 +69,7 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
         throw new Error("No payment URL received");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Payment failed. Please try again.");
+      toast.error("Purchase failed", err instanceof Error ? err.message : "Payment failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -163,14 +162,6 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
                   </span>
                 </div>
               </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex gap-3">
-                  <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-200">{error}</p>
-                </div>
-              )}
 
               {/* Auth Check */}
               {!user && (

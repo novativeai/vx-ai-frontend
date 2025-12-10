@@ -20,7 +20,7 @@ import { TipsSection } from "@/components/TipsSection";
 import { Separator } from "@/components/ui/separator";
 
 // Lucide React Icon Imports
-import { Frown } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 // Define the possible types for parameters state
 type ParamValues = string | number | null;
@@ -61,7 +61,6 @@ function GeneratorComponent() {
   const [outputUrl, setOutputUrl] = useState('');
   const [detectedOutputType, setDetectedOutputType] = useState<OutputType>(null);
   const [generating, setGenerating] = useState(false);
-  const [error, setError] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   
   // New state for toggling between Best Practice and Use Cases
@@ -77,7 +76,6 @@ function GeneratorComponent() {
     // Reset all outputs and previews
     setImagePreview(null);
     setOutputUrl('');
-    setError('');
     setGenerating(false);
     setDetectedOutputType(null);
     
@@ -105,16 +103,15 @@ function GeneratorComponent() {
 
   const handleGenerate = useCallback(async () => {
     if (!user) {
-      setError('Please sign in to generate videos');
+      toast.error('Sign in required', 'Please sign in to generate videos');
       return;
     }
 
     if (credits <= 0) {
-      setError('Insufficient credits');
+      toast.error('Insufficient credits', 'Please purchase more credits to continue');
       return;
     }
     setGenerating(true);
-    setError('');
     setOutputUrl('');
     setDetectedOutputType(null);
 
@@ -141,8 +138,8 @@ function GeneratorComponent() {
         throw new Error("The model did not return a valid output.");
       }
       setCredits(credits - 1);
-    } catch (err) { 
-      setError((err as Error).message);
+    } catch (err) {
+      toast.error('Generation failed', (err as Error).message);
     } finally {
       setGenerating(false);
     }
@@ -189,7 +186,6 @@ function GeneratorComponent() {
               <Button onClick={handleGenerate} disabled={generating} size="lg" className="w-full">
                  Generate Media ({credits} Credits)
               </Button>
-              {error && <p className="text-red-500 text-sm flex items-center"><Frown className="mr-2 h-4 w-4" />{error}</p>}
             </CardFooter>
           </Card>
         </div>

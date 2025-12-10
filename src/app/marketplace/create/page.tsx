@@ -14,6 +14,8 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Generation, MarketplaceProduct } from "@/types/types";
+import { logger } from "@/lib/logger";
+import { toast } from "@/hooks/use-toast";
 
 function ProductCreationContent() {
   const router = useRouter();
@@ -26,7 +28,6 @@ function ProductCreationContent() {
   const [generation, setGeneration] = useState<Generation | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -51,11 +52,11 @@ function ProductCreationContent() {
         if (genSnap.exists()) {
           setGeneration({ id: genSnap.id, ...genSnap.data() } as Generation);
         } else {
-          setError("Generation not found");
+          toast.error("Not found", "Generation not found");
         }
       } catch (err) {
-        setError("Failed to load generation");
-        console.error(err);
+        toast.error("Load failed", "Failed to load generation");
+        logger.error("Error fetching generation", err);
       } finally {
         setLoading(false);
       }
@@ -77,7 +78,6 @@ function ProductCreationContent() {
     if (!user || !generation) return;
 
     setSubmitting(true);
-    setError(null);
 
     try {
       // Validate form
@@ -129,10 +129,11 @@ function ProductCreationContent() {
       );
 
       // Redirect to marketplace page
+      toast.success("Success", "Your video has been listed on the marketplace");
       router.push("/marketplace");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create product listing");
-      console.error(err);
+      toast.error("Listing failed", err instanceof Error ? err.message : "Failed to create product listing");
+      logger.error("Failed to create product listing", err);
     } finally {
       setSubmitting(false);
     }
@@ -199,12 +200,6 @@ function ProductCreationContent() {
             {/* Form */}
             <div>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                  <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
-                    {error}
-                  </div>
-                )}
-
                 {/* Title */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Product Title *</label>

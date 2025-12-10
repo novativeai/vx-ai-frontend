@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/Googleicon';
 import { isProfileComplete } from '@/lib/profileUtils';
+import { toast } from '@/hooks/use-toast';
 
 // Email validation helper
 function validateEmail(email: string): string | undefined {
@@ -32,7 +33,6 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -45,7 +45,6 @@ export default function SignIn() {
   }, []);
 
   const handleGoogleSignIn = async () => {
-    setError('');
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -81,7 +80,7 @@ export default function SignIn() {
         }
       }
     } catch (err) {
-      setError((err as Error).message);
+      toast.error('Sign in failed', (err as Error).message);
     } finally {
       setIsGoogleLoading(false);
     }
@@ -89,7 +88,6 @@ export default function SignIn() {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     // Validate fields
     const emailError = validateEmail(email);
@@ -136,7 +134,7 @@ export default function SignIn() {
         router.push('/onboarding');
       }
     } catch {
-      setError('Invalid email or password. Please try again.');
+      toast.error('Sign in failed', 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -156,7 +154,6 @@ export default function SignIn() {
     if (fieldErrors[field]) {
       setFieldErrors(prev => ({ ...prev, [field]: undefined }));
     }
-    setError('');
   };
 
   return (
@@ -268,14 +265,6 @@ export default function SignIn() {
                   </p>
                 )}
               </div>
-              {error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg" role="alert">
-                  <p className="text-red-500 text-sm flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" aria-hidden="true" />
-                    {error}
-                  </p>
-                </div>
-              )}
               <Button
                 type="submit"
                 className="w-full"

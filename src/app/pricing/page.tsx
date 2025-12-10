@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
+import { toast } from "@/hooks/use-toast";
 
 export default function PricingPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [customAmount, setCustomAmount] = useState(10);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const processPurchase = async (amount: number) => {
     if (!user) {
@@ -21,7 +22,6 @@ export default function PricingPage() {
     }
 
     setIsProcessing(true);
-    setError(null);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/create-payment`, {
@@ -43,8 +43,8 @@ export default function PricingPage() {
         throw new Error("Payment URL not received from server");
       }
     } catch (error) {
-      console.error("Payment initiation failed:", error);
-      setError(`Could not initiate payment: ${(error as Error).message}`);
+      logger.error("Payment initiation failed", error);
+      toast.error("Payment failed", `Could not initiate payment: ${(error as Error).message}`);
       setIsProcessing(false);
     }
   };
@@ -73,15 +73,6 @@ export default function PricingPage() {
             Purchase credits and use them whenever you want. No subscriptions, no commitments, no expiration.
           </p>
         </div>
-
-        {/* Error Alert - Minimal */}
-        {error && (
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="bg-red-950/30 border border-red-900/50 rounded-lg px-6 py-4 text-red-400 text-sm">
-              {error}
-            </div>
-          </div>
-        )}
 
         {/* Main Credit Purchase Card */}
         <div className="bg-[#0A0A0A] border border-neutral-900 rounded-2xl overflow-hidden max-w-4xl mx-auto">
