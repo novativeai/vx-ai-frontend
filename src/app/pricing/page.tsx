@@ -61,8 +61,8 @@ export default function PricingPage() {
   const estimatedImages = Math.floor(credits / 3);
 
   return (
-    <div className="bg-black text-white min-h-screen pt-32 w-full">
-      <div className="w-full md:px-28 px-4 py-16 md:py-24">
+    <div className="bg-black text-white min-h-screen pt-8 md:pt-16 w-full">
+      <div className="w-full md:px-28 px-4 py-8 md:py-16">
         {/* Header - Brand Style */}
         <div className="text-center mx-auto mb-16">
           <p className="text-sm uppercase tracking-widest text-neutral-400">Pay as you go</p>

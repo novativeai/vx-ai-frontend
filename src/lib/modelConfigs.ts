@@ -22,6 +22,16 @@ interface TipSection {
   content: TipContent[];
 }
 
+// Credit pricing rules based on parameters
+interface CreditPricing {
+  base: number; // Base credits for default settings
+  modifiers?: {
+    param: string; // Parameter name to check
+    values: { [key: string]: number }; // Value -> credit multiplier or addition
+    type: 'multiply' | 'add' | 'set'; // How to apply the modifier
+  }[];
+}
+
 interface ModelConfig {
   id: string;
   displayName: string;
@@ -34,10 +44,48 @@ interface ModelConfig {
   params: ModelParameter[];
   tips?: TipSection[];
   useCases?: TipSection[];
+  creditCost: number; // Base credits required per generation (for display/fallback)
+  creditPricing: CreditPricing; // Dynamic pricing rules
 }
 
-// Firebase Storage base URL for marketplace videos
-const STORAGE_BASE = "https://storage.googleapis.com/reelzila.firebasestorage.app/marketplace/videos";
+// Calculate credits based on selected parameters
+export function calculateCredits(
+  modelConfig: ModelConfig,
+  params: { [key: string]: string | number | null }
+): number {
+  let credits = modelConfig.creditPricing.base;
+
+  if (modelConfig.creditPricing.modifiers) {
+    for (const modifier of modelConfig.creditPricing.modifiers) {
+      const paramValue = params[modifier.param];
+      if (paramValue !== null && paramValue !== undefined) {
+        const stringValue = String(paramValue);
+        const modifierValue = modifier.values[stringValue];
+
+        if (modifierValue !== undefined) {
+          switch (modifier.type) {
+            case 'multiply':
+              credits *= modifierValue;
+              break;
+            case 'add':
+              credits += modifierValue;
+              break;
+            case 'set':
+              credits = modifierValue;
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  // Round to nearest integer
+  return Math.round(credits);
+}
+
+// Firebase Storage base URLs
+const WEBSITE_VIDEOS = "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos";
+const MARKETPLACE_VIDEOS = "https://storage.googleapis.com/reelzila.firebasestorage.app/marketplace/videos";
 
 export const modelConfigs: { [key: string]: ModelConfig } = {
   "kling-2.5": {
@@ -45,10 +93,21 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "Kling 2.5 Turbo Pro",
     description: "Kuaishou's flagship video generation model released November 2025, featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements. Consistently ranked #1 in video generation benchmarks.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: "/videos/f1-speeding.mp4",
-    exampleVideo: `${STORAGE_BASE}/049_Cinematic_Train_Sunset_Window.mp4`,
+    cardVideo: `${WEBSITE_VIDEOS}/f1-speeding.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
     tags: ["top-rated", "motion", "cinematic"],
     outputType: 'video',
+    creditCost: 10,
+    creditPricing: {
+      base: 10, // 5-second video base
+      modifiers: [
+        {
+          param: "duration",
+          values: { "5": 10, "10": 20 },
+          type: "set"
+        }
+      ]
+    },
     params: [
       {
         name: "prompt",
@@ -158,10 +217,21 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "VEO 3.1",
     description: "Google's cutting-edge video generation model released October 2025, featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: "/videos/robot-3.mp4",
-    exampleVideo: `${STORAGE_BASE}/050_Dance_Home_Living_Room.mp4`,
+    cardVideo: `${WEBSITE_VIDEOS}/robot-3.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/055_Motorcycle_Highway_Speed.mp4`,
     tags: ["new", "audio", "reference-images"],
     outputType: 'video',
+    creditCost: 100,
+    creditPricing: {
+      base: 100, // 8-second video with audio
+      modifiers: [
+        {
+          param: "duration",
+          values: { "4": 50, "6": 75, "8": 100 },
+          type: "set"
+        }
+      ]
+    },
     params: [
       {
         name: "prompt",
@@ -293,10 +363,21 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "Seedance-1 Pro",
     description: "ByteDance's award-winning model released June 2025, specializing in multi-shot storytelling with seamless subject consistency. Generates 1080p videos at 24fps with sophisticated motion dynamics and cinema-grade aesthetic control. Tops leaderboards for T2V and I2V performance.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: "/videos/tron-1.mp4",
-    exampleVideo: `${STORAGE_BASE}/051_Warrior_Meditation_Dunes.mp4`,
+    cardVideo: `${WEBSITE_VIDEOS}/tron-1.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/052_Asian_Girl_Subway_Orange_Headphones.mp4`,
     tags: ["motion", "cinematic", "multi-shot"],
     outputType: 'video',
+    creditCost: 15,
+    creditPricing: {
+      base: 10, // 480p base
+      modifiers: [
+        {
+          param: "resolution",
+          values: { "480p": 10, "720p": 15, "1080p": 20 },
+          type: "set"
+        }
+      ]
+    },
     params: [
       {
         name: "prompt",
@@ -397,10 +478,21 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "WAN 2.2 14B",
     description: "ByteDance's efficient Mixture-of-Experts model released July 2025 with 27B parameters (14B active). Enhanced training on 65.6% more images and 83.2% more videos. Supports 480p/720p at 24fps with reduced flickering and excellent T2V, I2V, and hybrid modes.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${STORAGE_BASE}/055_Motorcycle_Highway_Speed.mp4`,
-    exampleVideo: `${STORAGE_BASE}/052_Film_Noir_Detective_Alley.mp4`,
+    cardVideo: `${MARKETPLACE_VIDEOS}/055_Motorcycle_Highway_Speed.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
     tags: ["image-to-video", "photorealistic"],
     outputType: 'video',
+    creditCost: 3,
+    creditPricing: {
+      base: 3, // 480p base
+      modifiers: [
+        {
+          param: "resolution",
+          values: { "480p": 3, "720p": 5 },
+          type: "set"
+        }
+      ]
+    },
     params: [
       {
         name: "image",
@@ -493,10 +585,14 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "FLUX 1.1 Pro Ultra",
     description: "Black Forest Labs&apos; flagship text-to-image model generating ultra high-resolution images up to 4 megapixels. Features exceptional prompt adherence, output diversity, and blazing fast generation. Supports raw mode for natural, less processed aesthetics.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${STORAGE_BASE}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
-    exampleVideo: `${STORAGE_BASE}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
+    cardVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
     tags: ["image", "4MP", "ultra-fast"],
     outputType: 'image',
+    creditCost: 2,
+    creditPricing: {
+      base: 2 // Fixed price for image generation
+    },
     params: [
       {
         name: "prompt",

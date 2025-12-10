@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, Suspense, useEffect, ChangeEvent, useMemo, useCallback } from 'react';
+import { useState, Suspense, useEffect, ChangeEvent, useMemo, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams } from 'next/navigation';
-import { modelConfigs } from '@/lib/modelConfigs';
+import { modelConfigs, calculateCredits } from '@/lib/modelConfigs';
 
 // Shadcn UI Component Imports
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { TipsSection } from "@/components/TipsSection";
 import { Separator } from "@/components/ui/separator";
 
 // Lucide React Icon Imports
+import { Volume2, VolumeX } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Define the possible types for parameters state
@@ -62,9 +63,22 @@ function GeneratorComponent() {
   const [detectedOutputType, setDetectedOutputType] = useState<OutputType>(null);
   const [generating, setGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
+
+  // Video preview state
+  const [videoAspectRatio, setVideoAspectRatio] = useState<number>(16/9);
+  const [isMuted, setIsMuted] = useState(true);
+  const [hasAudio, setHasAudio] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const exampleVideoRef = useRef<HTMLVideoElement>(null);
+
   // New state for toggling between Best Practice and Use Cases
   const [contentView, setContentView] = useState<'tips' | 'useCases'>('tips');
+
+  // Calculate credits dynamically based on selected parameters
+  const calculatedCredits = useMemo(() => {
+    if (!currentModelConfig) return 0;
+    return calculateCredits(currentModelConfig, params);
+  }, [currentModelConfig, params]);
 
   // Effect to reset state when the model is changed via URL
   useEffect(() => {
@@ -72,16 +86,54 @@ function GeneratorComponent() {
     const defaultParams: {[key: string]: ParamValues} = {};
     currentModelConfig.params.forEach(param => { defaultParams[param.name] = param.defaultValue; });
     setParams(defaultParams);
-    
+
     // Reset all outputs and previews
     setImagePreview(null);
     setOutputUrl('');
     setGenerating(false);
     setDetectedOutputType(null);
-    
+
+    // Reset video state
+    setVideoAspectRatio(16/9);
+    setIsMuted(true);
+    setHasAudio(false);
+
     // Reset content view to tips when model changes
     setContentView('tips');
   }, [currentModelConfig]);
+
+  // Handler for video metadata loaded - detect aspect ratio and audio
+  const handleVideoMetadata = useCallback((e: React.SyntheticEvent<HTMLVideoElement>, isExample: boolean = false) => {
+    const video = e.currentTarget;
+    if (video.videoWidth && video.videoHeight) {
+      setVideoAspectRatio(video.videoWidth / video.videoHeight);
+    }
+
+    // Check if video has audio tracks
+    // For generated videos, assume they might have audio
+    // For example videos, check the audio tracks or assume based on model
+    if (!isExample) {
+      // Generated video - check for audio tracks if available
+      const hasAudioTrack = (video as HTMLVideoElement & { mozHasAudio?: boolean; webkitAudioDecodedByteCount?: number; audioTracks?: { length: number } }).mozHasAudio ||
+        Boolean((video as HTMLVideoElement & { webkitAudioDecodedByteCount?: number }).webkitAudioDecodedByteCount) ||
+        Boolean((video as HTMLVideoElement & { audioTracks?: { length: number } }).audioTracks?.length);
+      setHasAudio(hasAudioTrack || true); // Default to showing audio control for generated videos
+    } else {
+      // Example video - check model config for audio capability
+      setHasAudio(currentModelConfig?.tags?.includes('audio') || false);
+    }
+  }, [currentModelConfig]);
+
+  // Toggle mute/unmute
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => !prev);
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+    }
+    if (exampleVideoRef.current) {
+      exampleVideoRef.current.muted = !exampleVideoRef.current.muted;
+    }
+  }, []);
 
   // Memoize event handlers
   const handleParamChange = useCallback((name: string, value: string | number) => {
@@ -107,8 +159,8 @@ function GeneratorComponent() {
       return;
     }
 
-    if (credits <= 0) {
-      toast.error('Insufficient credits', 'Please purchase more credits to continue');
+    if (credits < calculatedCredits) {
+      toast.error('Insufficient credits', `This generation requires ${calculatedCredits} credits. You have ${credits} credits.`);
       return;
     }
     setGenerating(true);
@@ -137,13 +189,13 @@ function GeneratorComponent() {
       } else {
         throw new Error("The model did not return a valid output.");
       }
-      setCredits(credits - 1);
+      setCredits(credits - calculatedCredits);
     } catch (err) {
       toast.error('Generation failed', (err as Error).message);
     } finally {
       setGenerating(false);
     }
-  }, [user, credits, modelId, params, setCredits]);
+  }, [user, credits, modelId, params, setCredits, currentModelConfig, calculatedCredits]);
 
   if (!currentModelConfig) {
     return (
@@ -183,8 +235,8 @@ function GeneratorComponent() {
               ))}
             </CardContent>
             <CardFooter className="flex-col items-start gap-4">
-              <Button onClick={handleGenerate} disabled={generating} size="lg" className="w-full">
-                 Generate Media ({credits} Credits)
+              <Button onClick={handleGenerate} disabled={generating || credits < calculatedCredits} size="lg" className="w-full">
+                 Generate Media ({calculatedCredits} Credits)
               </Button>
             </CardFooter>
           </Card>
@@ -199,8 +251,11 @@ function GeneratorComponent() {
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <AspectRatio ratio={16/9} className="bg-muted rounded-md flex items-center justify-center overflow-hidden">
+            <CardContent className="flex justify-center">
+              <div
+                className="relative bg-muted rounded-md flex items-center justify-center overflow-hidden transition-all duration-300 max-h-[60vh]"
+                style={{ aspectRatio: videoAspectRatio }}
+              >
                 {generating ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -209,22 +264,55 @@ function GeneratorComponent() {
                 ) : outputUrl ? (
                   <>
                     {detectedOutputType === 'video' && (
-                      <video src={outputUrl} controls autoPlay loop className="w-full h-full rounded-md" />
+                      <video
+                        ref={videoRef}
+                        src={outputUrl}
+                        controls
+                        autoPlay
+                        loop
+                        muted={isMuted}
+                        onLoadedMetadata={(e) => handleVideoMetadata(e, false)}
+                        className="w-full h-full rounded-md"
+                      />
                     )}
                     {detectedOutputType === 'image' && (
                       <Image src={outputUrl} alt="Generated result" fill className="object-contain rounded-md" />
                     )}
                     {detectedOutputType === null && (
-                        <div className="text-center text-muted-foreground p-4">
-                            <p>Unsupported output format.</p>
-                            <a href={outputUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline mt-2 block">View Raw Output</a>
-                        </div>
+                      <div className="text-center text-muted-foreground p-4">
+                        <p>Unsupported output format.</p>
+                        <a href={outputUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline mt-2 block">View Raw Output</a>
+                      </div>
                     )}
                   </>
                 ) : (
-                  <video src={currentModelConfig.exampleVideo} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  <video
+                    ref={exampleVideoRef}
+                    src={currentModelConfig.exampleVideo}
+                    autoPlay
+                    loop
+                    muted={isMuted}
+                    playsInline
+                    onLoadedMetadata={(e) => handleVideoMetadata(e, true)}
+                    className="w-full h-full object-cover"
+                  />
                 )}
-              </AspectRatio>
+
+                {/* Sound toggle button - only show for videos with audio */}
+                {!generating && hasAudio && (detectedOutputType === 'video' || !outputUrl) && (
+                  <button
+                    onClick={toggleMute}
+                    className="absolute bottom-3 right-3 p-2 bg-black/60 hover:bg-black/80 rounded-full transition-colors z-10"
+                    aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="h-5 w-5 text-white" />
+                    ) : (
+                      <Volume2 className="h-5 w-5 text-white" />
+                    )}
+                  </button>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
