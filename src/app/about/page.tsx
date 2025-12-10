@@ -6,7 +6,7 @@ import { AboutUsSection } from "@/components/homepage/AboutUsSection";
 // Define the content for the 3 slides
 const aboutUsSlides: BannerSlide[] = [
   {
-    videoSrc: "/videos/about-1.mp4", // Replace with your video
+    videoSrc: "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/about-1.mp4",
     title: <>Engineering the<br />Future of Creativity</>,
     subtitle: "We bring together experts from diverse fields to engineer robust, scalable systems that make advanced AI accessible and intuitive for everyone.",
     buttonText: "Explore Models",

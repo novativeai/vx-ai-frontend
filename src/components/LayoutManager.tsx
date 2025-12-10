@@ -1,6 +1,7 @@
 // FILE: ./src/components/LayoutManager.tsx
 "use client";
 
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -9,6 +10,10 @@ export default function LayoutManager({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  // Hide external footer on homepage (it has its own integrated footer)
+  const hideFooter = pathname === "/";
 
   return (
     <>
@@ -22,7 +27,7 @@ export default function LayoutManager({
 
       <Navbar />
       <main id="main-content" tabIndex={-1} className="flex-grow">{children}</main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </>
   );
 }

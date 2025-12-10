@@ -48,6 +48,14 @@ const EmpoweringSection = dynamic(
   }
 );
 
+const HomeFooterSection = dynamic(
+  () => import("@/components/homepage/HomeFooterSection").then(mod => ({ default: mod.HomeFooterSection })),
+  {
+    loading: () => <SectionSkeleton />,
+    ssr: true
+  }
+);
+
 export default function HomePage() {
   return (
     <main className="relative bg-black h-screen overflow-y-auto snap-y snap-mandatory scroll-smooth">
@@ -84,6 +92,13 @@ export default function HomePage() {
       <Suspense fallback={<SectionSkeleton />}>
         <SnapSection>
           <EmpoweringSection />
+        </SnapSection>
+      </Suspense>
+
+      {/* Footer section - snaps to bottom of viewport for smooth exit */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <SnapSection autoHeight snapAlign="end">
+          <HomeFooterSection />
         </SnapSection>
       </Suspense>
     </main>

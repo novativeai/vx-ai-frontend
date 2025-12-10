@@ -31,7 +31,7 @@ interface PurchasedVideo {
 
 const bannerSlides: BannerSlide[] = [
   {
-    videoSrc: "/videos/tron-1.mp4",
+    videoSrc: "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/tron-1.mp4",
     title: "Best Community",
     subtitle: "Join thousands of creators selling premium video content. Build your business with full usage rights.",
     buttonText: "Start Selling",

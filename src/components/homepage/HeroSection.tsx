@@ -9,7 +9,7 @@ import { PremiumSkeleton } from "@/components/ui/premium-skeleton";
 // Define the content for your hero slides
 const heroSlides = [
   {
-    videoSrc: "/videos/full-reel.mp4",
+    videoSrc: "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/full-reel.mp4",
     // Optional: Add a poster image for faster perceived loading
     // posterSrc: "/images/hero-poster.jpg",
     title: <>YOUR PERSPECTIVE<br />LIKE NEVER BEFORE</>,

@@ -344,7 +344,7 @@ export default function SignUp() {
           className="absolute inset-0 w-full h-full object-cover opacity-40"
           aria-label="Background demonstration of AI-generated video examples"
         >
-          <source src="/videos/full-reel.mp4" type="video/mp4" />
+          <source src="https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/full-reel.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
 

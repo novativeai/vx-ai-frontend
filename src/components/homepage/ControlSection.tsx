@@ -4,9 +4,9 @@ import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 import Link from "next/link";
 
 const controlItems = [
-  { title: "Camera", videoSrc: "/videos/control-1-optx.mp4" },
-  { title: "Pose", videoSrc: "/videos/control-2-optx.mp4" },
-  { title: "Transition", videoSrc: "/videos/control-3-optx.mp4" },
+  { title: "Camera", videoSrc: "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/control-1-optx.mp4" },
+  { title: "Pose", videoSrc: "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/control-2-optx.mp4" },
+  { title: "Transition", videoSrc: "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/control-3-optx.mp4" },
 ];
 //
 export function ControlSection() {

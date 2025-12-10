@@ -6,15 +6,19 @@ import { motion } from 'framer-motion';
 interface SnapSectionProps {
   children: ReactNode;
   className?: string;
+  autoHeight?: boolean;
+  snapAlign?: 'start' | 'end';
 }
 
-export const SnapSection = ({ children, className = '' }: SnapSectionProps) => {
+export const SnapSection = ({ children, className = '', autoHeight = false, snapAlign = 'start' }: SnapSectionProps) => {
+  const snapClass = snapAlign === 'end' ? 'snap-end' : 'snap-start';
+
   return (
     <section
-      className={`h-screen w-full snap-start relative overflow-hidden ${className}`}
+      className={`${autoHeight ? 'h-auto' : 'h-screen'} w-full ${snapClass} relative overflow-hidden ${className}`}
     >
       <motion.div
-        className="relative w-full h-full"
+        className={`relative w-full ${autoHeight ? '' : 'h-full'}`}
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
