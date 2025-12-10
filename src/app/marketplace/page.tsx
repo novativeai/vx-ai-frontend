@@ -15,6 +15,7 @@ import { CheckCircle, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 interface PurchasedVideo {
   id: string;
@@ -79,7 +80,7 @@ function MarketplaceContent() {
 
       return () => unsubscribe();
     } catch (error) {
-      console.error("Error fetching marketplace products:", error);
+      logger.error("Error fetching marketplace products", error);
       setIsLoading(false);
     }
   }, []);
@@ -106,7 +107,7 @@ function MarketplaceContent() {
 
       return () => unsubscribe();
     } catch (error) {
-      console.error("Error fetching purchased videos:", error);
+      logger.error("Error fetching purchased videos", error);
     }
   }, [user]);
 

@@ -16,6 +16,7 @@ import { generateTransactionPDF } from "@/lib/pdfGenerator";
 import { Download, AlertCircle, LogOut } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 import { FirebaseError } from "firebase/app";
 import { AccountNav, AccountNavMobile, type AccountTab } from "@/components/AccountNav";
 import { HistoryCard } from "@/components/HistoryCard";
@@ -149,7 +150,7 @@ function SubscriptionStatus() {
           });
         }
       } catch (error) {
-        console.error("Error fetching subscription:", error);
+        logger.error("Error fetching subscription", error);
       } finally {
         setLoading(false);
       }
@@ -342,7 +343,7 @@ export default function AccountPage() {
         setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
         timeoutRef.current = setTimeout(() => setSaveMessage(null), 3000);
       } catch (error) {
-        console.error("Error updating account:", error);
+        logger.error("Error updating account", error);
         let errorMessage = "Failed to update account";
         
         if (error instanceof FirebaseError) {
@@ -387,7 +388,7 @@ export default function AccountPage() {
         await signOut(auth);
         router.push('/signin');
       } catch (error) {
-        console.error("Error logging out:", error);
+        logger.error("Error logging out", error);
         setIsLoggingOut(false);
       }
     };

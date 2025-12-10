@@ -6,6 +6,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { UserProfile } from '@/types/types';
 import { isProfileComplete } from '@/lib/profileUtils';
+import { logger } from '@/lib/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -53,14 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setProfileComplete(isComplete);
           } else {
             // This can happen if signup is not complete before this listener attaches
-            console.log("Listening, but user document doesn't exist yet.");
+            logger.debug("User document doesn't exist yet, waiting for signup completion");
             setCredits(0);
             setUserProfile(null);
             setProfileComplete(false);
           }
           setLoading(false);
         }, (error) => {
-          console.error("Error listening to user document:", error);
+          logger.error("Error listening to user document", error);
           setCredits(0);
           setUserProfile(null);
           setProfileComplete(false);

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, X, Loader2 } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface WithdrawalRequestModalProps {
   isOpen: boolean;
@@ -41,7 +42,7 @@ export function WithdrawalRequestModal({
         setSavedEmail(profileDoc.data().paypalEmail || "");
       }
     } catch (error) {
-      console.error("Error loading seller profile:", error);
+      logger.error("Error loading seller profile", error);
     }
   };
 
@@ -123,11 +124,11 @@ export function WithdrawalRequestModal({
         });
 
         if (!notificationResponse.ok) {
-          console.warn('Failed to send withdrawal notification email');
+          logger.warn('Failed to send withdrawal notification email');
         }
       } catch (emailError) {
         // Don't fail the whole request if email fails
-        console.error('Error sending withdrawal notification:', emailError);
+        logger.error('Error sending withdrawal notification', emailError);
       }
 
       setMessage({
@@ -145,7 +146,7 @@ export function WithdrawalRequestModal({
         onSuccess?.();
       }, 2000);
     } catch (error) {
-      console.error("Error submitting withdrawal request:", error);
+      logger.error("Error submitting withdrawal request", error);
       setMessage({ type: "error", text: "Failed to submit withdrawal request. Please try again." });
     } finally {
       setLoading(false);

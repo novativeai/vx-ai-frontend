@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Maximize, Minimize, Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface VideoWithWatermarkProps {
   videoUrl: string;
@@ -78,7 +79,7 @@ export const VideoWithWatermark: React.FC<VideoWithWatermarkProps> = ({
         }
       }
     } catch (err) {
-      console.error("Fullscreen error:", err);
+      logger.error("Fullscreen error", err);
     }
   }, [isFullscreen]);
 

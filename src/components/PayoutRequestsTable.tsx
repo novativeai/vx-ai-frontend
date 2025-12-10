@@ -7,6 +7,7 @@ import { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, CheckCircle, XCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface PayoutRequest {
   id: string;
@@ -83,7 +84,7 @@ export function PayoutRequestsTable() {
         setLoading(false);
       },
       (error) => {
-        console.error("Error fetching payout requests:", error);
+        logger.error("Error fetching payout requests", error);
         setLoading(false);
       }
     );

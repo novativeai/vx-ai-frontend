@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Loader2, CheckCircle } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 export default function PaymentSuccessPage() {
   const { user } = useAuth();
@@ -44,7 +45,7 @@ export default function PaymentSuccessPage() {
           return;
         }
       } catch (error) {
-        console.error('Error verifying payment:', error);
+        logger.error('Error verifying payment', error);
         router.push('/pricing');
         return;
       }

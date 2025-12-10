@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface SellerTransaction {
   id: string;
@@ -53,7 +54,7 @@ export function SellerTransactions() {
         setLoading(false);
       },
       (error) => {
-        console.error("Error fetching transactions:", error);
+        logger.error("Error fetching transactions", error);
         setLoading(false);
       }
     );
@@ -100,7 +101,7 @@ export function SellerTransactions() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Export failed:", error);
+      logger.error("Export failed", error);
       alert("Failed to export transactions. Please try again.");
     } finally {
       setExporting(null);

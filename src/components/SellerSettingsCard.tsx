@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, CheckCircle, AlertCircle } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface SellerProfile {
   paypalEmail?: string;
@@ -48,7 +49,7 @@ export function SellerSettingsCard() {
         setLoading(false);
       },
       (error) => {
-        console.error("Error fetching seller profile:", error);
+        logger.error("Error fetching seller profile", error);
         setLoading(false);
       }
     );
@@ -102,7 +103,7 @@ export function SellerSettingsCard() {
       setIsEditing(false);
       timeoutRef.current = setTimeout(() => setMessage(null), 3000);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Error updating profile", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to update PayPal email";
       setMessage({ type: "error", text: errorMessage });
     } finally {

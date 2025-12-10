@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Wallet, ArrowUpRight } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface SellerBalance {
   totalEarned: number;
@@ -49,7 +50,7 @@ export function SellerEarningsCard({ onWithdrawClick }: SellerEarningsCardProps)
         setLoading(false);
       },
       (error) => {
-        console.error("Error fetching seller balance:", error);
+        logger.error("Error fetching seller balance", error);
         setLoading(false);
       }
     );
