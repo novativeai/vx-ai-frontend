@@ -28,6 +28,7 @@ function Navbar() {
       { href: "/explore", label: "Explore" },
       { href: "/marketplace", label: "Marketplace" },
       { href: "/pricing", label: "Pricing" },
+      { href: "/blog", label: "Blog" },
       { href: "/about", label: "About Us" },
       { href: "/contact", label: "Contact Us" },
     ],

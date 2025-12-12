@@ -31,7 +31,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary">Pricing</Link></li>
               <li><Link href="/explore" className="text-sm text-muted-foreground hover:text-primary">Explore</Link></li>
-              <li><Link href="/#model-gallery" className="text-sm text-muted-foreground hover:text-primary">Inspiration</Link></li>
+              <li><Link href="/marketplace" className="text-sm text-muted-foreground hover:text-primary">Marketplace</Link></li>
               {!user && (
                 <li><Link href="/signin" className="text-sm text-muted-foreground hover:text-primary">Sign In</Link></li>
               )}
