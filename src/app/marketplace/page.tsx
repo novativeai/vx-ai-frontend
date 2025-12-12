@@ -55,13 +55,14 @@ function MarketplaceContent() {
 
   // Fetch all published marketplace products
   useEffect(() => {
-    try {
-      const q = query(
-        collection(db, "marketplace_listings"),
-        where("status", "==", "published")
-      );
+    const q = query(
+      collection(db, "marketplace_listings"),
+      where("status", "==", "published")
+    );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
         const productsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -76,13 +77,14 @@ function MarketplaceContent() {
 
         setProducts(productsData);
         setIsLoading(false);
-      });
+      },
+      (error) => {
+        logger.error("Error fetching marketplace_listings", error);
+        setIsLoading(false);
+      }
+    );
 
-      return () => unsubscribe();
-    } catch (error) {
-      logger.error("Error fetching marketplace products", error);
-      setIsLoading(false);
-    }
+    return () => unsubscribe();
   }, []);
 
   // Fetch user's purchased videos
@@ -91,24 +93,26 @@ function MarketplaceContent() {
       return;
     }
 
-    try {
-      const q = query(
-        collection(db, "users", user.uid, "purchased_videos"),
-        orderBy("purchasedAt", "desc")
-      );
+    const q = query(
+      collection(db, "users", user.uid, "purchased_videos"),
+      orderBy("purchasedAt", "desc")
+    );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
         const purchasedData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         } as PurchasedVideo));
         setPurchased(purchasedData);
-      });
+      },
+      (error) => {
+        logger.error("Error fetching purchased_videos", error);
+      }
+    );
 
-      return () => unsubscribe();
-    } catch (error) {
-      logger.error("Error fetching purchased videos", error);
-    }
+    return () => unsubscribe();
   }, [user]);
 
   // Combine tag extraction and filtering into single memoized operation

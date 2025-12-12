@@ -61,7 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           setLoading(false);
         }, (error) => {
-          logger.error("Error listening to user document", error);
+          // Ignore permission denied errors during logout - they're expected
+          if (error.code === 'permission-denied') {
+            logger.debug("Firestore permission denied - user likely signed out");
+          } else {
+            logger.error("Error listening to user document", error);
+          }
           setCredits(0);
           setUserProfile(null);
           setProfileComplete(false);

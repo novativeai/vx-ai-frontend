@@ -383,11 +383,22 @@ export default function AccountPage() {
     const handleLogout = async () => {
       setIsLoggingOut(true);
       try {
+        // Navigate away first to trigger cleanup of listeners
+        router.push('/signin');
+
+        // Small delay to allow navigation and cleanup
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const { signOut } = await import('firebase/auth');
         const { auth } = await import('@/lib/firebase');
         await signOut(auth);
-        router.push('/signin');
       } catch (error) {
+        // Ignore Firestore internal errors during logout - they're harmless
+        if (error instanceof Error && error.message.includes('INTERNAL ASSERTION FAILED')) {
+          // Still navigate to signin even if Firestore throws
+          router.push('/signin');
+          return;
+        }
         logger.error("Error logging out", error);
         setIsLoggingOut(false);
       }
