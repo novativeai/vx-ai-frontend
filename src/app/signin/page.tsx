@@ -46,6 +46,7 @@ export default function SignIn() {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
+    setFieldErrors({}); // Clear any existing field errors
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -141,6 +142,9 @@ export default function SignIn() {
   };
 
   const handleBlur = (field: 'email' | 'password') => {
+    // Don't validate if Google sign-in is in progress (user clicked Google button)
+    if (isGoogleLoading) return;
+
     if (field === 'email') {
       const error = validateEmail(email);
       setFieldErrors(prev => ({ ...prev, email: error }));
