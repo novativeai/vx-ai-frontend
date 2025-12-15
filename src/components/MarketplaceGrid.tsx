@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useCallback, memo } from "react";
+import React, { useState, useRef, useCallback, useEffect, memo } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { MarketplaceProduct } from "@/types/types";
 import { Play } from "lucide-react";
-import { VideoCardSkeleton } from "@/components/ui/premium-skeleton";
+import { VideoCardSkeleton, PremiumSkeleton } from "@/components/ui/premium-skeleton";
 
 interface MarketplaceGridProps {
   products: MarketplaceProduct[];
@@ -22,13 +23,80 @@ const ProductCard = memo(function ProductCard({
   onProductClick: (product: MarketplaceProduct) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [generatedPoster, setGeneratedPoster] = useState<string | null>(null);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Generate poster from first frame if no thumbnailUrl provided
+  useEffect(() => {
+    if (product.thumbnailUrl || generatedPoster) return;
+
+    const video = document.createElement("video");
+    video.crossOrigin = "anonymous";
+    video.src = product.videoUrl;
+    video.muted = true;
+    video.preload = "metadata";
+
+    const handleLoadedData = () => {
+      video.currentTime = 0.1; // Seek to 0.1s to get first frame
+    };
+
+    const handleSeeked = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+          setGeneratedPoster(dataUrl);
+        }
+      } catch {
+        // CORS or other error - fallback to no poster
+      }
+      video.remove();
+    };
+
+    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("seeked", handleSeeked);
+    video.load();
+
+    return () => {
+      video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("seeked", handleSeeked);
+      video.remove();
+    };
+  }, [product.videoUrl, product.thumbnailUrl, generatedPoster]);
+
+  // Fallback timeout to hide skeleton after 5s max (prevents stuck state)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsImageLoaded(true);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const posterUrl = product.thumbnailUrl || generatedPoster;
+
+  // Mark as loaded when poster becomes available (for generated posters)
+  useEffect(() => {
+    if (generatedPoster) {
+      setIsImageLoaded(true);
+    }
+  }, [generatedPoster]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
+    setShowVideo(true);
+    // Small delay to allow video element to mount before playing
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().catch(() => {});
+      }
+    }, 50);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
@@ -37,6 +105,7 @@ const ProductCard = memo(function ProductCard({
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
+    // Keep video mounted for faster subsequent hovers
   }, []);
 
   return (
@@ -46,18 +115,51 @@ const ProductCard = memo(function ProductCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02]">
+      <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
         <AspectRatio ratio={1 / 1} className="bg-neutral-800 relative">
-          {/* Optimized Video with lazy loading */}
-          <video
-            ref={videoRef}
-            src={product.videoUrl}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="w-full h-full object-cover"
-          />
+          {/* Loading skeleton */}
+          {!isImageLoaded && (
+            <div className="absolute inset-0 z-10 transition-opacity duration-300">
+              <PremiumSkeleton className="w-full h-full" variant="card" />
+            </div>
+          )}
+
+          {/* Thumbnail/Poster shown by default */}
+          {posterUrl && !isHovered && (
+            <Image
+              src={posterUrl}
+              alt={product.title}
+              fill
+              className={`object-cover transition-opacity duration-300 ${
+                isImageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              priority={false}
+              onLoad={() => setIsImageLoaded(true)}
+            />
+          )}
+
+          {/* Video loads on hover */}
+          {showVideo && (
+            <video
+              ref={videoRef}
+              src={product.videoUrl}
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-200 ${
+                isHovered ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          )}
+
+          {/* Fallback background when no poster (only show after skeleton timeout) */}
+          {!posterUrl && !showVideo && isImageLoaded && (
+            <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
+              <Play size={32} className="text-neutral-600" />
+            </div>
+          )}
 
           {/* Play Icon on Hover with smooth animation */}
           <div

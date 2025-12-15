@@ -1,12 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { PremiumSkeleton } from "@/components/ui/premium-skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function ModelHighlightSection() {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Check if video is already ready on mount (handles cached videos)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && video.readyState >= 3) {
+      setIsVideoLoaded(true);
+    }
+  }, []);
+
+  // Fallback timeout to prevent skeleton from getting stuck (max 4s)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsVideoLoaded(true);
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleVideoLoad = useCallback(() => {
     setIsVideoLoaded(true);
@@ -58,12 +76,13 @@ export function ModelHighlightSection() {
           </AnimatePresence>
 
           <video
+            ref={videoRef}
             src="https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos/skeleton.mp4"
             autoPlay
             loop
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             onLoadedData={handleVideoLoad}
             className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
               isVideoLoaded ? 'opacity-100' : 'opacity-0'
@@ -72,13 +91,14 @@ export function ModelHighlightSection() {
 
           {/* VEO3.1 text overlay - inside video container for mix-blend-difference to work */}
           {/* Centered on "E" by offsetting right to compensate for "3.1" width */}
+          {/* No opacity animation - mix-blend-difference doesn't work with opacity transitions */}
           <div className="absolute inset-0 flex items-center justify-center">
             <motion.h3
               className="text-8xl md:text-9xl tracking-tighter text-white mix-blend-difference flex items-baseline translate-x-[0.75em]"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ scale: 0.8, y: 20 }}
+              whileInView={{ scale: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
               <span className="font-extrabold">VEO</span>
               <span className="font-light ml-1">3.1</span>

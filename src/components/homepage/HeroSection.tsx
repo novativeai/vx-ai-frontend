@@ -23,6 +23,23 @@ export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const currentSlide = heroSlides[currentIndex];
 
+  // Check if video is already ready on mount (handles cached videos)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && video.readyState >= 3) {
+      setIsVideoReady(true);
+    }
+  }, [currentIndex]);
+
+  // Fallback timeout to prevent skeleton from getting stuck (max 4s)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsVideoReady(true);
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, [currentIndex]);
+
   // Preload next video
   useEffect(() => {
     if (heroSlides.length <= 1) return;

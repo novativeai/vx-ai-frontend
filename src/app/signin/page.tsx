@@ -149,6 +149,10 @@ export default function SignIn() {
     const relatedTarget = e.relatedTarget as HTMLElement | null;
     if (relatedTarget?.closest('[data-google-signin]')) return;
 
+    // Don't validate empty fields when clicking buttons (likely Google sign-in)
+    // This handles edge cases where relatedTarget might be null in some browsers
+    if (field === 'email' && !email.trim() && relatedTarget?.tagName === 'BUTTON') return;
+
     if (field === 'email') {
       const error = validateEmail(email);
       setFieldErrors(prev => ({ ...prev, email: error }));
