@@ -15,7 +15,7 @@ export function ModelsSection() {
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between md:items-end mb-12">
           <div>        <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>
-        <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">MODELS</h2>
+        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tighter mt-2">MODELS</h2>
         <p className="max-w-2xl text-neutral-300 mt-4">We are focused on foundational research and systems engineering to build multimodal general intelligence.</p>
         </div>
                   <Link href="/explore" className="mt-6 md:mt-0">

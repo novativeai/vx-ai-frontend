@@ -16,7 +16,7 @@ export function ControlSection() {
         <div className="flex flex-col md:flex-row justify-between md:items-end mb-12">
           <div>
             <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>
-            <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">CONTROL</h2>
+            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tighter mt-2">CONTROL</h2>
             <p className="max-w-md text-neutral-300 mt-4">We provide full control over the output, from motion and pose to camera placement—everything is in your hands.</p>
           </div>
           <Link href="/explore" className="mt-6 md:mt-0">
