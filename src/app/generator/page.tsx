@@ -293,7 +293,7 @@ function GeneratorComponent() {
                     src={currentModelConfig.exampleImage}
                     alt={`${currentModelConfig.displayName} example`}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                   />
                 ) : currentModelConfig.exampleVideo ? (
                   <video
@@ -304,7 +304,7 @@ function GeneratorComponent() {
                     muted={isMuted}
                     playsInline
                     onLoadedMetadata={(e) => handleVideoMetadata(e, true)}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 ) : null}
 
