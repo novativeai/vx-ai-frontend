@@ -121,7 +121,7 @@ export function ModelHighlightSection() {
           </p>
 
           <Link href="/generator?model=veo-3.1" className="block mt-4">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors whitespace-nowrap">
               Available Now
             </h2>
           </Link>
