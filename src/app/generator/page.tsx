@@ -293,7 +293,7 @@ function GeneratorComponent() {
             </CardHeader>
             <CardContent className="flex justify-center">
               <div
-                className="relative w-full h-[500px] lg:h-[600px] bg-muted rounded-md flex items-center justify-center overflow-hidden transition-all duration-300"
+                className="relative w-full h-[500px] lg:h-[600px] bg-black rounded-md flex items-center justify-center overflow-hidden transition-all duration-300"
               >
                 {generating ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
