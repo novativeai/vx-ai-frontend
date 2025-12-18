@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
 import { memo } from "react";
@@ -11,7 +12,8 @@ interface Model {
   displayName: string;
   description: string;
   tags: string[];
-  cardVideo: string;
+  cardVideo?: string;
+  cardImage?: string;
   outputType: 'video' | 'image';
 }
 
@@ -23,14 +25,24 @@ export const ModelCard: React.FC<ModelCardProps> = memo(function ModelCard({ mod
   return (
     <Link href={`/generator?model=${model.id}`} className="group">
       <Card className="bg-[#1C1C1C] border-neutral-800 rounded-2xl p-4 transition-all md:h-full group-hover:ring-2 group-hover:ring-white/50 overflow-hidden min-w-80">
-        {/* 
+        {/*
           THE FIX: Added `min-w-80` (320px).
           - This prevents the card from shrinking below a readable width on mobile.
           - When the parent's `w-4/5` becomes smaller than 320px, this rule takes precedence,
             forcing the horizontal scroll to activate instead of squishing the card content.
         */}
-        <div className="aspect-video rounded-lg overflow-hidden">
-          <HoverVideoPlayer src={model.cardVideo} />
+        <div className="aspect-video rounded-lg overflow-hidden relative">
+          {model.cardImage ? (
+            <Image
+              src={model.cardImage}
+              alt={model.displayName}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 80vw, 33vw"
+            />
+          ) : model.cardVideo ? (
+            <HoverVideoPlayer src={model.cardVideo} />
+          ) : null}
         </div>
         <div className="p-4">
           <span className="inline-block text-[10px] uppercase tracking-wider text-neutral-500 px-2.5 py-1 rounded border border-neutral-700/60 bg-neutral-900/80">

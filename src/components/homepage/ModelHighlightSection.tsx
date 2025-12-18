@@ -31,8 +31,8 @@ export function ModelHighlightSection() {
   }, []);
 
   return (
-    <section className="bg-black text-white overflow-hidden h-full">
-      <div className="container mx-auto h-full relative flex flex-col justify-center px-0 md:block">
+    <section className="bg-black text-white overflow-hidden h-screen min-h-[800px]">
+      <div className="container mx-auto h-full relative flex flex-col justify-center px-4 md:px-0 md:block py-8 md:py-16">
 
         <motion.div
           className="relative z-10 md:absolute md:top-0 md:left-0"
@@ -59,7 +59,7 @@ export function ModelHighlightSection() {
 
         <Link
           href="/generator?model=veo-3.1"
-          className="w-full mt-8 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[60vw] max-w-[700px] aspect-[5/4] overflow-hidden relative block cursor-pointer group"
+          className="w-full mt-8 md:mt-0 md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[60vw] max-w-[700px] aspect-[5/4] overflow-hidden relative block cursor-pointer group isolate"
         >
           {/* Loading skeleton */}
           <AnimatePresence>
@@ -91,23 +91,23 @@ export function ModelHighlightSection() {
 
           {/* VEO3.1 text overlay - inside video container for mix-blend-difference to work */}
           {/* Centered on "E" by offsetting right to compensate for "3.1" width */}
-          {/* No opacity animation - mix-blend-difference doesn't work with opacity transitions */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.h3
-              className="text-8xl md:text-9xl tracking-tighter text-white mix-blend-difference flex items-baseline translate-x-[0.75em]"
-              initial={{ scale: 0.8, y: 20 }}
-              whileInView={{ scale: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            >
+          {/* Using isolation on parent and mix-blend-difference on text for negative effect */}
+          <motion.h3
+            className="absolute inset-0 flex items-center justify-center text-8xl md:text-9xl tracking-tighter text-white mix-blend-difference"
+            initial={{ scale: 0.8, y: 20 }}
+            whileInView={{ scale: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          >
+            <span className="flex items-baseline translate-x-[0.75em]">
               <span className="font-extrabold">VEO</span>
               <span className="font-light ml-1">3.1</span>
-            </motion.h3>
-          </div>
+            </span>
+          </motion.h3>
         </Link>
 
         <motion.div
-          className="mt-8 md:absolute md:bottom-0 md:left-0 max-w-sm z-20"
+          className="mt-8 md:absolute md:bottom-8 md:left-0 max-w-sm z-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -121,7 +121,7 @@ export function ModelHighlightSection() {
           </p>
 
           <Link href="/generator?model=veo-3.1" className="block mt-4">
-            <h2 className="text-6xl md:text-8xl font-extrabold tracking-tighter whitespace-nowrap overflow-visible hover:text-neutral-300 transition-colors">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors">
               Available Now
             </h2>
           </Link>

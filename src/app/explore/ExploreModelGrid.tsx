@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from "next/link";
+import Image from "next/image";
 import { modelConfigs } from "@/lib/modelConfigs";
 import { Badge } from "@/components/ui/badge";
 import { HoverVideoPlayer } from "@/components/HoverVideoPlayer";
@@ -14,8 +15,18 @@ export const ExploreModelGrid = () => {
       {models.map((model) => (
         <Link key={model.id} href={`/generator?model=${model.id}`} className="group">
           <div className="bg-[#1C1C1C] rounded-2xl p-4 transition-all group-hover:ring-2 group-hover:ring-white/50 h-full flex flex-col">
-            <div className="aspect-video rounded-lg overflow-hidden">
-              <HoverVideoPlayer src={model.cardVideo} />
+            <div className="aspect-video rounded-lg overflow-hidden relative">
+              {model.cardImage ? (
+                <Image
+                  src={model.cardImage}
+                  alt={model.displayName}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+              ) : model.cardVideo ? (
+                <HoverVideoPlayer src={model.cardVideo} />
+              ) : null}
             </div>
             <div className="p-4 flex-grow flex flex-col justify-between">
               <div>

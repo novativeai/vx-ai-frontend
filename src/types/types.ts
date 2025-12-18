@@ -31,7 +31,10 @@ export interface ModelConfig {
   outputType: 'video' | 'image';
   description: string;
   bannerImage: string;
-  cardVideo: string;
+  cardVideo?: string; // Video thumbnail for video models
+  cardImage?: string; // Static image thumbnail for image models
+  exampleVideo?: string; // Video shown as example on generator page
+  exampleImage?: string; // Static image shown as example for image models
   tags: string[];
   params: ModelParameter[];
   tips?: TipSection[];

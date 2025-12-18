@@ -288,7 +288,14 @@ function GeneratorComponent() {
                       </div>
                     )}
                   </>
-                ) : (
+                ) : currentModelConfig.exampleImage ? (
+                  <Image
+                    src={currentModelConfig.exampleImage}
+                    alt={`${currentModelConfig.displayName} example`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : currentModelConfig.exampleVideo ? (
                   <video
                     ref={exampleVideoRef}
                     src={currentModelConfig.exampleVideo}
@@ -299,7 +306,7 @@ function GeneratorComponent() {
                     onLoadedMetadata={(e) => handleVideoMetadata(e, true)}
                     className="w-full h-full object-cover"
                   />
-                )}
+                ) : null}
 
                 {/* Sound toggle button - only show for videos with audio */}
                 {!generating && hasAudio && (detectedOutputType === 'video' || !outputUrl) && (

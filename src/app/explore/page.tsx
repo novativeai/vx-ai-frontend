@@ -19,7 +19,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Generation, ModelConfig } from "@/types/types";
 
 // --- Data Transformation for the Banner ---
+// Filter to only video models with cardVideo for the banner
 const explorePageSlides: BannerSlide[] = Object.values(modelConfigs)
+  .filter(model => (model as ModelConfig).outputType === 'video' && (model as ModelConfig).cardVideo)
   .slice(0, 3)
   .map(model => ({
     videoSrc: (model as ModelConfig).cardVideo,
@@ -27,7 +29,6 @@ const explorePageSlides: BannerSlide[] = Object.values(modelConfigs)
     subtitle: (model as ModelConfig).description,
     buttonText: "Try it now!",
     buttonLink: `/generator?model=${(model as ModelConfig).id}`,
-    // posterSrc: (model as ModelConfig).posterImage, // Add this if you have poster images
   }));
 
 

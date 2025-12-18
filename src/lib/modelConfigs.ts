@@ -38,8 +38,10 @@ interface ModelConfig {
   outputType: 'video' | 'image';
   description: string;
   bannerImage: string;
-  cardVideo: string;
-  exampleVideo: string; // Video shown as example on the generator page
+  cardVideo?: string; // Video thumbnail for video models
+  cardImage?: string; // Static image thumbnail for image models
+  exampleVideo?: string; // Video shown as example on the generator page
+  exampleImage?: string; // Static image shown as example for image models
   tags: string[];
   params: ModelParameter[];
   tips?: TipSection[];
@@ -86,6 +88,7 @@ export function calculateCredits(
 // Firebase Storage base URLs
 const WEBSITE_VIDEOS = "https://storage.googleapis.com/reelzila.firebasestorage.app/website/videos";
 const MARKETPLACE_VIDEOS = "https://storage.googleapis.com/reelzila.firebasestorage.app/marketplace/videos";
+const MARKETPLACE_IMAGES = "https://storage.googleapis.com/reelzila.firebasestorage.app/marketplace/images";
 
 export const modelConfigs: { [key: string]: ModelConfig } = {
   "veo-3.1": {
@@ -648,8 +651,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     displayName: "Nano Banana Pro",
     description: "High-quality image generation model optimized for speed and resolution. Create stunning images up to 4K resolution with excellent prompt adherence and diverse artistic styles. Perfect for concept art, illustrations, and professional imagery.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
-    exampleVideo: `${MARKETPLACE_VIDEOS}/047_Blue_Hair_Girl_Neon_City.mp4`,
+    cardImage: `${MARKETPLACE_IMAGES}/nano-banana-card.jpg`,
+    exampleImage: `${MARKETPLACE_IMAGES}/nano-banana-example.jpg`,
     tags: ["image", "4K", "fast"],
     outputType: 'image',
     creditCost: 2,
