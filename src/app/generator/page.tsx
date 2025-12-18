@@ -20,8 +20,11 @@ import { TipsSection } from "@/components/TipsSection";
 import { Separator } from "@/components/ui/separator";
 
 // Lucide React Icon Imports
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, ChevronDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+
+// Number of parameters to show before "Advanced Settings"
+const PRIMARY_PARAMS_COUNT = 3;
 
 // Define the possible types for parameters state
 type ParamValues = string | number | null;
@@ -73,6 +76,9 @@ function GeneratorComponent() {
 
   // New state for toggling between Best Practice and Use Cases
   const [contentView, setContentView] = useState<'tips' | 'useCases'>('tips');
+
+  // State for showing advanced settings
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Calculate credits dynamically based on selected parameters
   const calculatedCredits = useMemo(() => {
@@ -227,7 +233,8 @@ function GeneratorComponent() {
           <Card className="sticky top-20 bg-black-500 border-black">
             <CardHeader><CardTitle className="text-2xl font-bold">Input Parameters</CardTitle></CardHeader>
             <CardContent className="space-y-6">
-              {currentModelConfig.params.map(param => (
+              {/* Primary Parameters - always visible */}
+              {currentModelConfig.params.slice(0, PRIMARY_PARAMS_COUNT).map(param => (
                 <div key={param.name} className="grid w-full items-center gap-2">
                   <Label htmlFor={param.name} className="font-semibold">{param.label}</Label>
                   {param.type === 'textarea' && <Textarea id={param.name} value={params[param.name] as string || ''} onChange={(e) => handleParamChange(param.name, e.target.value)} rows={5} disabled={generating} />}
@@ -236,6 +243,36 @@ function GeneratorComponent() {
                   {param.type === 'dropdown' && <Select value={params[param.name] as string || ''} onValueChange={(value) => handleParamChange(param.name, value)} disabled={generating}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{param.options?.map(option => <SelectItem key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>}
                 </div>
               ))}
+
+              {/* Advanced Settings Toggle - only show if there are more parameters */}
+              {currentModelConfig.params.length > PRIMARY_PARAMS_COUNT && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full py-2"
+                  >
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`} />
+                    <span className="font-medium">Advanced Settings</span>
+                    <span className="text-xs">({currentModelConfig.params.length - PRIMARY_PARAMS_COUNT} more)</span>
+                  </button>
+
+                  {/* Advanced Parameters - conditionally visible */}
+                  {showAdvanced && (
+                    <div className="space-y-6 pt-2 border-t border-border">
+                      {currentModelConfig.params.slice(PRIMARY_PARAMS_COUNT).map(param => (
+                        <div key={param.name} className="grid w-full items-center gap-2">
+                          <Label htmlFor={param.name} className="font-semibold">{param.label}</Label>
+                          {param.type === 'textarea' && <Textarea id={param.name} value={params[param.name] as string || ''} onChange={(e) => handleParamChange(param.name, e.target.value)} rows={5} disabled={generating} />}
+                          {param.type === 'slider' && <div className="flex items-center gap-4 pt-1"><Slider id={param.name} value={[params[param.name] as number || 0]} onValueChange={([value]) => handleParamChange(param.name, value)} min={param.min} max={param.max} step={param.step} disabled={generating} /><span className="font-mono text-sm w-12 text-center rounded-md border p-2">{params[param.name] as number}</span></div>}
+                          {param.type === 'image' && <div className='grid gap-3'><Input id={param.name} type="file" onChange={handleImageChange} accept="image/*" disabled={generating} />{imagePreview && <AspectRatio ratio={16 / 9} className="bg-muted rounded-md border"><Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-md" /></AspectRatio>}</div>}
+                          {param.type === 'dropdown' && <Select value={params[param.name] as string || ''} onValueChange={(value) => handleParamChange(param.name, value)} disabled={generating}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{param.options?.map(option => <SelectItem key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </CardContent>
             <CardFooter className="flex-col items-start gap-4">
               <Button onClick={handleGenerate} disabled={generating || credits < calculatedCredits} size="lg" className="w-full">
