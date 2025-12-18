@@ -91,7 +91,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "veo-3.1": {
     id: "veo-3.1",
     displayName: "VEO 3.1",
-    description: "Google&apos;s cutting-edge video generation model featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
+    description: "Google's cutting-edge video generation model featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${WEBSITE_VIDEOS}/robot-3.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/055_Motorcycle_Highway_Speed.mp4`,
@@ -167,19 +167,19 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Specify Shot Composition",
-            text: "Use cinematic terms to guide the camera. Include phrases like &apos;single shot&apos;, &apos;two shot&apos;, &apos;close-up&apos;, &apos;wide angle&apos;, or &apos;macro lens&apos; to control framing and perspective.",
+            text: "Use cinematic terms to guide the camera. Include phrases like 'single shot', 'two shot', 'close-up', 'wide angle', or 'macro lens' to control framing and perspective.",
             list: [
-              "Example: &apos;Close-up shot of hands crafting pottery, shallow depth of field&apos;",
-              "Example: &apos;Wide establishing shot of a mountain village at dawn&apos;"
+              "Example: 'Close-up shot of hands crafting pottery, shallow depth of field'",
+              "Example: 'Wide establishing shot of a mountain village at dawn'"
             ]
           },
           {
             subtitle: "Describe Camera Movement",
-            text: "VEO 3.1 excels at camera motion. Specify movements like &apos;dolly shot&apos;, &apos;pan shot&apos;, &apos;tracking shot&apos;, &apos;crane shot&apos;, or &apos;handheld&apos; for dynamic results."
+            text: "VEO 3.1 excels at camera motion. Specify movements like 'dolly shot', 'pan shot', 'tracking shot', 'crane shot', or 'handheld' for dynamic results."
           },
           {
             subtitle: "Set the Mood with Lighting",
-            text: "Describe lighting conditions: &apos;golden hour&apos;, &apos;blue hour&apos;, &apos;harsh midday sun&apos;, &apos;soft diffused light&apos;, &apos;neon-lit&apos;, or &apos;candlelit&apos; to establish atmosphere."
+            text: "Describe lighting conditions: 'golden hour', 'blue hour', 'harsh midday sun', 'soft diffused light', 'neon-lit', or 'candlelit' to establish atmosphere."
           }
         ]
       },
@@ -190,7 +190,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
             subtitle: "Native Audio Synthesis",
             text: "VEO 3.1 generates synchronized audio automatically - from dialogue and sound effects to ambient soundscapes and realistic Foley. Describe sounds in your prompt for better results.",
             list: [
-              "Include audio cues: &apos;the sound of waves crashing&apos;, &apos;footsteps on gravel&apos;, &apos;distant thunder&apos;",
+              "Include audio cues: 'the sound of waves crashing', 'footsteps on gravel', 'distant thunder'",
               "For dialogue scenes, describe the conversation tone and setting",
               "Foley effects are automatically synchronized with visuals"
             ]
@@ -225,7 +225,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "sora-2": {
     id: "sora-2",
     displayName: "Sora 2",
-    description: "OpenAI&apos;s flagship video generation model with exceptional temporal consistency and photorealistic output. Creates up to 12-second videos with smooth motion, accurate physics, and stunning visual quality across diverse styles and subjects.",
+    description: "OpenAI's flagship video generation model with exceptional temporal consistency and photorealistic output. Creates up to 12-second videos with smooth motion, accurate physics, and stunning visual quality across diverse styles and subjects.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${WEBSITE_VIDEOS}/f1-speeding.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
@@ -283,10 +283,10 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Cinematic Language",
-            text: "Sora 2 excels with cinematic terminology. Use terms like &apos;dolly shot&apos;, &apos;tracking shot&apos;, &apos;crane movement&apos;, &apos;shallow depth of field&apos;, and specific lens references (35mm, 85mm) for professional results.",
+            text: "Sora 2 excels with cinematic terminology. Use terms like 'dolly shot', 'tracking shot', 'crane movement', 'shallow depth of field', and specific lens references (35mm, 85mm) for professional results.",
             list: [
-              "Example: &apos;Tracking shot following a runner through city streets, shallow DOF, golden hour&apos;",
-              "Example: &apos;Slow dolly push-in on subject&apos;s face, dramatic lighting, film grain&apos;"
+              "Example: 'Tracking shot following a runner through city streets, shallow DOF, golden hour'",
+              "Example: 'Slow dolly push-in on subject's face, dramatic lighting, film grain'"
             ]
           },
           {
@@ -295,7 +295,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
           },
           {
             subtitle: "Lighting and Atmosphere",
-            text: "Specify lighting conditions clearly: &apos;golden hour&apos;, &apos;blue hour&apos;, &apos;neon-lit&apos;, &apos;candlelit&apos;, &apos;overcast diffused light&apos;. The model responds exceptionally well to atmospheric descriptions."
+            text: "Specify lighting conditions clearly: 'golden hour', 'blue hour', 'neon-lit', 'candlelit', 'overcast diffused light'. The model responds exceptionally well to atmospheric descriptions."
           }
         ]
       }
@@ -323,7 +323,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "kling-2.6": {
     id: "kling-2.6",
     displayName: "Kling 2.6 Pro",
-    description: "Kuaishou&apos;s flagship video generation model featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements.",
+    description: "Kuaishou's flagship video generation model featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${WEBSITE_VIDEOS}/tron-1.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/052_Asian_Girl_Subway_Orange_Headphones.mp4`,
@@ -392,10 +392,10 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Cinematic Language",
-            text: "Kling 2.6 excels with cinematic terminology. Use terms like &apos;dolly shot&apos;, &apos;tracking shot&apos;, &apos;crane movement&apos;, &apos;shallow depth of field&apos;, and specific lens references (35mm, 85mm) for professional results.",
+            text: "Kling 2.6 excels with cinematic terminology. Use terms like 'dolly shot', 'tracking shot', 'crane movement', 'shallow depth of field', and specific lens references (35mm, 85mm) for professional results.",
             list: [
-              "Example: &apos;Tracking shot following a runner through city streets, shallow DOF, golden hour&apos;",
-              "Example: &apos;Slow dolly push-in on subject&apos;s face, dramatic lighting, film grain&apos;"
+              "Example: 'Tracking shot following a runner through city streets, shallow DOF, golden hour'",
+              "Example: 'Slow dolly push-in on subject's face, dramatic lighting, film grain'"
             ]
           },
           {
@@ -404,7 +404,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
           },
           {
             subtitle: "Lighting and Atmosphere",
-            text: "Specify lighting conditions clearly: &apos;golden hour&apos;, &apos;blue hour&apos;, &apos;neon-lit&apos;, &apos;candlelit&apos;, &apos;overcast diffused light&apos;. The model responds exceptionally well to atmospheric descriptions."
+            text: "Specify lighting conditions clearly: 'golden hour', 'blue hour', 'neon-lit', 'candlelit', 'overcast diffused light'. The model responds exceptionally well to atmospheric descriptions."
           }
         ]
       },
@@ -449,10 +449,10 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "ltx-2": {
     id: "ltx-2",
     displayName: "LTX Video 2",
-    description: "Lightricks&apos; fast and efficient video generation model offering excellent quality at a low cost. Perfect for rapid prototyping and high-volume generation with customizable inference steps and guidance settings.",
+    description: "Lightricks' fast and efficient video generation model offering excellent quality at a low cost. Perfect for rapid prototyping and high-volume generation with customizable inference steps and guidance settings.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${MARKETPLACE_VIDEOS}/055_Motorcycle_Highway_Speed.mp4`,
-    exampleVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
+    cardVideo: `${MARKETPLACE_VIDEOS}/048_Dark_Room_Redhead_Ring_Light.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/050_Cyberpunk_Girl_Raining_Night.mp4`,
     tags: ["budget", "fast", "efficient"],
     outputType: 'video',
     creditCost: 1,
@@ -507,7 +507,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
           },
           {
             subtitle: "Negative Prompts",
-            text: "Use negative prompts to avoid unwanted artifacts. Common exclusions: &apos;blurry&apos;, &apos;distorted&apos;, &apos;low quality&apos;, &apos;watermark&apos;, &apos;text&apos;."
+            text: "Use negative prompts to avoid unwanted artifacts. Common exclusions: 'blurry', 'distorted', 'low quality', 'watermark', 'text'."
           }
         ]
       },
@@ -552,10 +552,10 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
   "hailuo-2.3-pro": {
     id: "hailuo-2.3-pro",
     displayName: "Hailuo 2.3 Pro",
-    description: "MiniMax&apos;s professional video generation model featuring exceptional character consistency and natural motion. Generates high-quality 5 or 10-second videos with intelligent prompt optimization for enhanced results.",
+    description: "MiniMax's professional video generation model featuring exceptional character consistency and natural motion. Generates high-quality 5 or 10-second videos with intelligent prompt optimization for enhanced results.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${WEBSITE_VIDEOS}/robot-3.mp4`,
-    exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    cardVideo: `${MARKETPLACE_VIDEOS}/046_Vintage_Floral_Dress_Garden.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/049_Pink_Sunset_Girl_Roof.mp4`,
     tags: ["professional", "character", "consistent"],
     outputType: 'video',
     creditCost: 4,
@@ -614,7 +614,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
           },
           {
             subtitle: "Natural Motion",
-            text: "The model produces exceptionally natural human motion. Describe actions clearly: &apos;walking confidently&apos;, &apos;dancing gracefully&apos;, &apos;turning to look over shoulder&apos;."
+            text: "The model produces exceptionally natural human motion. Describe actions clearly: 'walking confidently', 'dancing gracefully', 'turning to look over shoulder'."
           },
           {
             subtitle: "Prompt Optimizer",
@@ -649,7 +649,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
     description: "High-quality image generation model optimized for speed and resolution. Create stunning images up to 4K resolution with excellent prompt adherence and diverse artistic styles. Perfect for concept art, illustrations, and professional imagery.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
-    exampleVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/047_Blue_Hair_Girl_Neon_City.mp4`,
     tags: ["image", "4K", "fast"],
     outputType: 'image',
     creditCost: 2,
@@ -709,9 +709,9 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
             subtitle: "Detailed Descriptions",
             text: "Nano Banana Pro excels with detailed, descriptive prompts. Include specific details about lighting, composition, style, and atmosphere for best results.",
             list: [
-              "Specify camera settings: &apos;85mm lens&apos;, &apos;f/1.4 aperture&apos;, &apos;shallow DOF&apos;",
-              "Include lighting details: &apos;golden hour&apos;, &apos;soft diffused light&apos;, &apos;dramatic shadows&apos;",
-              "Add style references: &apos;cinematic&apos;, &apos;editorial photography&apos;, &apos;fine art&apos;"
+              "Specify camera settings: '85mm lens', 'f/1.4 aperture', 'shallow DOF'",
+              "Include lighting details: 'golden hour', 'soft diffused light', 'dramatic shadows'",
+              "Add style references: 'cinematic', 'editorial photography', 'fine art'"
             ]
           },
           {
