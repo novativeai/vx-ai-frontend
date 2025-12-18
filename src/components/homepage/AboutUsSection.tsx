@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const missionParagraphs = [
-    <>Our work is built on a bedrock of <strong className="text-white font-bold">scientific discovery</strong>. We invest heavily in <strong className="text-white font-bold">fundamental research</strong> to create tools that are not just powerful, but truly revolutionary.</>,
-    <>We aim to dismantle creative barriers by providing <strong className="text-white font-bold">intuitive tools</strong>. Our platform is designed to <strong className="text-white font-bold">amplify artistic vision</strong>, enabling storytellers everywhere to produce high-quality visual content effortlessly.</>,
-    <>Our expert engineers build <strong className="text-white font-bold">robust, scalable systems</strong> that translate complex AI breakthroughs into a <strong className="text-white font-bold">seamless user experience</strong>, making advanced content creation accessible and reliable for every user.</>,
-    <>We are charting the course for the future of digital storytelling. By pioneering the <strong className="text-white font-bold">next generation of creative AI</strong>, we are building a world where any <strong className="text-white font-bold">imagined vision can be realized</strong>.</>
+    <>Our work is built on a bedrock of <strong style={{ color: '#ffffff' }} className="font-bold">scientific discovery</strong>. We invest heavily in <strong style={{ color: '#ffffff' }} className="font-bold">fundamental research</strong> to create tools that are not just powerful, but truly revolutionary.</>,
+    <>We aim to dismantle creative barriers by providing <strong style={{ color: '#ffffff' }} className="font-bold">intuitive tools</strong>. Our platform is designed to <strong style={{ color: '#ffffff' }} className="font-bold">amplify artistic vision</strong>, enabling storytellers everywhere to produce high-quality visual content effortlessly.</>,
+    <>Our expert engineers build <strong style={{ color: '#ffffff' }} className="font-bold">robust, scalable systems</strong> that translate complex AI breakthroughs into a <strong style={{ color: '#ffffff' }} className="font-bold">seamless user experience</strong>, making advanced content creation accessible and reliable for every user.</>,
+    <>We are charting the course for the future of digital storytelling. By pioneering the <strong style={{ color: '#ffffff' }} className="font-bold">next generation of creative AI</strong>, we are building a world where any <strong style={{ color: '#ffffff' }} className="font-bold">imagined vision can be realized</strong>.</>
 ];
 
 export function AboutUsSection() {
@@ -18,7 +18,7 @@ export function AboutUsSection() {
         <div>
           {/* Section Label and Title - matching MODELS and CONTROL style */}
           <p className="text-sm uppercase tracking-widest text-neutral-400">GENERATIVE AI</p>
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tighter mt-2">MISSION</h2>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mt-2">MISSION</h2>
           <p className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tighter leading-tight mt-8">
             Our mission is to build the perfect generation platform, to elevate creative minds to the next level.
           </p>

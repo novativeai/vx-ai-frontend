@@ -53,7 +53,7 @@ export default function PricingPage() {
     setCustomAmount(value[0]);
   };
 
-  const presetAmounts = [5, 10, 25, 50, 100];
+  const presetAmounts = [10, 25, 50, 100, 250];
 
   // Calculate what credits can generate
   const credits = customAmount * 10;
@@ -104,14 +104,14 @@ export default function PricingPage() {
               <Slider
                 value={[customAmount]}
                 onValueChange={handleSliderChange}
-                min={1}
-                max={100}
+                min={10}
+                max={1500}
                 step={1}
                 className="w-full [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:bg-[#D4FF4F] [&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-[#D4FF4F] [&_[data-slot=slider-thumb]]:bg-black"
               />
               <div className="flex justify-between mt-4 text-xs text-neutral-600 uppercase tracking-wider">
-                <span>$1</span>
-                <span>$100</span>
+                <span>€10</span>
+                <span>€1500</span>
               </div>
             </div>
 
@@ -129,7 +129,7 @@ export default function PricingPage() {
                       : "border-neutral-800 bg-transparent text-neutral-400 hover:bg-neutral-900 hover:text-white hover:border-neutral-700"
                   )}
                 >
-                  ${amount}
+                  €{amount}
                 </Button>
               ))}
             </div>
@@ -138,7 +138,7 @@ export default function PricingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
               <div className="text-center sm:text-left">
                 <p className="text-xs text-neutral-600 uppercase tracking-widest">Total</p>
-                <div className="text-5xl font-regular text-white tracking-tight">${customAmount}</div>
+                <div className="text-5xl font-regular text-white tracking-tight">€{customAmount}</div>
               </div>
               <Button
                 size="lg"

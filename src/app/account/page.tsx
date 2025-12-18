@@ -420,7 +420,7 @@ export default function AccountPage() {
                     </div>
                     <div>
                         <h1 className="text-8xl font-bold">{user.displayName || "User"}</h1>
-                        <p className="text-neutral-400">{user.email}</p>
+                        <p className="text-neutral-400 mt-2">{user.email}</p>
                     </div>
                 </div>
 
