@@ -31,8 +31,8 @@ export function ModelHighlightSection() {
   }, []);
 
   return (
-    <section className="bg-black text-white overflow-hidden h-screen min-h-[800px]">
-      <div className="container mx-auto h-full relative flex flex-col justify-center px-4 md:px-0 md:block py-8 md:py-16">
+    <section className="bg-black text-white overflow-hidden h-screen">
+      <div className="container mx-auto h-full relative flex flex-col justify-center px-4 md:px-0 md:block py-8 md:py-12">
 
         <motion.div
           className="relative z-10 md:absolute md:top-0 md:left-0"
@@ -107,7 +107,7 @@ export function ModelHighlightSection() {
         </Link>
 
         <motion.div
-          className="mt-8 md:absolute md:bottom-8 md:left-0 max-w-sm z-20"
+          className="mt-8 md:absolute md:bottom-12 md:left-0 max-w-sm z-20"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -120,8 +120,8 @@ export function ModelHighlightSection() {
              producing immersive videos with stunning visuals and synchronized audio.
           </p>
 
-          <Link href="/generator?model=veo-3.1" className="block mt-4">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors whitespace-nowrap">
+          <Link href="/generator?model=veo-3.1" className="block mt-3">
+            <h2 className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors whitespace-nowrap">
               Available Now
             </h2>
           </Link>
