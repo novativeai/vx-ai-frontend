@@ -12,6 +12,7 @@ interface MarketplaceGridProps {
   products: MarketplaceProduct[];
   isLoading: boolean;
   onProductClick: (product: MarketplaceProduct) => void;
+  initialDisplayCount?: number;
 }
 
 // Memoized product card for better performance
@@ -208,7 +209,23 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   products,
   isLoading,
   onProductClick,
+  initialDisplayCount = 12,
 }) => {
+  const [displayCount, setDisplayCount] = useState(initialDisplayCount);
+
+  // Reset display count when products change (e.g., filter applied)
+  useEffect(() => {
+    setDisplayCount(initialDisplayCount);
+  }, [products.length, initialDisplayCount]);
+
+  const displayedProducts = products.slice(0, displayCount);
+  const hasMoreProducts = displayCount < products.length;
+  const remainingCount = products.length - displayCount;
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => prev + initialDisplayCount);
+  };
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -231,14 +248,33 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {products.map(product => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onProductClick={onProductClick}
-        />
-      ))}
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {displayedProducts.map(product => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onProductClick={onProductClick}
+          />
+        ))}
+      </div>
+
+      {/* Load More Button */}
+      {hasMoreProducts && (
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={handleLoadMore}
+            className="group flex items-center gap-2 px-8 py-3 border border-neutral-700 rounded-full bg-transparent hover:bg-neutral-900 hover:border-neutral-600 transition-all duration-300"
+          >
+            <span className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">
+              Load More
+            </span>
+            <span className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors">
+              ({remainingCount} more)
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

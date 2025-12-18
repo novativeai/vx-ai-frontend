@@ -15,6 +15,8 @@ interface MarketplaceSidebarProps {
   productCount: number;
 }
 
+const INITIAL_VISIBLE_COUNT = 5;
+
 export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
   availableTags,
   selectedTags,
@@ -28,6 +30,13 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
 }) => {
   const [expandedTags, setExpandedTags] = React.useState(true);
   const [expandedUseCases, setExpandedUseCases] = React.useState(true);
+  const [showAllTags, setShowAllTags] = React.useState(false);
+  const [showAllUseCases, setShowAllUseCases] = React.useState(false);
+
+  const visibleTags = showAllTags ? availableTags : availableTags.slice(0, INITIAL_VISIBLE_COUNT);
+  const visibleUseCases = showAllUseCases ? availableUseCases : availableUseCases.slice(0, INITIAL_VISIBLE_COUNT);
+  const hasMoreTags = availableTags.length > INITIAL_VISIBLE_COUNT;
+  const hasMoreUseCases = availableUseCases.length > INITIAL_VISIBLE_COUNT;
 
   const hasActiveFilters = selectedTags.length > 0 || selectedUseCases.length > 0;
 
@@ -79,7 +88,7 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
 
             {expandedTags && (
               <div className="space-y-3">
-                {availableTags.map(tag => (
+                {visibleTags.map(tag => (
                   <label
                     key={tag}
                     className="flex items-center gap-3 cursor-pointer group"
@@ -104,6 +113,15 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
                     </span>
                   </label>
                 ))}
+
+                {hasMoreTags && (
+                  <button
+                    onClick={() => setShowAllTags(!showAllTags)}
+                    className="mt-2 text-xs text-neutral-500 hover:text-[#D4FF4F] transition-colors"
+                  >
+                    {showAllTags ? "Show less" : `Show more (${availableTags.length - INITIAL_VISIBLE_COUNT})`}
+                  </button>
+                )}
 
                 {selectedTags.length > 0 && (
                   <button
@@ -138,7 +156,7 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
 
             {expandedUseCases && (
               <div className="space-y-3">
-                {availableUseCases.map(useCase => (
+                {visibleUseCases.map(useCase => (
                   <label
                     key={useCase}
                     className="flex items-center gap-3 cursor-pointer group"
@@ -163,6 +181,15 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
                     </span>
                   </label>
                 ))}
+
+                {hasMoreUseCases && (
+                  <button
+                    onClick={() => setShowAllUseCases(!showAllUseCases)}
+                    className="mt-2 text-xs text-neutral-500 hover:text-[#D4FF4F] transition-colors"
+                  >
+                    {showAllUseCases ? "Show less" : `Show more (${availableUseCases.length - INITIAL_VISIBLE_COUNT})`}
+                  </button>
+                )}
 
                 {selectedUseCases.length > 0 && (
                   <button
