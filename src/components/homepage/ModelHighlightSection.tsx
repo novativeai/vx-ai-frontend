@@ -54,7 +54,7 @@ export function ModelHighlightSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <p>VEO 3.1 generates synchronized dialogue, ambient soundscapes, and realistic Foley effects automatically. No post-production audio needed—everything is created in one generation.</p>
+          <p>VEO 3.1 generates <strong style={{ color: '#ffffff' }} className="font-bold">synchronized dialogue</strong>, <strong style={{ color: '#ffffff' }} className="font-bold">ambient soundscapes</strong>, and <strong style={{ color: '#ffffff' }} className="font-bold">realistic Foley effects</strong> automatically. <strong style={{ color: '#ffffff' }} className="font-bold">No post-production audio needed</strong>—everything is created in one generation.</p>
         </motion.div>
 
         <Link
