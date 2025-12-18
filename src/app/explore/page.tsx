@@ -21,14 +21,14 @@ import { Generation, ModelConfig } from "@/types/types";
 // --- Data Transformation for the Banner ---
 // Filter to only video models with cardVideo for the banner
 const explorePageSlides: BannerSlide[] = Object.values(modelConfigs)
-  .filter(model => (model as ModelConfig).outputType === 'video' && (model as ModelConfig).cardVideo)
+  .filter(model => model.outputType === 'video' && model.cardVideo)
   .slice(0, 3)
   .map(model => ({
-    videoSrc: (model as ModelConfig).cardVideo,
-    title: (model as ModelConfig).displayName,
-    subtitle: (model as ModelConfig).description,
+    videoSrc: model.cardVideo as string,
+    title: model.displayName,
+    subtitle: model.description,
     buttonText: "Try it now!",
-    buttonLink: `/generator?model=${(model as ModelConfig).id}`,
+    buttonLink: `/generator?model=${model.id}`,
   }));
 
 
