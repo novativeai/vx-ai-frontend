@@ -220,7 +220,6 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
 
   const displayedProducts = products.slice(0, displayCount);
   const hasMoreProducts = displayCount < products.length;
-  const remainingCount = products.length - displayCount;
 
   const handleLoadMore = () => {
     setDisplayCount(prev => prev + initialDisplayCount);
@@ -264,13 +263,10 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
         <div className="flex justify-center pt-4">
           <button
             onClick={handleLoadMore}
-            className="group flex items-center gap-2 px-8 py-3 border border-neutral-700 rounded-full bg-transparent hover:bg-neutral-900 hover:border-neutral-600 transition-all duration-300"
+            className="px-8 py-3 border border-neutral-700 rounded-full bg-transparent hover:bg-neutral-900 hover:border-neutral-600 transition-all duration-300"
           >
-            <span className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">
+            <span className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">
               Load More
-            </span>
-            <span className="text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors">
-              ({remainingCount} more)
             </span>
           </button>
         </div>
