@@ -88,147 +88,28 @@ const WEBSITE_VIDEOS = "https://storage.googleapis.com/reelzila.firebasestorage.
 const MARKETPLACE_VIDEOS = "https://storage.googleapis.com/reelzila.firebasestorage.app/marketplace/videos";
 
 export const modelConfigs: { [key: string]: ModelConfig } = {
-  "kling-2.5": {
-    id: "kling-2.5",
-    displayName: "Kling 2.5 Turbo Pro",
-    description: "Kuaishou's flagship video generation model released November 2025, featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements. Consistently ranked #1 in video generation benchmarks.",
-    bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${WEBSITE_VIDEOS}/f1-speeding.mp4`,
-    exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
-    tags: ["top-rated", "motion", "cinematic"],
-    outputType: 'video',
-    creditCost: 10,
-    creditPricing: {
-      base: 10, // 5-second video base
-      modifiers: [
-        {
-          param: "duration",
-          values: { "5": 10, "10": 20 },
-          type: "set"
-        }
-      ]
-    },
-    params: [
-      {
-        name: "prompt",
-        label: "Prompt",
-        type: "textarea",
-        defaultValue: "A cinematic shot of a woman walking through a neon-lit city at night, reflections on wet pavement, shallow depth of field, 35mm film aesthetic.",
-      },
-      {
-        name: "start_image",
-        label: "Starting Image (optional)",
-        type: "image",
-        defaultValue: null,
-      },
-      {
-        name: "negative_prompt",
-        label: "Negative Prompt",
-        type: "textarea",
-        defaultValue: "",
-      },
-      {
-        name: "duration",
-        label: "Duration (seconds)",
-        type: "dropdown",
-        defaultValue: "5",
-        options: ["5", "10"],
-      },
-      {
-        name: "aspect_ratio",
-        label: "Aspect Ratio",
-        type: "dropdown",
-        defaultValue: "16:9",
-        options: ["16:9", "9:16", "1:1"],
-      },
-    ],
-    tips: [
-      {
-        title: "Prompting Guide",
-        content: [
-          {
-            subtitle: "Cinematic Language",
-            text: "Kling 2.5 excels with cinematic terminology. Use terms like 'dolly shot', 'tracking shot', 'crane movement', 'shallow depth of field', and specific lens references (35mm, 85mm) for professional results.",
-            list: [
-              "Example: 'Tracking shot following a runner through city streets, shallow DOF, golden hour'",
-              "Example: 'Slow dolly push-in on subject's face, dramatic lighting, film grain'"
-            ]
-          },
-          {
-            subtitle: "Motion Descriptions",
-            text: "Be specific about movement. Describe both subject motion and camera motion separately for best results. Kling 2.5 handles complex multi-subject scenes with ease."
-          },
-          {
-            subtitle: "Lighting and Atmosphere",
-            text: "Specify lighting conditions clearly: 'golden hour', 'blue hour', 'neon-lit', 'candlelit', 'overcast diffused light'. The model responds exceptionally well to atmospheric descriptions."
-          }
-        ]
-      },
-      {
-        title: "Technical Excellence",
-        content: [
-          {
-            subtitle: "Superior Motion Quality",
-            text: "Kling 2.5 is recognized for industry-leading motion coherence. Complex movements like dancing, sports, and multi-character interactions are handled with exceptional stability.",
-            list: [
-              "Natural physics simulation for realistic object interactions",
-              "Consistent subject identity throughout the video",
-              "Smooth transitions and camera movements"
-            ]
-          },
-          {
-            subtitle: "Image-to-Video Mode",
-            text: "Upload a starting image to animate it. The model preserves facial features and clothing details while adding natural, fluid motion. Perfect for bringing portraits to life."
-          }
-        ]
-      }
-    ],
-    useCases: [
-      {
-        title: "Primary Use Cases",
-        content: [
-          {
-            subtitle: "Commercial Production",
-            text: "Create broadcast-quality video content for advertising, social media campaigns, and brand storytelling. The exceptional motion quality rivals professional footage."
-          },
-          {
-            subtitle: "Creative Content",
-            text: "Perfect for music videos, short films, and artistic projects. The cinematic control and consistent quality enable professional-grade creative expression."
-          },
-          {
-            subtitle: "Portrait Animation",
-            text: "Transform static portraits into dynamic videos with natural expressions and movements. Ideal for social media content creators and digital marketing."
-          }
-        ]
-      },
-      {
-        title: "Benchmark Performance",
-        content: [
-          {
-            subtitle: "Industry Leader",
-            text: "Consistently ranks first in VBench and other video generation benchmarks. Outperforms competitors in motion quality, temporal consistency, and overall video coherence."
-          }
-        ]
-      }
-    ]
-  },
   "veo-3.1": {
     id: "veo-3.1",
     displayName: "VEO 3.1",
-    description: "Google's cutting-edge video generation model released October 2025, featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
+    description: "Google&apos;s cutting-edge video generation model featuring native audio synthesis, physics simulation, and reference image composition. Create up to 8-second 1080p videos at 24fps with automatically synchronized dialogue, ambient soundscapes, and Foley effects.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${WEBSITE_VIDEOS}/robot-3.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/055_Motorcycle_Highway_Speed.mp4`,
-    tags: ["new", "audio", "reference-images"],
+    tags: ["premium", "audio", "reference-images"],
     outputType: 'video',
-    creditCost: 100,
+    creditCost: 32,
     creditPricing: {
-      base: 100, // 8-second video with audio
+      base: 32,
       modifiers: [
         {
           param: "duration",
-          values: { "4": 50, "6": 75, "8": 100 },
+          values: { "4": 16, "6": 24, "8": 32 },
           type: "set"
+        },
+        {
+          param: "generate_audio",
+          values: { "false": 0.5 },
+          type: "multiply"
         }
       ]
     },
@@ -241,7 +122,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
       },
       {
         name: "image",
-        label: "Starting Image (optional)",
+        label: "Reference Image (optional)",
         type: "image",
         defaultValue: null,
       },
@@ -286,19 +167,19 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Specify Shot Composition",
-            text: "Use cinematic terms to guide the camera. Include phrases like 'single shot', 'two shot', 'close-up', 'wide angle', or 'macro lens' to control framing and perspective.",
+            text: "Use cinematic terms to guide the camera. Include phrases like &apos;single shot&apos;, &apos;two shot&apos;, &apos;close-up&apos;, &apos;wide angle&apos;, or &apos;macro lens&apos; to control framing and perspective.",
             list: [
-              "Example: 'Close-up shot of hands crafting pottery, shallow depth of field'",
-              "Example: 'Wide establishing shot of a mountain village at dawn'"
+              "Example: &apos;Close-up shot of hands crafting pottery, shallow depth of field&apos;",
+              "Example: &apos;Wide establishing shot of a mountain village at dawn&apos;"
             ]
           },
           {
             subtitle: "Describe Camera Movement",
-            text: "Veo 3.1 excels at camera motion. Specify movements like 'dolly shot', 'pan shot', 'tracking shot', 'crane shot', or 'handheld' for dynamic results."
+            text: "VEO 3.1 excels at camera motion. Specify movements like &apos;dolly shot&apos;, &apos;pan shot&apos;, &apos;tracking shot&apos;, &apos;crane shot&apos;, or &apos;handheld&apos; for dynamic results."
           },
           {
             subtitle: "Set the Mood with Lighting",
-            text: "Describe lighting conditions: 'golden hour', 'blue hour', 'harsh midday sun', 'soft diffused light', 'neon-lit', or 'candlelit' to establish atmosphere."
+            text: "Describe lighting conditions: &apos;golden hour&apos;, &apos;blue hour&apos;, &apos;harsh midday sun&apos;, &apos;soft diffused light&apos;, &apos;neon-lit&apos;, or &apos;candlelit&apos; to establish atmosphere."
           }
         ]
       },
@@ -307,9 +188,9 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Native Audio Synthesis",
-            text: "Veo 3.1 generates synchronized audio automatically - from dialogue and sound effects to ambient soundscapes and realistic Foley. Describe sounds in your prompt for better results.",
+            text: "VEO 3.1 generates synchronized audio automatically - from dialogue and sound effects to ambient soundscapes and realistic Foley. Describe sounds in your prompt for better results.",
             list: [
-              "Include audio cues: 'the sound of waves crashing', 'footsteps on gravel', 'distant thunder'",
+              "Include audio cues: &apos;the sound of waves crashing&apos;, &apos;footsteps on gravel&apos;, &apos;distant thunder&apos;",
               "For dialogue scenes, describe the conversation tone and setting",
               "Foley effects are automatically synchronized with visuals"
             ]
@@ -338,42 +219,25 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
             text: "Perfect for rapid prototyping and A/B testing of creative concepts. Generate multiple video variations with audio for campaigns and social media content."
           }
         ]
-      },
-      {
-        title: "Advanced Features",
-        content: [
-          {
-            subtitle: "Reference Image Composition",
-            text: "Combine up to 3 reference images to control characters, objects, and style within a single scene. Perfect for maintaining consistency across video sequences."
-          },
-          {
-            subtitle: "Frame-to-Video Interpolation",
-            text: "Specify both starting and ending frames to create seamless transitions. The model generates intermediate frames based on your prompt for precise cinematic control."
-          },
-          {
-            subtitle: "SynthID Watermarking",
-            text: "Videos are automatically watermarked with Google's SynthID technology for authenticity verification."
-          }
-        ]
       }
     ]
   },
-  "seedance-1-pro": {
-    id: "seedance-1-pro",
-    displayName: "Seedance-1 Pro",
-    description: "ByteDance's award-winning model released June 2025, specializing in multi-shot storytelling with seamless subject consistency. Generates 1080p videos at 24fps with sophisticated motion dynamics and cinema-grade aesthetic control. Tops leaderboards for T2V and I2V performance.",
+  "sora-2": {
+    id: "sora-2",
+    displayName: "Sora 2",
+    description: "OpenAI&apos;s flagship video generation model with exceptional temporal consistency and photorealistic output. Creates up to 12-second videos with smooth motion, accurate physics, and stunning visual quality across diverse styles and subjects.",
     bannerImage: "/banners/wan-banner.jpg",
-    cardVideo: `${WEBSITE_VIDEOS}/tron-1.mp4`,
-    exampleVideo: `${MARKETPLACE_VIDEOS}/052_Asian_Girl_Subway_Orange_Headphones.mp4`,
-    tags: ["motion", "cinematic", "multi-shot"],
+    cardVideo: `${WEBSITE_VIDEOS}/f1-speeding.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    tags: ["top-rated", "photorealistic", "cinematic"],
     outputType: 'video',
-    creditCost: 15,
+    creditCost: 4,
     creditPricing: {
-      base: 10, // 480p base
+      base: 4,
       modifiers: [
         {
-          param: "resolution",
-          values: { "480p": 10, "720p": 15, "1080p": 20 },
+          param: "duration",
+          values: { "4": 4, "8": 8, "12": 12 },
           type: "set"
         }
       ]
@@ -383,63 +247,181 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         name: "prompt",
         label: "Prompt",
         type: "textarea",
-        defaultValue: "A dancer performs fluid contemporary movements in an abandoned warehouse, dust particles floating in shafts of light. Cinematic, 35mm film grain.",
+        defaultValue: "A cinematic shot of a woman walking through a neon-lit city at night, reflections on wet pavement, shallow depth of field, 35mm film aesthetic.",
+      },
+      {
+        name: "image",
+        label: "Starting Image (optional)",
+        type: "image",
+        defaultValue: null,
+      },
+      {
+        name: "duration",
+        label: "Duration (seconds)",
+        type: "dropdown",
+        defaultValue: "4",
+        options: ["4", "8", "12"],
+      },
+      {
+        name: "aspect_ratio",
+        label: "Aspect Ratio",
+        type: "dropdown",
+        defaultValue: "16:9",
+        options: ["16:9", "9:16", "1:1"],
       },
       {
         name: "resolution",
         label: "Resolution",
         type: "dropdown",
-        defaultValue: "720p",
-        options: ["480p", "720p", "1080p"],
+        defaultValue: "1080p",
+        options: ["720p", "1080p"],
+      },
+    ],
+    tips: [
+      {
+        title: "Prompting Guide",
+        content: [
+          {
+            subtitle: "Cinematic Language",
+            text: "Sora 2 excels with cinematic terminology. Use terms like &apos;dolly shot&apos;, &apos;tracking shot&apos;, &apos;crane movement&apos;, &apos;shallow depth of field&apos;, and specific lens references (35mm, 85mm) for professional results.",
+            list: [
+              "Example: &apos;Tracking shot following a runner through city streets, shallow DOF, golden hour&apos;",
+              "Example: &apos;Slow dolly push-in on subject&apos;s face, dramatic lighting, film grain&apos;"
+            ]
+          },
+          {
+            subtitle: "Motion Descriptions",
+            text: "Be specific about movement. Describe both subject motion and camera motion separately for best results. Sora 2 handles complex multi-subject scenes with ease."
+          },
+          {
+            subtitle: "Lighting and Atmosphere",
+            text: "Specify lighting conditions clearly: &apos;golden hour&apos;, &apos;blue hour&apos;, &apos;neon-lit&apos;, &apos;candlelit&apos;, &apos;overcast diffused light&apos;. The model responds exceptionally well to atmospheric descriptions."
+          }
+        ]
+      }
+    ],
+    useCases: [
+      {
+        title: "Primary Use Cases",
+        content: [
+          {
+            subtitle: "Commercial Production",
+            text: "Create broadcast-quality video content for advertising, social media campaigns, and brand storytelling. The exceptional motion quality rivals professional footage."
+          },
+          {
+            subtitle: "Creative Content",
+            text: "Perfect for music videos, short films, and artistic projects. The cinematic control and consistent quality enable professional-grade creative expression."
+          },
+          {
+            subtitle: "Portrait Animation",
+            text: "Transform static portraits into dynamic videos with natural expressions and movements. Ideal for social media content creators and digital marketing."
+          }
+        ]
+      }
+    ]
+  },
+  "kling-2.6": {
+    id: "kling-2.6",
+    displayName: "Kling 2.6 Pro",
+    description: "Kuaishou&apos;s flagship video generation model featuring industry-leading motion quality and temporal consistency. Generates 5 or 10-second videos at 1080p with exceptional subject coherence, natural physics simulation, and cinematic camera movements.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${WEBSITE_VIDEOS}/tron-1.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/052_Asian_Girl_Subway_Orange_Headphones.mp4`,
+    tags: ["top-rated", "motion", "cinematic"],
+    outputType: 'video',
+    creditCost: 5,
+    creditPricing: {
+      base: 5,
+      modifiers: [
+        {
+          param: "duration",
+          values: { "5": 5, "10": 10 },
+          type: "set"
+        }
+      ]
+    },
+    params: [
+      {
+        name: "prompt",
+        label: "Prompt",
+        type: "textarea",
+        defaultValue: "A cinematic shot of a woman walking through a neon-lit city at night, reflections on wet pavement, shallow depth of field, 35mm film aesthetic.",
+      },
+      {
+        name: "image",
+        label: "Starting Image (optional)",
+        type: "image",
+        defaultValue: null,
       },
       {
         name: "duration",
         label: "Duration (seconds)",
+        type: "dropdown",
+        defaultValue: "5",
+        options: ["5", "10"],
+      },
+      {
+        name: "cfg_scale",
+        label: "CFG Scale",
+        type: "slider",
+        defaultValue: 7,
+        min: 1,
+        max: 15,
+        step: 0.5,
+      },
+      {
+        name: "aspect_ratio",
+        label: "Aspect Ratio",
+        type: "dropdown",
+        defaultValue: "16:9",
+        options: ["16:9", "9:16", "1:1"],
+      },
+      {
+        name: "motion_strength",
+        label: "Motion Strength",
         type: "slider",
         defaultValue: 5,
         min: 1,
-        max: 5,
+        max: 10,
         step: 1,
       },
     ],
     tips: [
       {
-        title: "Technical Innovations",
+        title: "Prompting Guide",
         content: [
           {
-            subtitle: "Multi-Shot Storytelling",
-            text: "Seedance 1.0 Pro excels at seamless 2-3 shot transitions while maintaining perfect subject consistency. Create coherent narrative sequences without breaking character continuity."
+            subtitle: "Cinematic Language",
+            text: "Kling 2.6 excels with cinematic terminology. Use terms like &apos;dolly shot&apos;, &apos;tracking shot&apos;, &apos;crane movement&apos;, &apos;shallow depth of field&apos;, and specific lens references (35mm, 85mm) for professional results.",
+            list: [
+              "Example: &apos;Tracking shot following a runner through city streets, shallow DOF, golden hour&apos;",
+              "Example: &apos;Slow dolly push-in on subject&apos;s face, dramatic lighting, film grain&apos;"
+            ]
           },
           {
-            subtitle: "Advanced Motion Architecture",
-            text: "Combines Temporally-Causal VAE for frame coherence with Decoupled Spatio-Temporal Diffusion Transformer. Handles nuanced body motion, athletic actions, and detailed facial expressions with exceptional stability."
+            subtitle: "Motion Descriptions",
+            text: "Be specific about movement. Describe both subject motion and camera motion separately for best results. Kling 2.6 handles complex multi-subject scenes with ease."
           },
           {
-            subtitle: "Wide Dynamic Range",
-            text: "Supports large-scale movements with comprehensive semantic control. Exceptional at generating complex scenes with multiple subjects and accurate spatial relationships."
+            subtitle: "Lighting and Atmosphere",
+            text: "Specify lighting conditions clearly: &apos;golden hour&apos;, &apos;blue hour&apos;, &apos;neon-lit&apos;, &apos;candlelit&apos;, &apos;overcast diffused light&apos;. The model responds exceptionally well to atmospheric descriptions."
           }
         ]
       },
       {
-        title: "Prompting Strategy",
+        title: "Technical Settings",
         content: [
           {
-            subtitle: "Basic Formula",
-            text: "For new users: Simple, clear prompts work well. Focus on what you want to see happen.",
-            list: [
-              "Formula: Subject + Scene + Motion",
-              "Subject: The main character or focus (person, animal, object)",
-              "Scene: The environment and setting",
-              "Motion: Specific actions and movements"
-            ]
+            subtitle: "CFG Scale",
+            text: "Controls how closely the output follows your prompt. Higher values (10-15) give more literal interpretations, while lower values (3-6) allow more creative freedom."
           },
           {
-            subtitle: "Pro Formula",
-            text: "For experienced users: Enhance with cinematography details for award-quality results.",
-            list: [
-              "Formula: Subject (details) + Scene (lighting/mood) + Motion (style) + Cinematic language",
-              "Example: 'A dancer in flowing white dress, warm golden hour light, performing graceful contemporary movements across a desert landscape, cinematic, 35mm'"
-            ]
+            subtitle: "Motion Strength",
+            text: "Adjusts the amount of movement in the video. Lower values (1-3) create subtle, gentle motion. Higher values (7-10) generate more dynamic, energetic movements."
+          },
+          {
+            subtitle: "Image-to-Video Mode",
+            text: "Upload a starting image to animate it. The model preserves facial features and clothing details while adding natural, fluid motion. Perfect for bringing portraits to life."
           }
         ]
       }
@@ -449,104 +431,194 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         title: "Primary Use Cases",
         content: [
           {
-            subtitle: "Multi-Shot Narrative Production",
-            text: "Create coherent short films and stories with 2-3 shot transitions while maintaining character consistency. Perfect for narrative-driven content and commercials."
+            subtitle: "Commercial Production",
+            text: "Create broadcast-quality video content for advertising, social media campaigns, and brand storytelling. The exceptional motion quality rivals professional footage."
           },
           {
-            subtitle: "Performance & Dance Content",
-            text: "Exceptional at capturing nuanced body movements, athletic actions, and facial expressions. Ideal for dance videos, sports highlights, and performance documentation."
+            subtitle: "Creative Content",
+            text: "Perfect for music videos, short films, and artistic projects. The cinematic control and consistent quality enable professional-grade creative expression."
           },
           {
-            subtitle: "Commercial & Advertising",
-            text: "Cinema-grade aesthetic control produces professional-quality ads. 41-second generation time for 5-second 1080p videos enables rapid iteration and testing."
-          }
-        ]
-      },
-      {
-        title: "Performance Metrics",
-        content: [
-          {
-            subtitle: "Leaderboard Rankings",
-            text: "Consistently ranks first in Text-to-Video and Image-to-Video benchmarks, outperforming VEO 3.1 and Kling 2.0 across multiple evaluation metrics."
+            subtitle: "Portrait Animation",
+            text: "Transform static portraits into dynamic videos with natural expressions and movements. Ideal for social media content creators and digital marketing."
           }
         ]
       }
     ]
   },
-  "wan-2.2": {
-    id: "wan-2.2",
-    displayName: "WAN 2.2 14B",
-    description: "ByteDance's efficient Mixture-of-Experts model released July 2025 with 27B parameters (14B active). Enhanced training on 65.6% more images and 83.2% more videos. Supports 480p/720p at 24fps with reduced flickering and excellent T2V, I2V, and hybrid modes.",
+  "ltx-2": {
+    id: "ltx-2",
+    displayName: "LTX Video 2",
+    description: "Lightricks&apos; fast and efficient video generation model offering excellent quality at a low cost. Perfect for rapid prototyping and high-volume generation with customizable inference steps and guidance settings.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${MARKETPLACE_VIDEOS}/055_Motorcycle_Highway_Speed.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
-    tags: ["image-to-video", "photorealistic"],
+    tags: ["budget", "fast", "efficient"],
     outputType: 'video',
-    creditCost: 3,
+    creditCost: 1,
     creditPricing: {
-      base: 3, // 480p base
+      base: 1
+    },
+    params: [
+      {
+        name: "prompt",
+        label: "Prompt",
+        type: "textarea",
+        defaultValue: "A cinematic shot of a woman walking through a city at sunset, golden light illuminating her silhouette, shallow depth of field.",
+      },
+      {
+        name: "image",
+        label: "Starting Image (optional)",
+        type: "image",
+        defaultValue: null,
+      },
+      {
+        name: "negative_prompt",
+        label: "Negative Prompt",
+        type: "textarea",
+        defaultValue: "blurry, distorted, low quality, pixelated",
+      },
+      {
+        name: "num_inference_steps",
+        label: "Inference Steps",
+        type: "slider",
+        defaultValue: 30,
+        min: 10,
+        max: 50,
+        step: 5,
+      },
+      {
+        name: "guidance_scale",
+        label: "Guidance Scale",
+        type: "slider",
+        defaultValue: 7,
+        min: 1,
+        max: 20,
+        step: 0.5,
+      },
+    ],
+    tips: [
+      {
+        title: "Prompting Guide",
+        content: [
+          {
+            subtitle: "Clear Descriptions",
+            text: "LTX Video 2 works best with clear, concise prompts. Focus on the main subject and action rather than overly complex descriptions."
+          },
+          {
+            subtitle: "Negative Prompts",
+            text: "Use negative prompts to avoid unwanted artifacts. Common exclusions: &apos;blurry&apos;, &apos;distorted&apos;, &apos;low quality&apos;, &apos;watermark&apos;, &apos;text&apos;."
+          }
+        ]
+      },
+      {
+        title: "Technical Settings",
+        content: [
+          {
+            subtitle: "Inference Steps",
+            text: "Controls generation quality vs speed. Lower values (10-20) are faster but may have artifacts. Higher values (30-50) produce cleaner results but take longer."
+          },
+          {
+            subtitle: "Guidance Scale",
+            text: "Determines how closely the model follows your prompt. Values 5-8 offer good balance. Higher values (12-20) follow prompts more literally but may reduce creativity."
+          },
+          {
+            subtitle: "Image-to-Video",
+            text: "Upload a starting image to animate it. The model will use your image as the first frame and generate motion based on your prompt."
+          }
+        ]
+      }
+    ],
+    useCases: [
+      {
+        title: "Primary Use Cases",
+        content: [
+          {
+            subtitle: "Rapid Prototyping",
+            text: "Quickly test ideas and concepts before committing to higher-cost models. Perfect for iterating on prompts and compositions."
+          },
+          {
+            subtitle: "High-Volume Generation",
+            text: "Generate large quantities of videos at minimal cost. Ideal for social media content calendars and A/B testing."
+          },
+          {
+            subtitle: "Learning & Experimentation",
+            text: "Great for learning video AI prompting techniques without significant credit investment."
+          }
+        ]
+      }
+    ]
+  },
+  "hailuo-2.3-pro": {
+    id: "hailuo-2.3-pro",
+    displayName: "Hailuo 2.3 Pro",
+    description: "MiniMax&apos;s professional video generation model featuring exceptional character consistency and natural motion. Generates high-quality 5 or 10-second videos with intelligent prompt optimization for enhanced results.",
+    bannerImage: "/banners/wan-banner.jpg",
+    cardVideo: `${WEBSITE_VIDEOS}/robot-3.mp4`,
+    exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
+    tags: ["professional", "character", "consistent"],
+    outputType: 'video',
+    creditCost: 4,
+    creditPricing: {
+      base: 4,
       modifiers: [
         {
-          param: "resolution",
-          values: { "480p": 3, "720p": 5 },
+          param: "duration",
+          values: { "5": 4, "10": 8 },
           type: "set"
         }
       ]
     },
     params: [
       {
+        name: "prompt",
+        label: "Prompt",
+        type: "textarea",
+        defaultValue: "A young woman dancing gracefully in a modern kitchen, natural lighting through windows, joyful expression, smooth flowing movements.",
+      },
+      {
         name: "image",
-        label: "Input Image",
+        label: "Starting Image (optional)",
         type: "image",
         defaultValue: null,
       },
       {
-        name: "prompt",
-        label: "Prompt",
-        type: "textarea",
-        defaultValue: "Commercial video of a luxury watch rotating slowly, dramatic lighting highlighting the craftsmanship and details.",
+        name: "duration",
+        label: "Duration (seconds)",
+        type: "dropdown",
+        defaultValue: "5",
+        options: ["5", "10"],
       },
       {
         name: "resolution",
         label: "Resolution",
         type: "dropdown",
-        defaultValue: "480p",
-        options: ["480p", "720p"]
+        defaultValue: "1080p",
+        options: ["720p", "1080p"],
       },
       {
-        name: "num_frames",
-        label: "Number of frames",
-        type: "slider",
-        defaultValue: 81,
-        min: 81,
-        max: 100,
-        step: 1
-      },
-      {
-        name: "frames_per_second",
-        label: "Frames per second",
-        type: "slider",
-        defaultValue: 16,
-        min: 5,
-        max: 24,
-        step: 1
+        name: "prompt_optimizer",
+        label: "Prompt Optimizer",
+        type: "dropdown",
+        defaultValue: "true",
+        options: ["true", "false"],
       },
     ],
     tips: [
       {
-        title: "Model Architecture",
+        title: "Prompting Guide",
         content: [
           {
-            subtitle: "Mixture-of-Experts Design",
-            text: "WAN 2.2's MoE architecture uses two specialized experts: a high-noise expert for spatial layout and composition, and a low-noise expert for fine details and quality. This enables efficient 14B active parameters from a 27B total model."
+            subtitle: "Character Focus",
+            text: "Hailuo 2.3 Pro excels at human subjects. Describe characters in detail including clothing, expressions, and posture for best results."
           },
           {
-            subtitle: "Enhanced Training Data",
-            text: "Trained on 65.6% more images and 83.2% more videos compared to WAN 2.1. Supports three modes: Text-to-Video (T2V), Image-to-Video (I2V), and hybrid Text+Image-to-Video (TI2V)."
+            subtitle: "Natural Motion",
+            text: "The model produces exceptionally natural human motion. Describe actions clearly: &apos;walking confidently&apos;, &apos;dancing gracefully&apos;, &apos;turning to look over shoulder&apos;."
           },
           {
-            subtitle: "Reduced Frame Flickering",
-            text: "Significant improvements in temporal consistency eliminate the flickering artifacts from previous versions, resulting in smoother, more natural video output."
+            subtitle: "Prompt Optimizer",
+            text: "Enable the prompt optimizer to automatically enhance your prompt for better results. The AI will expand and improve your description while maintaining your intent."
           }
         ]
       }
@@ -556,42 +628,40 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         title: "Primary Use Cases",
         content: [
           {
-            subtitle: "Product Visualization & E-Commerce",
-            text: "Transform static product photos into engaging video content with smooth camera movements. Perfect for product showcases, 360-degree rotations, and e-commerce platforms."
+            subtitle: "Character Animation",
+            text: "Create videos featuring human subjects with consistent appearance and natural motion. Perfect for ads, social content, and storytelling."
           },
           {
-            subtitle: "Photorealistic Animation",
-            text: "Bring still photographs to life with natural, fluid motion. Excels at maintaining visual quality and preserving fine details from the source image."
+            subtitle: "Portrait-to-Video",
+            text: "Transform photos into dynamic videos. Upload a portrait and describe the motion you want to see."
           },
           {
-            subtitle: "Content Variety",
-            text: "Supports T2V for generating videos from prompts alone, I2V for animating images, and hybrid TI2V combining both for maximum flexibility."
-          }
-        ]
-      },
-      {
-        title: "Technical Advantages",
-        content: [
-          {
-            subtitle: "Generation Speed",
-            text: "39 seconds to generate 480p videos, 150 seconds for 720p on Replicate. Fast iteration suitable for rapid prototyping and A/B testing."
+            subtitle: "Professional Content",
+            text: "Generate polished, professional-quality videos suitable for commercial use and marketing campaigns."
           }
         ]
       }
     ]
   },
-  "flux-1.1-pro-ultra": {
-    id: "flux-1.1-pro-ultra",
-    displayName: "FLUX 1.1 Pro Ultra",
-    description: "Black Forest Labs&apos; flagship text-to-image model generating ultra high-resolution images up to 4 megapixels. Features exceptional prompt adherence, output diversity, and blazing fast generation. Supports raw mode for natural, less processed aesthetics.",
+  "nano-banana-pro": {
+    id: "nano-banana-pro",
+    displayName: "Nano Banana Pro",
+    description: "High-quality image generation model optimized for speed and resolution. Create stunning images up to 4K resolution with excellent prompt adherence and diverse artistic styles. Perfect for concept art, illustrations, and professional imagery.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/053_Macro_Shot_Emerald_Eyes_Redhead.mp4`,
-    tags: ["image", "4MP", "ultra-fast"],
+    tags: ["image", "4K", "fast"],
     outputType: 'image',
     creditCost: 2,
     creditPricing: {
-      base: 2 // Fixed price for image generation
+      base: 2,
+      modifiers: [
+        {
+          param: "resolution",
+          values: { "1K": 2, "2K": 3, "4K": 4 },
+          type: "set"
+        }
+      ]
     },
     params: [
       {
@@ -599,6 +669,22 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         label: "Prompt",
         type: "textarea",
         defaultValue: "A stunning portrait of a woman with emerald eyes, soft golden hour lighting, ultra detailed skin texture, 85mm lens, shallow depth of field, professional photography.",
+      },
+      {
+        name: "num_images",
+        label: "Number of Images",
+        type: "slider",
+        defaultValue: 1,
+        min: 1,
+        max: 4,
+        step: 1,
+      },
+      {
+        name: "resolution",
+        label: "Resolution",
+        type: "dropdown",
+        defaultValue: "2K",
+        options: ["1K", "2K", "4K"],
       },
       {
         name: "aspect_ratio",
@@ -611,15 +697,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         name: "output_format",
         label: "Output Format",
         type: "dropdown",
-        defaultValue: "jpg",
-        options: ["jpg", "png"],
-      },
-      {
-        name: "raw",
-        label: "Raw Mode",
-        type: "dropdown",
-        defaultValue: "false",
-        options: ["true", "false"],
+        defaultValue: "png",
+        options: ["png", "jpg", "webp"],
       },
     ],
     tips: [
@@ -628,7 +707,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Detailed Descriptions",
-            text: "FLUX 1.1 Pro Ultra excels with detailed, descriptive prompts. Include specific details about lighting, composition, style, and atmosphere for best results.",
+            text: "Nano Banana Pro excels with detailed, descriptive prompts. Include specific details about lighting, composition, style, and atmosphere for best results.",
             list: [
               "Specify camera settings: &apos;85mm lens&apos;, &apos;f/1.4 aperture&apos;, &apos;shallow DOF&apos;",
               "Include lighting details: &apos;golden hour&apos;, &apos;soft diffused light&apos;, &apos;dramatic shadows&apos;",
@@ -636,8 +715,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
             ]
           },
           {
-            subtitle: "Raw Mode",
-            text: "Enable raw mode for more natural, less processed images. Perfect for realistic scenes and photography where you want organic, authentic results."
+            subtitle: "Resolution Selection",
+            text: "Choose resolution based on your needs: 1K for web use and previews, 2K for standard professional work, 4K for print materials and large displays."
           },
           {
             subtitle: "Aspect Ratio Selection",
@@ -652,28 +731,15 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Professional Photography",
-            text: "Generate photorealistic portraits, product shots, and editorial imagery at unprecedented resolution. 4MP output enables large-format prints and professional use."
+            text: "Generate photorealistic portraits, product shots, and editorial imagery at high resolution. 4K output enables large-format prints and professional use."
           },
           {
             subtitle: "Marketing & Advertising",
             text: "Create high-resolution marketing assets, social media content, and advertising visuals with exceptional quality and fast turnaround."
           },
           {
-            subtitle: "Creative Exploration",
-            text: "Rapid ideation and concept development for artists, designers, and creative professionals. Fast generation enables extensive exploration."
-          }
-        ]
-      },
-      {
-        title: "Technical Advantages",
-        content: [
-          {
-            subtitle: "4 Megapixel Output",
-            text: "Generate images up to 4MP resolution, perfect for print materials, large displays, and professional applications requiring high-resolution assets."
-          },
-          {
-            subtitle: "Generation Speed",
-            text: "Industry-leading generation speed enables rapid iteration and exploration without long wait times."
+            subtitle: "Concept Art & Illustration",
+            text: "Rapidly generate concept art, illustrations, and visual ideas for creative projects. Multiple image generation enables exploration of variations."
           }
         ]
       }
