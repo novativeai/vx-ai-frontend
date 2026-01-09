@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,31 @@ import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/Googleicon';
 import { isProfileComplete } from '@/lib/profileUtils';
 import { toast } from '@/hooks/use-toast';
+
+// Helper to get user doc with retry for token propagation delay
+async function getUserDocWithRetry(userId: string, maxRetries = 3, delayMs = 500) {
+  const userDocRef = doc(db, "users", userId);
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const userDoc = await getDoc(userDocRef);
+      return userDoc;
+    } catch (error: unknown) {
+      const isPermissionError = error instanceof Error &&
+        (error.message.includes('permission') || error.message.includes('Missing'));
+
+      if (isPermissionError && attempt < maxRetries - 1) {
+        // Wait for token to propagate and retry
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  // Final attempt without catching
+  return await getDoc(userDocRef);
+}
 
 // Email validation helper
 function validateEmail(email: string): string | undefined {
@@ -52,12 +77,13 @@ export default function SignIn() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
+      // Use retry helper to handle token propagation delay after logout/login
+      const userDoc = await getUserDocWithRetry(user.uid);
 
       if (!userDoc.exists()) {
         // New user - create profile with profileComplete: false
-        await setDoc(userDocRef, {
+        const newUserDocRef = doc(db, "users", user.uid);
+        await setDoc(newUserDocRef, {
           email: user.email,
           firstName: user.displayName?.split(' ')[0] || '',
           lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
@@ -106,9 +132,8 @@ export default function SignIn() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Check if profile is complete
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
+      // Check if profile is complete - use retry helper for token propagation
+      const userDoc = await getUserDocWithRetry(user.uid);
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
@@ -120,7 +145,8 @@ export default function SignIn() {
         }
       } else {
         // User exists in Auth but not in Firestore - create document
-        await setDoc(userDocRef, {
+        const newUserDocRef = doc(db, "users", user.uid);
+        await setDoc(newUserDocRef, {
           email: user.email,
           firstName: user.displayName?.split(' ')[0] || '',
           lastName: user.displayName?.split(' ').slice(1).join(' ') || '',

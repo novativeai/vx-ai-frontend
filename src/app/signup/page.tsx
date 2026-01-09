@@ -15,6 +15,31 @@ import { GoogleIcon } from '@/components/icons/Googleicon';
 import { isProfileComplete } from '@/lib/profileUtils';
 import { toast } from '@/hooks/use-toast';
 
+// Helper to get user doc with retry for token propagation delay
+async function getUserDocWithRetry(userId: string, maxRetries = 3, delayMs = 500) {
+  const userDocRef = doc(db, "users", userId);
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const userDoc = await getDoc(userDocRef);
+      return userDoc;
+    } catch (error: unknown) {
+      const isPermissionError = error instanceof Error &&
+        (error.message.includes('permission') || error.message.includes('Missing'));
+
+      if (isPermissionError && attempt < maxRetries - 1) {
+        // Wait for token to propagate and retry
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  // Final attempt without catching
+  return await getDoc(userDocRef);
+}
+
 // Country list for the dropdown
 const COUNTRIES = [
   'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany',
@@ -219,13 +244,14 @@ export default function SignUp() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
+      // Use retry helper to handle token propagation delay after logout/login
+      const userDoc = await getUserDocWithRetry(user.uid);
 
       if (!userDoc.exists()) {
         // For Google sign-in, create user with profileComplete: false
         // User will be redirected to onboarding to complete mandatory fields
-        await setDoc(userDocRef, {
+        const newUserDocRef = doc(db, "users", user.uid);
+        await setDoc(newUserDocRef, {
           email: user.email,
           firstName: user.displayName?.split(' ')[0] || '',
           lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
