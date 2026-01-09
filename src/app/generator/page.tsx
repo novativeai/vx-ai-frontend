@@ -66,6 +66,7 @@ function GeneratorComponent() {
   const [detectedOutputType, setDetectedOutputType] = useState<OutputType>(null);
   const [generating, setGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   // Video preview state
   const [videoAspectRatio, setVideoAspectRatio] = useState<number>(16/9);
@@ -98,6 +99,7 @@ function GeneratorComponent() {
     setOutputUrl('');
     setGenerating(false);
     setDetectedOutputType(null);
+    setGenerationError(null);
 
     // Reset video state
     setVideoAspectRatio(16/9);
@@ -172,20 +174,35 @@ function GeneratorComponent() {
     setGenerating(true);
     setOutputUrl('');
     setDetectedOutputType(null);
+    setGenerationError(null);
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate-video`
         : 'http://localhost:8000/generate-video';
+
+      console.log('[Generation] Starting request to:', apiUrl, { model_id: modelId, params: { ...params, image: params.image ? '[base64 data]' : undefined } });
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.uid, model_id: modelId, params }),
       });
+
       if (!response.ok) {
-        throw new Error((await response.json()).detail || 'Failed to generate');
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error occurred' }));
+        const errorMessage = errorData.detail || `HTTP ${response.status}: ${response.statusText}`;
+        console.error('[Generation] API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          model_id: modelId,
+        });
+        throw new Error(errorMessage);
       }
+
       const data = await response.json();
+      console.log('[Generation] Success:', { output_urls: data.output_urls });
 
       if (data.output_urls && Array.isArray(data.output_urls) && data.output_urls.length > 0) {
         const newUrl = data.output_urls[0];
@@ -200,7 +217,15 @@ function GeneratorComponent() {
       // credits state when the database changes, ensuring the frontend always shows
       // the accurate balance from the database.
     } catch (err) {
-      toast.error('Generation failed', (err as Error).message);
+      const errorMessage = (err as Error).message;
+      console.error('[Generation] Failed:', {
+        error: err,
+        message: errorMessage,
+        model_id: modelId,
+        timestamp: new Date().toISOString(),
+      });
+      setGenerationError(errorMessage);
+      toast.error('Generation failed', errorMessage);
     } finally {
       setGenerating(false);
     }
@@ -286,12 +311,19 @@ function GeneratorComponent() {
             <CardHeader >
               <CardTitle className="flex justify-between items-center">
                 Result
-                <Badge variant={generating ? "secondary" : "default"}>
-                  {generating ? "Generating..." : (outputUrl ? "Complete" : "Example")}
+                <Badge variant={generating ? "secondary" : generationError ? "destructive" : "default"}>
+                  {generating ? "Generating..." : generationError ? "Error" : (outputUrl ? "Complete" : "Example")}
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center">
+            <CardContent className="flex flex-col gap-4">
+              {/* Error display */}
+              {generationError && !generating && (
+                <div className="w-full p-4 rounded-md bg-destructive/10 border border-destructive/20">
+                  <p className="text-sm font-medium text-destructive mb-1">Generation Failed</p>
+                  <p className="text-sm text-destructive/80 break-words">{generationError}</p>
+                </div>
+              )}
               <div
                 className="relative w-full h-[500px] lg:h-[600px] bg-black rounded-md flex items-center justify-center overflow-hidden transition-all duration-300"
               >
