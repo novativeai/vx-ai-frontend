@@ -38,15 +38,29 @@ type OutputType = 'video' | 'image' | null;
  */
 const getOutputTypeFromUrl = (url: string): OutputType => {
   if (!url) return null;
-  // Use URL constructor for robust parsing, even with query parameters
-  const pathname = new URL(url).pathname;
-  const extension = pathname.split('.').pop()?.toLowerCase();
-  
-  if (extension === 'mp4') return 'video';
-  if (['png', 'jpg', 'jpeg', 'webp', 'avif'].includes(extension || '')) return 'image';
-  
-  // Fallback if no known extension is found
-  return null;
+  try {
+    // Use URL constructor for robust parsing, even with query parameters
+    const parsedUrl = new URL(url);
+    const pathname = parsedUrl.pathname.toLowerCase();
+    const extension = pathname.split('.').pop();
+
+    // Check for video extensions
+    if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(extension || '')) return 'video';
+    // Check for image extensions
+    if (['png', 'jpg', 'jpeg', 'webp', 'avif', 'gif'].includes(extension || '')) return 'image';
+
+    // Check URL patterns for fal.ai video outputs (may not have extension)
+    if (url.includes('fal.media') || url.includes('fal-cdn')) {
+      // fal.ai video URLs often contain these patterns
+      if (pathname.includes('video') || pathname.includes('output')) return 'video';
+    }
+
+    // Default to video for unknown types (most generations are video)
+    return 'video';
+  } catch {
+    // If URL parsing fails, default to video
+    return 'video';
+  }
 };
 
 function GeneratorComponent() {
