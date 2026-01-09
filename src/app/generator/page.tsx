@@ -72,7 +72,6 @@ function GeneratorComponent() {
   const [videoAspectRatio, setVideoAspectRatio] = useState<number>(16/9);
   const [isMuted, setIsMuted] = useState(true);
   const [hasAudio, setHasAudio] = useState(false);
-  const [videoLoadError, setVideoLoadError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const exampleVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -106,7 +105,6 @@ function GeneratorComponent() {
     setVideoAspectRatio(16/9);
     setIsMuted(true);
     setHasAudio(false);
-    setVideoLoadError(false);
 
     // Reset content view to tips when model changes
     setContentView('tips');
@@ -177,7 +175,6 @@ function GeneratorComponent() {
     setOutputUrl('');
     setDetectedOutputType(null);
     setGenerationError(null);
-    setVideoLoadError(false);
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL
@@ -337,7 +334,7 @@ function GeneratorComponent() {
                   </div>
                 ) : outputUrl ? (
                   <>
-                    {detectedOutputType === 'video' && !videoLoadError && (
+                    {detectedOutputType === 'video' && (
                       <video
                         ref={videoRef}
                         src={outputUrl}
@@ -347,24 +344,24 @@ function GeneratorComponent() {
                         muted={isMuted}
                         playsInline
                         onLoadedMetadata={(e) => handleVideoMetadata(e, false)}
-                        onError={() => setVideoLoadError(true)}
-                        className="w-full h-full object-contain rounded-md"
+                        className="w-full h-full object-contain"
                       />
-                    )}
-                    {detectedOutputType === 'video' && videoLoadError && (
-                      <div className="text-center text-muted-foreground p-4">
-                        <p className="mb-2">Video failed to load in browser.</p>
-                        <a href={outputUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">Open Video in New Tab</a>
-                      </div>
                     )}
                     {detectedOutputType === 'image' && (
                       <Image src={outputUrl} alt="Generated result" fill className="object-contain rounded-md" />
                     )}
                     {detectedOutputType === null && (
-                      <div className="text-center text-muted-foreground p-4">
-                        <p>Unsupported output format.</p>
-                        <a href={outputUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline mt-2 block">View Raw Output</a>
-                      </div>
+                      <video
+                        ref={videoRef}
+                        src={outputUrl}
+                        controls
+                        autoPlay
+                        loop
+                        muted={isMuted}
+                        playsInline
+                        onLoadedMetadata={(e) => handleVideoMetadata(e, false)}
+                        className="w-full h-full object-contain"
+                      />
                     )}
                   </>
                 ) : currentModelConfig.exampleImage ? (
