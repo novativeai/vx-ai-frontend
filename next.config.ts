@@ -42,15 +42,15 @@ const securityHeaders = [
       // Styles - allow self and inline for styled-components/tailwind
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // Images from various sources
-      "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://replicate.delivery https://*.replicate.delivery",
+      "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://replicate.delivery https://*.replicate.delivery https://fal.media https://*.fal.media",
       // Fonts
       "font-src 'self' https://fonts.gstatic.com",
-      // Connect to backend and Firebase
-      "connect-src 'self' https://aivideogenerator-production.up.railway.app https://*.firebaseio.com https://*.googleapis.com https://api.replicate.com wss://*.firebaseio.com",
+      // Connect to backend, Firebase, and fal.ai
+      "connect-src 'self' https://aivideogenerator-production.up.railway.app https://*.firebaseio.com https://*.googleapis.com https://api.replicate.com wss://*.firebaseio.com https://fal.media https://*.fal.media",
       // Frames for Firebase auth
       "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
-      // Media from Firebase storage
-      "media-src 'self' blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://replicate.delivery https://*.replicate.delivery",
+      // Media from Firebase storage and fal.ai
+      "media-src 'self' blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://replicate.delivery https://*.replicate.delivery https://fal.media https://*.fal.media",
       // Form submissions
       "form-action 'self'",
       // Base URI
@@ -83,6 +83,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.replicate.delivery',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fal.media',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.fal.media',
       },
     ],
     formats: ["image/avif", "image/webp"],
