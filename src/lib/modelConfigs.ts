@@ -270,7 +270,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         label: "Aspect Ratio",
         type: "dropdown",
         defaultValue: "16:9",
-        options: ["16:9", "9:16", "1:1"],
+        options: ["16:9", "9:16"],
       },
       {
         name: "resolution",
@@ -416,7 +416,7 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "CFG Scale",
-            text: "Controls how closely the output follows your prompt. Higher values (10-15) give more literal interpretations, while lower values (3-6) allow more creative freedom."
+            text: "Controls how closely the output follows your prompt. Higher values (0.7-1.0) give more literal interpretations, while lower values (0.3-0.5) allow more creative freedom."
           },
           {
             subtitle: "Motion Strength",
