@@ -29,9 +29,20 @@ const ProductCard = memo(function ProductCard({
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Generate poster from first frame if no thumbnailUrl provided
+  // Check if thumbnailUrl is actually an image (not a video URL)
+  // Video URLs should be ignored so we can generate a proper poster
+  const isVideoUrl = (url: string) => {
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
+  const validThumbnailUrl = product.thumbnailUrl && !isVideoUrl(product.thumbnailUrl)
+    ? product.thumbnailUrl
+    : null;
+
+  // Generate poster from first frame if no valid thumbnailUrl provided
   useEffect(() => {
-    if (product.thumbnailUrl || generatedPoster) return;
+    if (validThumbnailUrl || generatedPoster) return;
 
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
@@ -69,7 +80,7 @@ const ProductCard = memo(function ProductCard({
       video.removeEventListener("seeked", handleSeeked);
       video.remove();
     };
-  }, [product.videoUrl, product.thumbnailUrl, generatedPoster]);
+  }, [product.videoUrl, validThumbnailUrl, generatedPoster]);
 
   // Fallback timeout to hide skeleton after 5s max (prevents stuck state)
   useEffect(() => {
@@ -80,7 +91,7 @@ const ProductCard = memo(function ProductCard({
     return () => clearTimeout(timeout);
   }, []);
 
-  const posterUrl = product.thumbnailUrl || generatedPoster;
+  const posterUrl = validThumbnailUrl || generatedPoster;
 
   // Mark as loaded when poster becomes available (for generated posters)
   useEffect(() => {
