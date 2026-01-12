@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <footer className="bg-black border-t border-neutral-800">
       <div className="container mx-auto py-24 px-4 md:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
 
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
@@ -55,6 +55,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Newsletter section - commented out for now
           <div className="space-y-4">
              <h3 className="font-semibold text-foreground">Stay Updated</h3>
              <p className="text-sm text-muted-foreground mb-3">Get the latest news on features and releases.</p>
@@ -86,6 +87,7 @@ export default function Footer() {
                 </Button>
             </form>
           </div>
+          */}
 
           {/* Company Registration & Payment Methods */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-4">
