@@ -121,12 +121,12 @@ export function HomeFooterSection() {
                   className="h-7 w-auto object-contain"
                 />
                 {/* 3D Secure Badge */}
-                <svg className="h-6 w-auto" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
-                  <rect width="80" height="32" rx="4" fill="#1A1F71"/>
-                  <circle cx="16" cy="16" r="8" fill="white"/>
-                  <path d="M13 16L15 18L19 14" stroke="#1A1F71" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <text x="48" y="14" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold" fontFamily="system-ui, sans-serif">3D</text>
-                  <text x="48" y="22" textAnchor="middle" fill="white" fontSize="5" fontFamily="system-ui, sans-serif">Secure</text>
+                <svg className="h-7 w-auto" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
+                  <rect x="0.5" y="0.5" width="47" height="27" rx="3.5" fill="#fff" stroke="#e5e5e5"/>
+                  <path d="M14 6C11.5 6 9 7.5 9 7.5V16C9 20 14 23 14 23C14 23 19 20 19 16V7.5C19 7.5 16.5 6 14 6Z" stroke="#1A1F71" strokeWidth="1.5" fill="none"/>
+                  <path d="M11.5 14.5L13 16L16.5 12" stroke="#1A1F71" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <text x="33" y="12" textAnchor="middle" fill="#1A1F71" fontSize="6" fontWeight="600" fontFamily="system-ui, sans-serif">3D</text>
+                  <text x="33" y="19" textAnchor="middle" fill="#666" fontSize="5" fontFamily="system-ui, sans-serif">Secure</text>
                 </svg>
               </div>
             </div>
