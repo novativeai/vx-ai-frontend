@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF } from "@/lib/pdfGenerator";
 import { Download, AlertCircle, LogOut } from "lucide-react";
@@ -662,10 +663,14 @@ export default function AccountPage() {
                                 {isLoadingHistory ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {[...Array(3)].map((_, i) => (
-                                            <div key={i} className="space-y-2">
-                                                <Card className="overflow-hidden rounded-2xl bg-transparent">
-                                                    <Skeleton className="w-full h-48 bg-[#1C1C1C]" />
-                                                </Card>
+                                            <div key={i} className="w-full">
+                                                <div className="w-80 flex-shrink-0">
+                                                    <Card className="overflow-hidden rounded-2xl bg-transparent">
+                                                        <AspectRatio ratio={1 / 1} className="bg-neutral-800">
+                                                            <Skeleton className="w-full h-full bg-[#1C1C1C]" />
+                                                        </AspectRatio>
+                                                    </Card>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
