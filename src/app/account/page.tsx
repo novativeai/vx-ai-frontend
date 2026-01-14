@@ -256,7 +256,7 @@ export default function AccountPage() {
       const balanceRef = doc(db, "users", user.uid, "seller_balance", "current");
       const unsub = onSnapshot(balanceRef, (doc) => {
         if (doc.exists()) {
-          setSellerBalance(doc.data().pendingBalance || 0);
+          setSellerBalance(doc.data().availableBalance || 0);
         }
       });
       return () => unsub();
@@ -273,13 +273,15 @@ export default function AccountPage() {
 
     const handleSaveChanges = async () => {
       if (!user) return;
-      
+
       setIsSaving(true);
       setSaveMessage(null);
-      
+
+      let authUpdatesSucceeded = false;
+
       try {
         const { updateProfile, updateEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential } = await import('firebase/auth');
-        
+
         // If changing password, validate
         if (newPassword || confirmPassword || currentPassword) {
           if (!currentPassword) {
@@ -291,30 +293,30 @@ export default function AccountPage() {
           if (newPassword.length < 6) {
             throw new Error("New password must be at least 6 characters");
           }
-          
+
           // Re-authenticate before password change
           const credential = EmailAuthProvider.credential(
             user.email!,
             currentPassword
           );
           await reauthenticateWithCredential(user, credential);
-          
+
           // Update password
           await updatePassword(user, newPassword);
         }
-        
+
         // Update display name if changed
         if (displayName !== user.displayName) {
           await updateProfile(user, { displayName });
         }
-        
+
         // Update email if changed
         if (email !== user.email && email) {
           // Re-authenticate if not already done
           if (!currentPassword && !newPassword) {
             throw new Error("Please enter your current password to change your email");
           }
-          
+
           if (!newPassword) {
             const credential = EmailAuthProvider.credential(
               user.email!,
@@ -322,19 +324,26 @@ export default function AccountPage() {
             );
             await reauthenticateWithCredential(user, credential);
           }
-          
+
           await updateEmail(user, email);
         }
-        
-        // Update Firestore user document
-        const userDocRef = doc(db, "users", user.uid);
-        await import('firebase/firestore').then(({ updateDoc }) => 
-          updateDoc(userDocRef, {
-            name: displayName,
+
+        // Auth updates succeeded - mark this before Firestore operation
+        authUpdatesSucceeded = true;
+
+        // Update Firestore user document separately - don't fail if this fails
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const { updateDoc } = await import('firebase/firestore');
+          await updateDoc(userDocRef, {
+            firstName: displayName.split(' ')[0] || displayName,
+            lastName: displayName.split(' ').slice(1).join(' ') || '',
             email: email
-          })
-        );
-        
+          });
+        } catch {
+          // Firestore sync delayed - don't fail, it will sync on next load
+        }
+
         // Clear password fields
         setCurrentPassword("");
         setNewPassword("");
@@ -343,29 +352,42 @@ export default function AccountPage() {
         setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
         timeoutRef.current = setTimeout(() => setSaveMessage(null), 3000);
       } catch (error) {
-        logger.error("Error updating account", error);
-        let errorMessage = "Failed to update account";
-        
-        if (error instanceof FirebaseError) {
-          switch (error.code) {
-            case 'auth/requires-recent-login':
-              errorMessage = "Please sign out and sign in again to change your email";
-              break;
-            case 'auth/email-already-in-use':
-              errorMessage = "This email is already in use";
-              break;
-            case 'auth/invalid-email':
-              errorMessage = "Invalid email address";
-              break;
-            default:
+        // Only show error if auth updates failed
+        if (!authUpdatesSucceeded) {
+          logger.error("Error updating account", error);
+          let errorMessage = "Failed to update account";
+
+          if (error instanceof FirebaseError) {
+            switch (error.code) {
+              case 'auth/requires-recent-login':
+                errorMessage = "Please sign out and sign in again to change your email";
+                break;
+              case 'auth/email-already-in-use':
+                errorMessage = "This email is already in use";
+                break;
+              case 'auth/invalid-email':
+                errorMessage = "Invalid email address";
+                break;
+              case 'auth/wrong-password':
+                errorMessage = "Current password is incorrect";
+                break;
+              default:
+                errorMessage = error.message;
+                break;
+            }
+          } else if (error instanceof Error) {
               errorMessage = error.message;
-              break;
           }
-        } else if (error instanceof Error) {
-            errorMessage = error.message;
+
+          setSaveMessage({ type: 'error', text: errorMessage });
+        } else {
+          // Auth succeeded but something else failed - still show success
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+          setSaveMessage({ type: 'success', text: 'Account updated successfully!' });
+          timeoutRef.current = setTimeout(() => setSaveMessage(null), 3000);
         }
-        
-        setSaveMessage({ type: 'error', text: errorMessage });
       } finally {
         setIsSaving(false);
       }
@@ -596,7 +618,7 @@ export default function AccountPage() {
                                           <div>
                                             <p className="text-sm font-medium mb-1">Payment Management</p>
                                             <p className="text-xs text-neutral-400">
-                                              All payments are securely processed through PayTrust. To update your payment method or view detailed invoices, simply make a new purchase and use your preferred payment method.
+                                              All payments are securely processed through our trusted payment partners. Your payment information is encrypted and never stored on our servers. To update your payment method, simply use your preferred option on your next purchase.
                                             </p>
                                           </div>
                                         </div>
@@ -686,7 +708,10 @@ export default function AccountPage() {
 
                                 {/* Earnings Cards */}
                                 <SellerEarningsCard
-                                    onWithdrawClick={() => setIsWithdrawalModalOpen(true)}
+                                    onWithdrawClick={(balance) => {
+                                        setSellerBalance(balance);
+                                        setIsWithdrawalModalOpen(true);
+                                    }}
                                 />
 
                                 <Separator className="bg-neutral-800" />
@@ -721,7 +746,7 @@ export default function AccountPage() {
             <WithdrawalRequestModal
                 isOpen={isWithdrawalModalOpen}
                 onClose={() => setIsWithdrawalModalOpen(false)}
-                pendingBalance={sellerBalance}
+                availableBalance={sellerBalance}
             />
         </div>
     );

@@ -276,6 +276,64 @@ export const apiClient = {
       requireAuth: false,
     });
   },
+
+  // --- Seller/Payout endpoints ---
+
+  /**
+   * Create payout request
+   */
+  createPayoutRequest: async (params: {
+    amount: number;
+    bankDetails: {
+      iban: string;
+      accountHolder: string;
+      bankName?: string;
+      bic?: string;
+    };
+  }) => {
+    return apiClient.post<{
+      message: string;
+      requestId: string;
+      amount: number;
+      accountHolder: string;
+      status: string;
+    }>('/seller/payout-request', params);
+  },
+
+  /**
+   * Get seller balance
+   */
+  getSellerBalance: async () => {
+    return apiClient.get<{
+      availableBalance: number;
+      pendingBalance: number;
+      totalEarned: number;
+      withdrawnBalance: number;
+    }>('/seller/balance');
+  },
+
+  /**
+   * Get payout request history
+   */
+  getPayoutRequests: async (limit: number = 20, status?: string) => {
+    const params = new URLSearchParams({ limit: limit.toString() });
+    if (status) params.append('status', status);
+    return apiClient.get<{
+      payoutRequests: Array<{
+        id: string;
+        amount: number;
+        status: string;
+        requestedAt: string;
+        bankDetails: {
+          iban: string;
+          accountHolder: string;
+          bankName?: string;
+          bic?: string;
+        };
+      }>;
+      total: number;
+    }>(`/seller/payout-requests?${params.toString()}`);
+  },
 };
 
 export default apiClient;

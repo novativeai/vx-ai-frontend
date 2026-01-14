@@ -6,23 +6,38 @@ import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, CheckCircle, XCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { Clock, CheckCircle, XCircle, RefreshCw, AlertCircle, Building2 } from "lucide-react";
 import { logger } from "@/lib/logger";
+
+interface BankDetails {
+  iban?: string;
+  accountHolder?: string;
+  bankName?: string;
+  bic?: string;
+}
 
 interface PayoutRequest {
   id: string;
   amount: number;
-  paypalEmail: string;
+  bankDetails?: BankDetails;
   status: "pending" | "approved" | "rejected" | "completed";
-  createdAt?: Date | { toDate: () => Date };
+  requestedAt?: Date | { toDate: () => Date };
   approvedAt?: Date | { toDate: () => Date };
   rejectedAt?: Date | { toDate: () => Date };
+  completedAt?: Date | { toDate: () => Date };
 }
 
 interface NotificationState {
   id: string;
   type: "approved" | "completed" | "rejected";
   amount: number;
+}
+
+// Mask IBAN for security (show only last 4 characters)
+function maskIBAN(iban: string): string {
+  const cleaned = iban.replace(/\s/g, '');
+  if (cleaned.length <= 4) return cleaned;
+  return '•••• •••• •••• ' + cleaned.slice(-4);
 }
 
 export function PayoutRequestsTable() {
@@ -41,7 +56,7 @@ export function PayoutRequestsTable() {
 
     const q = query(
       collection(db, "users", user.uid, "payout_requests"),
-      orderBy("createdAt", "desc")
+      orderBy("requestedAt", "desc")
     );
 
     const unsub = onSnapshot(
@@ -142,7 +157,7 @@ export function PayoutRequestsTable() {
       <Card className="bg-neutral-900/50 border-neutral-800 p-12 text-center">
         <p className="text-neutral-400 mb-2">No withdrawal requests yet</p>
         <p className="text-sm text-neutral-500">
-          Submit a withdrawal request to transfer your pending balance to PayPal
+          When you request a withdrawal, it will appear here.
         </p>
       </Card>
     );
@@ -177,14 +192,20 @@ export function PayoutRequestsTable() {
   const getNotificationMessage = (type: string, amount: number) => {
     switch (type) {
       case "approved":
-        return `Payout approved! €${amount.toFixed(2)} is ready for transfer.`;
+        return `Payout approved! €${amount.toFixed(2)} is being processed.`;
       case "completed":
-        return `Payout completed! €${amount.toFixed(2)} has been transferred.`;
+        return `Payout completed! €${amount.toFixed(2)} has been transferred to your bank account.`;
       case "rejected":
         return `Payout rejected. €${amount.toFixed(2)} has been returned to your balance.`;
       default:
         return "Payout status updated.";
     }
+  };
+
+  const formatDate = (date: Date | { toDate: () => Date } | undefined) => {
+    if (!date) return "Date pending";
+    const d = typeof date === 'object' && 'toDate' in date ? date.toDate() : date;
+    return d.toLocaleDateString();
   };
 
   return (
@@ -234,13 +255,21 @@ export function PayoutRequestsTable() {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
+                  <Building2 className="w-4 h-4 text-blue-400" />
                   <div>
-                    <p className="text-sm text-neutral-500 mb-1">PayPal Email</p>
-                    <p className="font-mono text-white text-sm">{request.paypalEmail}</p>
+                    <p className="text-sm text-neutral-500 mb-1">Bank Account</p>
+                    {request.bankDetails?.accountHolder ? (
+                      <div>
+                        <p className="font-medium text-white text-sm">{request.bankDetails.accountHolder}</p>
+                        <p className="font-mono text-neutral-400 text-xs">{maskIBAN(request.bankDetails.iban || "")}</p>
+                      </div>
+                    ) : (
+                      <p className="text-neutral-500 text-sm">Bank details not available</p>
+                    )}
                   </div>
                 </div>
                 <p className="text-xs text-neutral-500">
-                  {request.createdAt && typeof request.createdAt === 'object' && 'toDate' in request.createdAt ? request.createdAt.toDate().toLocaleDateString() : "Date pending"}
+                  {formatDate(request.requestedAt)}
                 </p>
               </div>
               <div className="flex items-center gap-4 ml-4">
