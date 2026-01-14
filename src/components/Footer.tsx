@@ -104,14 +104,8 @@ export default function Footer() {
               <p className="text-xs text-muted-foreground mb-2">We accept</p>
               <div className="flex items-center gap-2">
                 {/* Visa Logo */}
-                <svg className="h-7 w-auto" viewBox="0 0 780 500" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Visa">
-                  <rect width="780" height="500" rx="40" fill="#1A1F71"/>
-                  <path d="M293.2 348.7l33.4-195.7h53.4l-33.4 195.7h-53.4zm220.2-190.9c-10.6-4-27.1-8.3-47.8-8.3-52.7 0-89.8 26.6-90.1 64.7-.3 28.2 26.5 43.9 46.8 53.3 20.8 9.6 27.8 15.8 27.7 24.4-.1 13.2-16.6 19.2-31.9 19.2-21.4 0-32.7-3-50.3-10.3l-6.9-3.1-7.5 44c12.5 5.5 35.5 10.2 59.4 10.5 56.1 0 92.5-26.3 92.9-67 .2-22.3-14-39.3-44.8-53.3-18.6-9.1-30.1-15.1-30-24.3 0-8.1 9.7-16.8 30.6-16.8 17.4-.3 30.1 3.5 39.9 7.5l4.8 2.3 7.2-42.8zm137.3-4.8h-41.2c-12.8 0-22.3 3.5-27.9 16.2l-79.2 179.5h56l11.2-29.4h68.4l6.5 29.4h49.4l-43.2-195.7zm-65.8 126.3c4.4-11.3 21.4-54.8 21.4-54.8-.3.5 4.4-11.4 7.1-18.8l3.6 17s10.3 47.1 12.4 57h-44.5v-.4zm-290.5-126.3l-52.3 133.4-5.6-27.2c-9.7-31.2-39.9-65.1-73.7-82l47.8 171.5h56.4l83.8-195.7h-56.4z" fill="#fff"/>
-                  <path d="M146.9 153l-.9 5.2c66.9 16.2 112.1 55.3 130.7 102.3l-18.8-90.6c-3.3-12.4-12.8-16.2-24.7-16.9h-86.3z" fill="#F9A533"/>
-                </svg>
-                {/* Visa Brand Symbol */}
                 <Image
-                  src="/icons/visa-brand-symbol.webp"
+                  src="/icons/visa-logo.webp"
                   alt="Visa"
                   width={44}
                   height={28}
@@ -125,6 +119,13 @@ export default function Footer() {
                   height={28}
                   className="h-7 w-auto object-contain"
                 />
+                {/* 3D Secure Logo */}
+                <svg className="h-7 w-auto" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
+                  <rect width="100" height="60" rx="6" fill="#1a1a2e"/>
+                  <path d="M50 8C42 8 35 12 35 12V32C35 42 50 52 50 52C50 52 65 42 65 32V12C65 12 58 8 50 8Z" fill="#00d26a" stroke="#00d26a" strokeWidth="2"/>
+                  <path d="M44 30L48 34L56 24" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <text x="50" y="58" textAnchor="middle" fill="#888" fontSize="6" fontFamily="system-ui, sans-serif">3D Secure</text>
+                </svg>
               </div>
             </div>
           </div>
