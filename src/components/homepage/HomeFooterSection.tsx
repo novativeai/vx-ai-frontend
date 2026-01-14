@@ -120,6 +120,8 @@ export function HomeFooterSection() {
                   height={28}
                   className="h-7 w-auto object-contain"
                 />
+                {/* Separator */}
+                <div className="h-5 w-px bg-neutral-700 mx-1" />
                 {/* 3D Secure Badge */}
                 <svg className="h-7 w-auto" viewBox="0 0 70 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
                   <path d="M14 4C10 4 6 6.5 6 6.5V17C6 23 14 27 14 27C14 27 22 23 22 17V6.5C22 6.5 18 4 14 4Z" stroke="#22c55e" strokeWidth="1.8" fill="none"/>
