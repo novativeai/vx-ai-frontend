@@ -9,7 +9,7 @@ export default function PrivacyPolicyPage() {
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-8">
           Privacy &amp; Cookies Policy
         </h1>
-        <p className="text-neutral-400 mb-12">Effective date: December 2025</p>
+        <p className="text-neutral-400 mb-12">Effective date: January 2026</p>
 
         <div className="space-y-8 text-neutral-300">
           <section>
@@ -330,6 +330,50 @@ export default function PrivacyPolicyPage() {
                 </a>
               </p>
             </div>
+          </section>
+
+          <section className="mt-12 pt-8 border-t border-neutral-700">
+            <h2 className="text-3xl font-bold text-white mb-6">Appendix A – Marketplace Data &amp; Payments (Additional Disclosures)</h2>
+
+            <h3 className="text-xl font-semibold text-white mb-2 mt-6">A.1 When Marketplace features apply</h3>
+            <p className="mb-4">
+              If we offer user-to-user Marketplace features (where Users list, sell, or license Marketplace Items to other Users),
+              we process additional personal data as described in this Appendix A, in addition to the data described above.
+            </p>
+
+            <h3 className="text-xl font-semibold text-white mb-2 mt-6">A.2 Additional categories of data (Marketplace)</h3>
+            <p className="mb-4">Depending on how you use the Marketplace, we may process:</p>
+            <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
+              <li><strong className="text-white">Marketplace profile data</strong> (e.g., seller display name, profile bio, portfolio links, listing history, ratings/reviews);</li>
+              <li><strong className="text-white">Transaction data</strong> (e.g., orders, amounts, currency, timestamps, applicable fees, refunds, chargebacks, dispute records);</li>
+              <li><strong className="text-white">Payout data (for Sellers)</strong> (e.g., payout method, bank account/IBAN, PayPal email, or other payout identifiers; and payout status/history);</li>
+              <li><strong className="text-white">Identity and compliance data</strong> (for Sellers and/or Buyers where required) (e.g., date of birth, address, government ID verification results, sanctions/PEP screening results, tax residence, VAT number, and other information required by our payment service providers or by law);</li>
+              <li><strong className="text-white">Communications and support data</strong> related to Marketplace Transactions (e.g., messages between Buyers and Sellers where provided through the Platform; dispute communications; customer support tickets).</li>
+            </ul>
+
+            <h3 className="text-xl font-semibold text-white mb-2 mt-6">A.3 Purposes and legal bases (Marketplace)</h3>
+            <p className="mb-4">We process Marketplace data to:</p>
+            <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
+              <li>operate the Marketplace, enable listings, orders, delivery/access, and customer support (legal basis: <strong className="text-white">contract</strong>);</li>
+              <li>process payments, payouts, refunds and chargebacks through our payment service providers (legal basis: <strong className="text-white">contract; legal obligation</strong> where applicable);</li>
+              <li>prevent fraud and abuse, enforce our Terms and AUP, and protect Users (legal basis: <strong className="text-white">legitimate interests; legal obligation</strong> where applicable);</li>
+              <li>comply with legal obligations such as tax, accounting, and regulatory reporting (legal basis: <strong className="text-white">legal obligation</strong>).</li>
+            </ul>
+
+            <h3 className="text-xl font-semibold text-white mb-2 mt-6">A.4 Sharing (Marketplace)</h3>
+            <p className="mb-4">In addition to sharing described above, we may share Marketplace-related data:</p>
+            <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
+              <li>with <strong className="text-white">payment service providers</strong> (and their compliance/verification partners) to process payments and payouts, and to conduct identity verification and fraud prevention;</li>
+              <li>between <strong className="text-white">Buyers and Sellers</strong> as necessary to complete a transaction (e.g., showing seller profile information to buyers; showing buyer identifiers and order information to sellers);</li>
+              <li>with <strong className="text-white">authorities</strong> where required (e.g., tax authorities, law enforcement, regulators);</li>
+              <li>with <strong className="text-white">professional advisers</strong> (e.g., legal and accounting) where necessary for compliance or to establish, exercise or defend legal claims.</li>
+            </ul>
+
+            <h3 className="text-xl font-semibold text-white mb-2 mt-6">A.5 Retention</h3>
+            <p>
+              We retain Marketplace transaction and payment-related records for as long as necessary for the purposes described above,
+              including to comply with tax/accounting and fraud prevention obligations.
+            </p>
           </section>
         </div>
 

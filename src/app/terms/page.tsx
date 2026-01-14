@@ -9,7 +9,7 @@ export default function TermsOfServicePage() {
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-8">
           Terms &amp; Conditions
         </h1>
-        <p className="text-neutral-400 mb-12">Effective Date: December 2025</p>
+        <p className="text-neutral-400 mb-12">Effective Date: January 2026</p>
 
         <div className="space-y-8 text-neutral-300">
           <section>
@@ -293,6 +293,46 @@ export default function TermsOfServicePage() {
                 </a>
               </p>
             </div>
+          </section>
+
+          <section className="mt-12 pt-8 border-t border-neutral-700">
+            <h2 className="text-2xl font-bold text-white mb-4">24. Marketplace (User-to-User Transactions)</h2>
+
+            <ul className="list-disc list-inside space-y-4 ml-4">
+              <li>
+                <strong className="text-white">24.1 Marketplace scope.</strong> The Service may include a user-to-user marketplace (the &quot;Marketplace&quot;) allowing Users (&quot;Sellers&quot;) to list and sell and/or license AI-generated videos and related digital content (&quot;Marketplace Items&quot;) to other Users (&quot;Buyers&quot;).
+              </li>
+              <li>
+                <strong className="text-white">24.2 Our role; contract between Buyer and Seller.</strong> Unless we expressly state otherwise in a specific checkout flow or Order confirmation, Marketplace Transactions are contracts directly between Buyers and Sellers. We are an intermediary service provider and are not the seller or buyer of Marketplace Items, and we do not take title to Marketplace Items.
+              </li>
+              <li>
+                <strong className="text-white">24.3 Seller appointment of Reelzilla as commercial agent / collection agent (important).</strong> If you are a Seller, you appoint Reelzilla as your commercial agent for the limited purpose of (a) promoting and marketing your Marketplace Items, (b) facilitating and (where applicable) concluding Marketplace Transactions in your name, and (c) collecting payments from Buyers on your behalf and remitting your net proceeds (&quot;Seller Earnings&quot;) to you, subject to these Terms and the Marketplace Payment Terms. Reelzilla acts only on behalf of the Seller (as payee) and not on behalf of the Buyer (as payer). This arrangement is intended to support reliance on the &quot;commercial agent&quot; exclusion from payment services regulation where available; however, regulatory classification depends on the facts and applicable law.
+              </li>
+              <li>
+                <strong className="text-white">24.4 Payment to Reelzilla discharges Buyer&apos;s payment obligation to Seller.</strong> Buyers agree that when they pay Reelzilla (or our designated payment service provider) for a Marketplace Transaction, they are paying the Seller via the Seller&apos;s authorised agent. As a result, payment to Reelzilla discharges the Buyer&apos;s payment obligation to the Seller for that Marketplace Transaction (subject to any refund rights).
+              </li>
+              <li>
+                <strong className="text-white">24.5 Marketplace Payment Terms; third-party payment service providers.</strong> Marketplace payments, holds, payouts, chargebacks, refunds and disputes are governed by our Marketplace Payment Terms (the &quot;Payment Terms&quot;), which are incorporated by reference. Payments are processed by one or more third-party payment service providers (&quot;PSPs&quot;). You may be required to agree to PSP terms, and PSPs may carry out identity checks, sanctions screening and other compliance steps.
+              </li>
+              <li>
+                <strong className="text-white">24.6 No payment account / stored value; Credits are not a Marketplace payment method.</strong> The Marketplace is not a payment account, e-money product, or stored value service. Unless we expressly state otherwise, Credits are for use within the video-generation SaaS features only and cannot be used to buy Marketplace Items or to withdraw funds.
+              </li>
+              <li>
+                <strong className="text-white">24.7 Fees and deductions.</strong> We may charge Sellers and/or Buyers Marketplace fees, processing fees and/or other charges (including dispute/chargeback fees) as described in the Payment Terms. We may deduct such fees from amounts paid by Buyers before remitting Seller Earnings.
+              </li>
+              <li>
+                <strong className="text-white">24.8 Holds, reserves, refunds and chargebacks.</strong> We may (and our PSPs may) place holds/reserves on Seller Earnings, delay payouts, or recover amounts from Sellers (including by set-off from future Seller Earnings) to cover refunds, chargebacks, disputes, fraud or policy breaches, as described in the Payment Terms.
+              </li>
+              <li>
+                <strong className="text-white">24.9 Seller representations.</strong> Sellers represent and warrant that: (a) they have all rights, permissions, and licences needed to sell or license the Marketplace Items; (b) listings are accurate and not misleading; (c) Marketplace Items and listings comply with law and our AUP; and (d) they will comply with all tax obligations relating to their Marketplace activity.
+              </li>
+              <li>
+                <strong className="text-white">24.10 Buyer responsibilities.</strong> Buyers are responsible for reviewing listings and ensuring Marketplace Items meet their needs. Because Marketplace Items are digital content, Marketplace purchases may be non-cancellable and non-refundable once delivery begins, except where required by law or expressly provided in the Payment Terms.
+              </li>
+              <li>
+                <strong className="text-white">24.11 Changes; suspension.</strong> We may modify the Marketplace, eligibility, fees, payout methods, or suspend Marketplace access for compliance, risk, or policy reasons.
+              </li>
+            </ul>
           </section>
         </div>
 

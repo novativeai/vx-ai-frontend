@@ -9,7 +9,7 @@ export default function RefundPolicyPage() {
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-8">
           Refund &amp; Cancellation Policy
         </h1>
-        <p className="text-neutral-400 mb-12">Effective date: December 2025</p>
+        <p className="text-neutral-400 mb-12">Effective date: January 2026</p>
 
         <div className="space-y-8 text-neutral-300">
           <section>
@@ -233,7 +233,29 @@ export default function RefundPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">13. Contact Us</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">13. Marketplace Transactions (User-to-User Purchases)</h2>
+
+            <ul className="list-disc list-inside space-y-4 ml-4">
+              <li>
+                <strong className="text-white">13.1 Scope.</strong> This Policy applies to Credits, add-ons, and other purchases made directly from Reelzilla for access to the AI video-generation Service. It does not govern purchases of Marketplace Items from other Users via the Marketplace.
+              </li>
+              <li>
+                <strong className="text-white">13.2 Marketplace purchases.</strong> Marketplace Transactions (where a Buyer purchases or licenses a Marketplace Item from a Seller) are governed by the Marketplace Payment Terms and any additional terms disclosed at checkout or in the relevant listing.
+              </li>
+              <li>
+                <strong className="text-white">13.3 Digital content.</strong> Because Marketplace Items are digital content, cancellation and refund rights may be limited once delivery or access begins, except where required by law or expressly provided in the Marketplace Payment Terms.
+              </li>
+              <li>
+                <strong className="text-white">13.4 Support.</strong> If you believe a Marketplace Item is infringing, defective, not as described, or otherwise problematic, please contact support with the relevant transaction details. We may (but are not obliged to) assist with dispute resolution in accordance with the Marketplace Payment Terms.
+              </li>
+              <li>
+                <strong className="text-white">13.5 Statutory rights preserved.</strong> Nothing in this Section 13 is intended to exclude or limit any statutory rights you may have under applicable law.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-white mb-4">14. Contact Us</h2>
             <p className="mb-4">If you have questions about this Policy or our practices, please contact:</p>
             <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
               <p className="font-semibold text-white">Reelzilla (ZEPHIRIX LTD)</p>
