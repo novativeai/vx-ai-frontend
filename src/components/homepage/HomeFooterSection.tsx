@@ -112,10 +112,10 @@ export function HomeFooterSection() {
                   height={24}
                   className="h-6 w-auto object-contain"
                 />
-                {/* Maestro Logo */}
+                {/* Mastercard Logo */}
                 <Image
-                  src="/icons/maestro-full-logo.png"
-                  alt="Maestro"
+                  src="/icons/mc-logo.png"
+                  alt="Mastercard"
                   width={44}
                   height={28}
                   className="h-7 w-auto object-contain"
