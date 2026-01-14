@@ -103,13 +103,13 @@ export default function Footer() {
             <div className="pt-2">
               <p className="text-xs text-muted-foreground mb-2">We accept</p>
               <div className="flex items-center gap-2">
-                {/* Visa Logo */}
+                {/* Visa Logo - reduced 15% */}
                 <Image
                   src="/icons/visa-logo.webp"
                   alt="Visa"
-                  width={44}
-                  height={28}
-                  className="h-7 w-auto object-contain"
+                  width={37}
+                  height={24}
+                  className="h-6 w-auto object-contain"
                 />
                 {/* Maestro Logo */}
                 <Image
@@ -119,12 +119,13 @@ export default function Footer() {
                   height={28}
                   className="h-7 w-auto object-contain"
                 />
-                {/* 3D Secure Logo */}
-                <svg className="h-7 w-auto" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
-                  <rect width="100" height="60" rx="6" fill="#1a1a2e"/>
-                  <path d="M50 8C42 8 35 12 35 12V32C35 42 50 52 50 52C50 52 65 42 65 32V12C65 12 58 8 50 8Z" fill="#00d26a" stroke="#00d26a" strokeWidth="2"/>
-                  <path d="M44 30L48 34L56 24" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                  <text x="50" y="58" textAnchor="middle" fill="#888" fontSize="6" fontFamily="system-ui, sans-serif">3D Secure</text>
+                {/* Visa Secure Badge */}
+                <svg className="h-6 w-auto" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Visa Secure">
+                  <rect width="80" height="32" rx="4" fill="#1A1F71"/>
+                  <circle cx="16" cy="16" r="8" fill="white"/>
+                  <path d="M13 16L15 18L19 14" stroke="#1A1F71" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <text x="48" y="14" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold" fontFamily="system-ui, sans-serif">VISA</text>
+                  <text x="48" y="22" textAnchor="middle" fill="white" fontSize="5" fontFamily="system-ui, sans-serif">Secure</text>
                 </svg>
               </div>
             </div>
