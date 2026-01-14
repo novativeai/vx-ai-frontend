@@ -119,12 +119,12 @@ export default function Footer() {
                   height={28}
                   className="h-7 w-auto object-contain"
                 />
-                {/* Visa Secure Badge */}
-                <svg className="h-6 w-auto" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Visa Secure">
+                {/* 3D Secure Badge */}
+                <svg className="h-6 w-auto" viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
                   <rect width="80" height="32" rx="4" fill="#1A1F71"/>
                   <circle cx="16" cy="16" r="8" fill="white"/>
                   <path d="M13 16L15 18L19 14" stroke="#1A1F71" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <text x="48" y="14" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold" fontFamily="system-ui, sans-serif">VISA</text>
+                  <text x="48" y="14" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold" fontFamily="system-ui, sans-serif">3D</text>
                   <text x="48" y="22" textAnchor="middle" fill="white" fontSize="5" fontFamily="system-ui, sans-serif">Secure</text>
                 </svg>
               </div>
