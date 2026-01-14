@@ -120,12 +120,11 @@ export default function Footer() {
                   className="h-7 w-auto object-contain"
                 />
                 {/* 3D Secure Badge */}
-                <svg className="h-7 w-auto" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
-                  <rect x="0.5" y="0.5" width="47" height="27" rx="3.5" fill="#fff" stroke="#e5e5e5"/>
-                  <path d="M14 6C11.5 6 9 7.5 9 7.5V16C9 20 14 23 14 23C14 23 19 20 19 16V7.5C19 7.5 16.5 6 14 6Z" stroke="#1A1F71" strokeWidth="1.5" fill="none"/>
-                  <path d="M11.5 14.5L13 16L16.5 12" stroke="#1A1F71" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <text x="33" y="12" textAnchor="middle" fill="#1A1F71" fontSize="6" fontWeight="600" fontFamily="system-ui, sans-serif">3D</text>
-                  <text x="33" y="19" textAnchor="middle" fill="#666" fontSize="5" fontFamily="system-ui, sans-serif">Secure</text>
+                <svg className="h-7 w-auto" viewBox="0 0 70 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="3D Secure">
+                  <path d="M14 4C10 4 6 6.5 6 6.5V17C6 23 14 27 14 27C14 27 22 23 22 17V6.5C22 6.5 18 4 14 4Z" stroke="#22c55e" strokeWidth="1.8" fill="none"/>
+                  <path d="M10 15L13 18L18 12" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <text x="46" y="12" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="700" fontFamily="system-ui, sans-serif">3D</text>
+                  <text x="46" y="22" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontFamily="system-ui, sans-serif">Secure</text>
                 </svg>
               </div>
             </div>
