@@ -192,7 +192,11 @@ export default function SignUp() {
     }
   };
 
-  const handleBlur = (field: keyof FormData) => {
+  const handleBlur = (field: keyof FormData, e?: React.FocusEvent) => {
+    // Don't validate when clicking navigation links (Sign in link)
+    const relatedTarget = e?.relatedTarget as HTMLElement | null;
+    if (relatedTarget?.tagName === 'A') return;
+
     let error: string | undefined;
     switch (field) {
       case 'firstName': error = validateFirstName(formData.firstName); break;
@@ -240,42 +244,56 @@ export default function SignUp() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
+
+    let authSucceeded = false;
+
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      authSucceeded = true;
 
-      // Use retry helper to handle token propagation delay after logout/login
-      const userDoc = await getUserDocWithRetry(user.uid);
+      // Handle Firestore operations separately - don't fail signup if these fail
+      try {
+        const userDoc = await getUserDocWithRetry(user.uid);
 
-      if (!userDoc.exists()) {
-        // For Google sign-in, create user with profileComplete: false
-        // User will be redirected to onboarding to complete mandatory fields
-        const newUserDocRef = doc(db, "users", user.uid);
-        await setDoc(newUserDocRef, {
-          email: user.email,
-          firstName: user.displayName?.split(' ')[0] || '',
-          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
-          credits: 10,
-          activePlan: "Starter",
-          isAdmin: false,
-          emailVerified: true, // Google accounts are pre-verified
-          profileComplete: false, // Needs to complete onboarding
-          createdAt: new Date(),
-        });
-        // Redirect to onboarding to collect mandatory fields
-        router.push('/onboarding');
-      } else {
-        // Existing user - check if profile is complete
-        const userData = userDoc.data();
-
-        if (isProfileComplete(userData)) {
-          router.push('/');
-        } else {
+        if (!userDoc.exists()) {
+          // For Google sign-in, create user with profileComplete: false
+          const newUserDocRef = doc(db, "users", user.uid);
+          await setDoc(newUserDocRef, {
+            email: user.email,
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+            credits: 10,
+            activePlan: "Starter",
+            isAdmin: false,
+            emailVerified: true,
+            profileComplete: false,
+            createdAt: new Date(),
+          });
           router.push('/onboarding');
+        } else {
+          // Existing user - check if profile is complete
+          const userData = userDoc.data();
+          if (isProfileComplete(userData)) {
+            router.push('/');
+          } else {
+            router.push('/onboarding');
+          }
         }
+      } catch {
+        // Firestore failed but auth succeeded - AuthContext will handle state
+        router.push('/onboarding');
       }
     } catch (err) {
-      toast.error('Sign up failed', (err as Error).message);
+      // Only show error if auth itself failed
+      if (!authSucceeded) {
+        const errorCode = (err as { code?: string }).code;
+        if (errorCode === 'auth/popup-closed-by-user' || errorCode === 'auth/cancelled-popup-request') {
+          // User closed popup or another popup opened - don't show error
+        } else {
+          toast.error('Sign up failed', (err as Error).message);
+        }
+      }
     } finally {
       setIsGoogleLoading(false);
     }
@@ -290,40 +308,55 @@ export default function SignUp() {
 
     setIsLoading(true);
 
+    let authSucceeded = false;
+
     try {
+      // Step 1: Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
+      authSucceeded = true;
 
-      // Send email verification
-      await sendEmailVerification(user);
+      // Step 2: Handle email verification and Firestore separately
+      try {
+        await sendEmailVerification(user);
+      } catch {
+        // Email verification failed but continue - user can request again
+      }
 
-      // Save user data to Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        country: formData.country,
-        address: formData.address,
-        city: formData.city,
-        postCode: formData.postCode,
-        phone: formData.phone,
-        credits: 10,
-        activePlan: "Starter",
-        isAdmin: false,
-        emailVerified: false,
-        profileComplete: true, // All mandatory fields collected during email signup
-        createdAt: new Date(),
-      });
+      try {
+        // Save user data to Firestore
+        await setDoc(doc(db, 'users', user.uid), {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          country: formData.country,
+          address: formData.address,
+          city: formData.city,
+          postCode: formData.postCode,
+          phone: formData.phone,
+          credits: 10,
+          activePlan: "Starter",
+          isAdmin: false,
+          emailVerified: false,
+          profileComplete: true,
+          createdAt: new Date(),
+        });
+      } catch {
+        // Firestore failed but auth succeeded - AuthContext will retry
+      }
 
       setVerificationSent(true);
     } catch (err) {
-      const errorCode = (err as { code?: string }).code;
-      if (errorCode === 'auth/email-already-in-use') {
-        toast.error('Sign up failed', 'An account with this email already exists.');
-      } else if (errorCode === 'auth/weak-password') {
-        toast.error('Sign up failed', 'Password is too weak. Please use a stronger password.');
-      } else {
-        toast.error('Sign up failed', (err as Error).message);
+      // Only show error for auth failures
+      if (!authSucceeded) {
+        const errorCode = (err as { code?: string }).code;
+        if (errorCode === 'auth/email-already-in-use') {
+          toast.error('Sign up failed', 'An account with this email already exists.');
+        } else if (errorCode === 'auth/weak-password') {
+          toast.error('Sign up failed', 'Password is too weak. Please use a stronger password.');
+        } else {
+          toast.error('Sign up failed', (err as Error).message);
+        }
       }
     } finally {
       setIsLoading(false);
@@ -469,7 +502,7 @@ export default function SignUp() {
                     placeholder="John"
                     value={formData.firstName}
                     onChange={(e) => updateField('firstName', e.target.value)}
-                    onBlur={() => handleBlur('firstName')}
+                    onBlur={(e) => handleBlur('firstName', e)}
                     disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.firstName}
@@ -493,7 +526,7 @@ export default function SignUp() {
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={(e) => updateField('lastName', e.target.value)}
-                    onBlur={() => handleBlur('lastName')}
+                    onBlur={(e) => handleBlur('lastName', e)}
                     disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.lastName}
@@ -521,7 +554,7 @@ export default function SignUp() {
                   placeholder="m@example.com"
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
-                  onBlur={() => handleBlur('email')}
+                  onBlur={(e) => handleBlur('email', e)}
                   disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.email}
@@ -548,7 +581,7 @@ export default function SignUp() {
                     placeholder="Min. 8 characters"
                     value={formData.password}
                     onChange={(e) => updateField('password', e.target.value)}
-                    onBlur={() => handleBlur('password')}
+                    onBlur={(e) => handleBlur('password', e)}
                     disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.password}
@@ -589,7 +622,7 @@ export default function SignUp() {
                   placeholder="+1 (234) 567-8900"
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
-                  onBlur={() => handleBlur('phone')}
+                  onBlur={(e) => handleBlur('phone', e)}
                   disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.phone}
@@ -612,7 +645,7 @@ export default function SignUp() {
                   name="country"
                   value={formData.country}
                   onChange={(e) => updateField('country', e.target.value)}
-                  onBlur={() => handleBlur('country')}
+                  onBlur={(e) => handleBlur('country', e)}
                   disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.country}
@@ -645,7 +678,7 @@ export default function SignUp() {
                   placeholder="123 Main Street, Apt 4B"
                   value={formData.address}
                   onChange={(e) => updateField('address', e.target.value)}
-                  onBlur={() => handleBlur('address')}
+                  onBlur={(e) => handleBlur('address', e)}
                   disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.address}
@@ -672,7 +705,7 @@ export default function SignUp() {
                     placeholder="New York"
                     value={formData.city}
                     onChange={(e) => updateField('city', e.target.value)}
-                    onBlur={() => handleBlur('city')}
+                    onBlur={(e) => handleBlur('city', e)}
                     disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.city}
@@ -696,7 +729,7 @@ export default function SignUp() {
                     placeholder="10001"
                     value={formData.postCode}
                     onChange={(e) => updateField('postCode', e.target.value)}
-                    onBlur={() => handleBlur('postCode')}
+                    onBlur={(e) => handleBlur('postCode', e)}
                     disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.postCode}

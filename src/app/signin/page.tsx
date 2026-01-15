@@ -73,41 +73,58 @@ export default function SignIn() {
     setIsGoogleLoading(true);
     setFieldErrors({}); // Clear any existing field errors
     const provider = new GoogleAuthProvider();
+
+    let authSucceeded = false;
+
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      authSucceeded = true;
 
-      // Use retry helper to handle token propagation delay after logout/login
-      const userDoc = await getUserDocWithRetry(user.uid);
+      // Handle Firestore operations separately - don't fail signin if these fail
+      try {
+        const userDoc = await getUserDocWithRetry(user.uid);
 
-      if (!userDoc.exists()) {
-        // New user - create profile with profileComplete: false
-        const newUserDocRef = doc(db, "users", user.uid);
-        await setDoc(newUserDocRef, {
-          email: user.email,
-          firstName: user.displayName?.split(' ')[0] || '',
-          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
-          credits: 10,
-          activePlan: "Starter",
-          isAdmin: false,
-          emailVerified: true,
-          profileComplete: false,
-          createdAt: new Date(),
-        });
-        // Redirect to onboarding to complete mandatory fields
-        router.push('/onboarding');
-      } else {
-        // Existing user - check if profile is complete
-        const userData = userDoc.data();
-
-        if (isProfileComplete(userData)) {
-          router.push('/');
-        } else {
+        if (!userDoc.exists()) {
+          // New user - create profile with profileComplete: false
+          const newUserDocRef = doc(db, "users", user.uid);
+          await setDoc(newUserDocRef, {
+            email: user.email,
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+            credits: 10,
+            activePlan: "Starter",
+            isAdmin: false,
+            emailVerified: true,
+            profileComplete: false,
+            createdAt: new Date(),
+          });
           router.push('/onboarding');
+        } else {
+          // Existing user - check if profile is complete
+          const userData = userDoc.data();
+          if (isProfileComplete(userData)) {
+            router.push('/');
+          } else {
+            router.push('/onboarding');
+          }
         }
+      } catch {
+        // Firestore failed but auth succeeded - AuthContext will handle state
+        router.push('/');
       }
     } catch (err) {
-      toast.error('Sign in failed', (err as Error).message);
+      // Only show error if auth itself failed
+      if (!authSucceeded) {
+        const errorCode = (err as { code?: string }).code;
+        if (errorCode === 'auth/popup-closed-by-user') {
+          // User closed the popup - don't show error
+        } else if (errorCode === 'auth/cancelled-popup-request') {
+          // Another popup was opened - don't show error
+        } else {
+          toast.error('Sign in failed', (err as Error).message);
+        }
+      }
     } finally {
       setIsGoogleLoading(false);
     }
@@ -129,39 +146,53 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
+      // Step 1: Firebase Authentication
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Check if profile is complete - use retry helper for token propagation
-      const userDoc = await getUserDocWithRetry(user.uid);
+      // Step 2: Handle Firestore operations separately - don't fail signin if these fail
+      // The AuthContext will handle the user state via onAuthStateChanged
+      try {
+        const userDoc = await getUserDocWithRetry(user.uid);
 
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-
-        if (isProfileComplete(userData)) {
-          router.push('/');
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (isProfileComplete(userData)) {
+            router.push('/');
+          } else {
+            router.push('/onboarding');
+          }
         } else {
+          // User exists in Auth but not in Firestore - create document
+          const newUserDocRef = doc(db, "users", user.uid);
+          await setDoc(newUserDocRef, {
+            email: user.email,
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+            credits: 10,
+            activePlan: "Starter",
+            isAdmin: false,
+            emailVerified: user.emailVerified,
+            profileComplete: false,
+            createdAt: new Date(),
+          });
           router.push('/onboarding');
         }
-      } else {
-        // User exists in Auth but not in Firestore - create document
-        const newUserDocRef = doc(db, "users", user.uid);
-        await setDoc(newUserDocRef, {
-          email: user.email,
-          firstName: user.displayName?.split(' ')[0] || '',
-          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
-          credits: 10,
-          activePlan: "Starter",
-          isAdmin: false,
-          emailVerified: user.emailVerified,
-          profileComplete: false,
-          createdAt: new Date(),
-        });
-        // Redirect to onboarding to complete profile
-        router.push('/onboarding');
+      } catch {
+        // Firestore operation failed but auth succeeded - just redirect
+        // AuthContext will handle the user state
+        router.push('/');
       }
-    } catch {
-      toast.error('Sign in failed', 'Invalid email or password. Please try again.');
+    } catch (err) {
+      // Only show error for actual authentication failures
+      const errorCode = (err as { code?: string }).code;
+      if (errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-credential') {
+        toast.error('Sign in failed', 'Invalid email or password. Please try again.');
+      } else if (errorCode === 'auth/too-many-requests') {
+        toast.error('Too many attempts', 'Please try again later.');
+      } else {
+        toast.error('Sign in failed', 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -178,6 +209,9 @@ export default function SignIn() {
     // Don't validate empty fields when clicking buttons (likely Google sign-in)
     // This handles edge cases where relatedTarget might be null in some browsers
     if (field === 'email' && !email.trim() && relatedTarget?.tagName === 'BUTTON') return;
+
+    // Don't validate when clicking navigation links (Sign up, Forgot password)
+    if (relatedTarget?.tagName === 'A') return;
 
     if (field === 'email') {
       const error = validateEmail(email);
