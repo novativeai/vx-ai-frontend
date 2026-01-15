@@ -53,10 +53,12 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <AspectRatio ratio={1 / 1} className="bg-neutral-800">
+        <AspectRatio ratio={1 / 1} className="bg-neutral-800 relative">
           {/* Loading skeleton */}
           {isLoading && (
-            <PremiumSkeleton className="absolute inset-0 z-10" />
+            <div className="absolute inset-0 z-10 bg-neutral-800 overflow-hidden">
+              <PremiumSkeleton className="w-full h-full rounded-none" />
+            </div>
           )}
 
           {item.outputType === 'video' ? (
