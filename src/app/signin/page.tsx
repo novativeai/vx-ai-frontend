@@ -202,13 +202,13 @@ export default function SignIn() {
     // Don't validate if Google sign-in is in progress
     if (isGoogleLoading) return;
 
-    // Don't validate if focus is moving to the Google sign-in button
     const relatedTarget = e.relatedTarget as HTMLElement | null;
+
+    // Don't validate if focus is moving to the Google sign-in button
     if (relatedTarget?.closest('[data-google-signin]')) return;
 
-    // Don't validate empty fields when clicking buttons (likely Google sign-in)
-    // This handles edge cases where relatedTarget might be null in some browsers
-    if (field === 'email' && !email.trim() && relatedTarget?.tagName === 'BUTTON') return;
+    // Don't validate when clicking buttons (Google sign-in, submit, etc.)
+    if (relatedTarget?.tagName === 'BUTTON') return;
 
     // Don't validate when clicking navigation links (Sign up, Forgot password)
     if (relatedTarget?.tagName === 'A') return;
