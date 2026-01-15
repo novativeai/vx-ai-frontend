@@ -214,10 +214,6 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
                   >
                     {isProcessing ? "Processing..." : "Proceed to Checkout"}
                   </Button>
-
-                  <p className="text-xs text-neutral-500 text-center">
-                    Powered by PayTrust
-                  </p>
                 </div>
               )}
             </div>

@@ -160,7 +160,7 @@ function ProductCreationContent() {
     <div className="min-h-screen bg-black text-white py-20">
       <div className="container mx-auto px-4">
         {/* Back Button */}
-        <Link href="/explore" className="inline-flex items-center gap-2 text-neutral-400 hover:text-white mb-8 transition-colors">
+        <Link href="/explore#history" className="inline-flex items-center gap-2 text-neutral-400 hover:text-white mb-8 transition-colors">
           <ArrowLeft size={20} />
           Back to History
         </Link>

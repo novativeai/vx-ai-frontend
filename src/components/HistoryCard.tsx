@@ -63,7 +63,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <AspectRatio ratio={1 / 1} className="bg-neutral-800 relative">
+        <AspectRatio ratio={1 / 1} className="bg-neutral-900 relative">
           {/* Loading skeleton */}
           {isLoading && (
             <div className="absolute inset-0 z-10 bg-neutral-800 overflow-hidden">
@@ -82,7 +82,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
                 preload="auto"
                 onLoadedData={handleLoadComplete}
                 onCanPlay={handleLoadComplete}
-                className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                className={`w-full h-full object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
               />
               {/* Play indicator on hover */}
               <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>

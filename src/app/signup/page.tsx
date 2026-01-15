@@ -14,6 +14,7 @@ import { Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { GoogleIcon } from '@/components/icons/Googleicon';
 import { isProfileComplete } from '@/lib/profileUtils';
 import { toast } from '@/hooks/use-toast';
+import { COUNTRIES } from '@/lib/countries';
 
 // Helper to get user doc with retry for token propagation delay
 async function getUserDocWithRetry(userId: string, maxRetries = 3, delayMs = 500) {
@@ -39,17 +40,6 @@ async function getUserDocWithRetry(userId: string, maxRetries = 3, delayMs = 500
   // Final attempt without catching
   return await getDoc(userDocRef);
 }
-
-// Country list for the dropdown
-const COUNTRIES = [
-  'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany',
-  'France', 'Spain', 'Italy', 'Netherlands', 'Belgium', 'Switzerland',
-  'Austria', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Ireland',
-  'Portugal', 'Poland', 'Czech Republic', 'Japan', 'South Korea',
-  'Singapore', 'Hong Kong', 'New Zealand', 'Brazil', 'Mexico',
-  'Argentina', 'Chile', 'Colombia', 'India', 'United Arab Emirates',
-  'Saudi Arabia', 'Israel', 'South Africa', 'Other'
-].sort();
 
 // Phone number formatting helper
 function formatPhoneNumber(value: string): string {
