@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { DollarSign, Play } from "lucide-react";
-import { memo, useState, useRef, useCallback } from "react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
 import { PremiumSkeleton } from "@/components/ui/premium-skeleton";
 
 interface Generation {
@@ -46,6 +46,16 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     setIsLoading(false);
   }, []);
 
+  // Check if video is already loaded on mount (handles cached videos)
+  useEffect(() => {
+    if (item.outputType === 'video' && videoRef.current) {
+      // readyState >= 2 means HAVE_CURRENT_DATA (first frame available)
+      if (videoRef.current.readyState >= 2) {
+        setIsLoading(false);
+      }
+    }
+  }, [item.outputType]);
+
   return (
     <div className="w-80 flex-shrink-0">
       <Card
@@ -71,6 +81,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
                 playsInline
                 preload="auto"
                 onLoadedData={handleLoadComplete}
+                onCanPlay={handleLoadComplete}
                 className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
               />
               {/* Play indicator on hover */}
