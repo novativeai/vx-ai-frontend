@@ -193,8 +193,18 @@ export default function SignUp() {
   };
 
   const handleBlur = (field: keyof FormData, e?: React.FocusEvent) => {
-    // Don't validate when clicking navigation links (Sign in link)
+    // Don't validate if Google sign-in is in progress
+    if (isGoogleLoading) return;
+
     const relatedTarget = e?.relatedTarget as HTMLElement | null;
+
+    // Don't validate if focus is moving to the Google sign-in button
+    if (relatedTarget?.closest('[data-google-signin]')) return;
+
+    // Don't validate when clicking buttons (Google sign-in, submit, etc.)
+    if (relatedTarget?.tagName === 'BUTTON') return;
+
+    // Don't validate when clicking navigation links (Sign in link)
     if (relatedTarget?.tagName === 'A') return;
 
     let error: string | undefined;
@@ -468,6 +478,7 @@ export default function SignUp() {
               onClick={handleGoogleSignIn}
               disabled={isLoading || isGoogleLoading}
               aria-busy={isGoogleLoading}
+              data-google-signin
             >
               {isGoogleLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
