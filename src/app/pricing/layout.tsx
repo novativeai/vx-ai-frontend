@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pricing - Flexible Plans | reelzila",
-  description: "Choose the perfect plan for your AI video generation needs. Pay as you go or subscribe for more credits.",
+  title: "Credits - Pay As You Go | reelzila",
+  description: "Purchase credits for AI video generation. No subscriptions, no commitments. Credits never expire.",
   openGraph: {
     title: "Pricing | reelzila",
     description: "Flexible pricing plans for AI video generation",

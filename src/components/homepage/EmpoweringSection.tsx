@@ -24,7 +24,7 @@ export function EmpoweringSection() {
               </p>
               <Link href="/student-verify">
                 <Button className="mt-6 bg-black text-white hover:bg-neutral-800 font-semibold">
-                  Subscribe
+                  Apply Now
                 </Button>
               </Link>
             </div>

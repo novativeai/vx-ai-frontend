@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
     <div className="bg-black text-white min-h-screen pt-32">
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-8">
-          Privacy &amp; Cookies Policy
+          Privacy Policy
         </h1>
         <p className="text-neutral-400 mb-12">Effective date: January 2026</p>
 
@@ -68,10 +68,10 @@ export default function PrivacyPolicyPage() {
               <li>Contact preferences, language, time zone</li>
             </ul>
 
-            <h3 className="text-xl font-semibold text-white mb-2 mt-6">2.2 Subscription &amp; Billing Data</h3>
+            <h3 className="text-xl font-semibold text-white mb-2 mt-6">2.2 Billing Data</h3>
             <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
-              <li>Plan type (Free / Paid / Enterprise)</li>
-              <li>Billing contact details, invoicing details</li>
+              <li>Credit purchase history</li>
+              <li>Billing contact details</li>
               <li>Payment-related information (e.g. last 4 digits of card, card type, billing address) processed via our payment processor; we do not store full card numbers ourselves.</li>
             </ul>
 
@@ -236,27 +236,14 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">10. Cookies &amp; Similar Technologies</h2>
-
-            <h3 className="text-xl font-semibold text-white mb-2 mt-6">10.1 What Are Cookies?</h3>
-            <p className="mb-4">Cookies are small text files stored on your device when you visit a website. Similar technologies include local storage, pixels, and SDKs. They help websites function, remember preferences, and analyse usage.</p>
-
-            <h3 className="text-xl font-semibold text-white mb-2 mt-6">10.2 How We Use Cookies</h3>
-            <p className="mb-4">On the Site and within the Service, we use:</p>
-            <ul className="list-disc list-inside space-y-3 ml-4 mb-4">
-              <li><strong className="text-white">Strictly necessary cookies:</strong> Required for basic operation (e.g. log-in, session management, security features, load balancing). Set on the basis of legitimate interests or contract, and do not require consent under UK/EU cookie rules.</li>
-              <li><strong className="text-white">Preference (functional) cookies:</strong> Remember choices (e.g. language, region, UI preferences). May rely on legitimate interests or consent, depending on local law.</li>
-              <li><strong className="text-white">Analytics &amp; performance cookies:</strong> Help us understand how the Site and Service are used (e.g. pages visited, features used, error rates). Used to improve performance and usability. Typically rely on consent (via cookie banner) in the UK/EEA.</li>
-              <li><strong className="text-white">Advertising / marketing cookies (if we use them):</strong> Used to measure campaigns or to show relevant ads on other sites. Only used where you have given consent, and can be disabled via the cookie banner and/or browser settings.</li>
+            <h2 className="text-2xl font-bold text-white mb-4">10. Technical Data &amp; Local Storage</h2>
+            <p className="mb-4">We use strictly necessary local storage and session data for:</p>
+            <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
+              <li>Authentication and session management</li>
+              <li>Remembering your preferences (e.g. UI settings)</li>
+              <li>Security features</li>
             </ul>
-
-            <h3 className="text-xl font-semibold text-white mb-2 mt-6">10.3 Cookie Consent &amp; Management</h3>
-            <p className="mb-4">When you first visit the Site from certain jurisdictions (e.g. UK/EEA), you will see a cookie banner that explains our use of cookies and allows you to accept all, reject non-essential, or customise cookie settings.</p>
-            <p className="mb-4">You can change your preferences at any time (e.g. via a &quot;Cookie Settings&quot; link in the Site footer) or by clearing cookies in your browser.</p>
-            <p>If you disable certain cookies, some features of the Site or Service may not work properly.</p>
-
-            <h3 className="text-xl font-semibold text-white mb-2 mt-6">10.4 Browser Controls &amp; Do Not Track</h3>
-            <p>Most browsers let you manage cookies (e.g. block, delete, or limit them). Please refer to your browser&apos;s help section. The Service does not currently respond to Do Not Track (DNT) signals; if that changes, we will update this Policy.</p>
+            <p>This data is essential for the Service to function and does not require consent under UK/EU rules. Most browsers allow you to manage local storage through their settings.</p>
           </section>
 
           <section>

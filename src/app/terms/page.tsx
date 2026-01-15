@@ -40,8 +40,7 @@ export default function TermsOfServicePage() {
               <li><strong className="text-white">Account:</strong> A registered profile enabling access to the Service.</li>
               <li><strong className="text-white">AUP:</strong> Our Acceptable Use restrictions in §8.</li>
               <li><strong className="text-white">Credits:</strong> Units consumed to generate, edit, or export content via the Service; not legal tender.</li>
-              <li><strong className="text-white">Customer, User, or Subscriber:</strong> Any person or entity that creates an Account or otherwise uses the Service.</li>
-              <li><strong className="text-white">Free Plan / Paid Plan:</strong> Subscription tiers with different entitlements, rates, and limits.</li>
+              <li><strong className="text-white">Customer or User:</strong> Any person or entity that creates an Account or otherwise uses the Service.</li>
               <li><strong className="text-white">Input(s):</strong> Content you or your authorized users submit (e.g., prompts, text, images, reference videos/audio, data, tags, settings).</li>
               <li><strong className="text-white">Model:</strong> Any machine-learning system used to create or transform content, whether operated by us or by a third-party provider.</li>
               <li><strong className="text-white">Output(s) or Generated Content:</strong> Content produced by the Service based on Inputs, including videos, frames, images, audio, and related metadata.</li>
@@ -71,7 +70,7 @@ export default function TermsOfServicePage() {
               <li>upload images;</li>
               <li>generate videos using one or more Models;</li>
               <li>download, store, and use Outputs; and</li>
-              <li>access usage under Free and Paid Plans.</li>
+              <li>purchase credits on a pay-as-you-go basis.</li>
             </ul>
             <h3 className="text-xl font-semibold text-white mb-2 mt-6">3.2 Availability</h3>
             <p className="mb-4">Features may vary by region, plan, and device. Beta/experimental features may be offered and can change or be withdrawn at any time (§14).</p>
@@ -80,23 +79,22 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-white mb-4">4. Plans, Billing, Credits, Auto-Renewal, Refunds, Taxes, Failed Payments</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">4. Credits, Billing, Refunds &amp; Taxes</h2>
             <ul className="list-disc list-inside space-y-3 ml-4">
-              <li><strong className="text-white">4.1 Subscriptions.</strong> Paid Plans are billed in advance on a recurring basis (monthly or annually) and auto-renew at then-current rates unless canceled before the renewal date in your billing settings.</li>
+              <li><strong className="text-white">4.1 Credit purchases.</strong> Credits are purchased on a pay-as-you-go basis. There are no subscriptions or recurring charges. Credits are added to your Account immediately upon successful payment.</li>
               <li><strong className="text-white">4.2 Credits.</strong>
                 <ul className="list-disc list-inside space-y-1 ml-6 mt-2">
                   <li>Credit consumption may vary by Model, resolution, duration, or feature;</li>
                   <li>Credits are not currency, non-transferable, and non-refundable;</li>
-                  <li>Promotional or trial credits may expire earlier;</li>
-                  <li>We may adjust credit pricing/consumption with notice for future use.</li>
+                  <li>Credits do not expire;</li>
+                  <li>We may adjust credit pricing/consumption with notice for future purchases.</li>
                 </ul>
               </li>
-              <li><strong className="text-white">4.3 Overage &amp; failed payments.</strong> If your payment method fails or an invoice is overdue, we may suspend features, reduce generation priority, limit exports, or terminate after notice. You remain responsible for amounts due.</li>
-              <li><strong className="text-white">4.4 Price changes.</strong> We may change plan prices and will provide advance notice for future billing cycles.</li>
-              <li><strong className="text-white">4.5 Cancellations.</strong> You can cancel at any time; cancellation takes effect at the end of the current term. We do not provide refunds for partial terms except where required by law.</li>
-              <li><strong className="text-white">4.6 Taxes.</strong> Prices exclude taxes. You are responsible for all applicable taxes, duties, and government charges, which we may collect where legally obliged.</li>
-              <li><strong className="text-white">4.7 Local consumer rights.</strong> If you are an EEA/UK consumer purchasing digital content, you may have a statutory 14-day withdrawal right. You expressly consent to immediate provision of digital content and acknowledge that once generation begins or credits are used, you lose the withdrawal right to the extent permitted by law.</li>
-              <li><strong className="text-white">4.8 Chargebacks.</strong> Unfounded chargebacks are a breach. We may contest them and suspend your Account.</li>
+              <li><strong className="text-white">4.3 Failed payments.</strong> If your payment method fails, no credits will be added. You may retry with a different payment method.</li>
+              <li><strong className="text-white">4.4 Price changes.</strong> We may change credit prices and will provide advance notice for future purchases.</li>
+              <li><strong className="text-white">4.5 Taxes.</strong> Prices exclude taxes. You are responsible for all applicable taxes, duties, and government charges, which we may collect where legally obliged.</li>
+              <li><strong className="text-white">4.6 Local consumer rights.</strong> If you are an EEA/UK consumer purchasing digital content, you may have a statutory 14-day withdrawal right. You expressly consent to immediate provision of digital content and acknowledge that once generation begins or credits are used, you lose the withdrawal right to the extent permitted by law.</li>
+              <li><strong className="text-white">4.7 Chargebacks.</strong> Unfounded chargebacks are a breach. We may contest them and suspend your Account.</li>
             </ul>
           </section>
 
