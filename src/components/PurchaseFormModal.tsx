@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { MarketplaceProduct } from "@/types/types";
-import { X } from "lucide-react";
+import { X, Loader2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VideoWithWatermark } from "@/components/VideoWithWatermark";
 import { useAuth } from "@/context/AuthContext";
@@ -210,10 +210,25 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
                   <Button
                     onClick={handlePurchase}
                     disabled={isProcessing}
-                    className="w-full bg-[#D4FF4F] hover:bg-[#D4FF4F]/90 text-black font-bold py-3 rounded-lg transition-all disabled:opacity-50"
+                    className="w-full bg-[#D4FF4F] hover:bg-[#D4FF4F]/90 text-black font-bold py-3 rounded-lg transition-all disabled:opacity-70"
                   >
-                    {isProcessing ? "Processing..." : "Proceed to Checkout"}
+                    {isProcessing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Connecting to Payment...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <CreditCard className="w-5 h-5" />
+                        Proceed to Checkout
+                      </span>
+                    )}
                   </Button>
+                  {isProcessing && (
+                    <p className="text-xs text-neutral-500 text-center">
+                      Securely connecting to payment gateway...
+                    </p>
+                  )}
                 </div>
               )}
             </div>

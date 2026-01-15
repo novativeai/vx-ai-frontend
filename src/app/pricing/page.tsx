@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { toast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export default function PricingPage() {
   const { user } = useAuth();
@@ -147,8 +148,20 @@ export default function PricingPage() {
                 onClick={() => processPurchase(customAmount)}
                 disabled={isProcessing || customAmount <= 0}
               >
-                {isProcessing ? "Processing..." : "Purchase Credits"}
+                {isProcessing ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Connecting to Payment...
+                  </span>
+                ) : (
+                  "Purchase Credits"
+                )}
               </Button>
+              {isProcessing && (
+                <p className="text-xs text-neutral-500 text-center mt-3">
+                  Securely connecting to payment gateway...
+                </p>
+              )}
             </div>
           </div>
         </div>
