@@ -111,7 +111,21 @@ function HistorySection() {
 
 export default function ExplorePage() {
   const { user } = useAuth();
-  
+
+  // Handle hash scroll on page load
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className="bg-black text-white">
       <DynamicBanner slides={explorePageSlides} />
