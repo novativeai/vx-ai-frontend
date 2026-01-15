@@ -99,14 +99,14 @@ export default function SignIn() {
             profileComplete: false,
             createdAt: new Date(),
           });
-          router.push('/onboarding');
+          router.push('/');
         } else {
           // Existing user - check if profile is complete
           const userData = userDoc.data();
           if (isProfileComplete(userData)) {
             router.push('/');
           } else {
-            router.push('/onboarding');
+            router.push('/');
           }
         }
       } catch {
@@ -160,7 +160,7 @@ export default function SignIn() {
           if (isProfileComplete(userData)) {
             router.push('/');
           } else {
-            router.push('/onboarding');
+            router.push('/');
           }
         } else {
           // User exists in Auth but not in Firestore - create document
@@ -176,7 +176,7 @@ export default function SignIn() {
             profileComplete: false,
             createdAt: new Date(),
           });
-          router.push('/onboarding');
+          router.push('/');
         }
       } catch {
         // Firestore operation failed but auth succeeded - just redirect

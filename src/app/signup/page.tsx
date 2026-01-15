@@ -249,19 +249,19 @@ export default function SignUp() {
             profileComplete: false,
             createdAt: new Date(),
           });
-          router.push('/onboarding');
+          router.push('/');
         } else {
           // Existing user - check if profile is complete
           const userData = userDoc.data();
           if (isProfileComplete(userData)) {
             router.push('/');
           } else {
-            router.push('/onboarding');
+            router.push('/');
           }
         }
       } catch {
         // Firestore failed but auth succeeded - AuthContext will handle state
-        router.push('/onboarding');
+        router.push('/');
       }
     } catch (err) {
       // Only show error if auth itself failed
