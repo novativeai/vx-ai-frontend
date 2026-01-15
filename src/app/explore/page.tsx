@@ -128,7 +128,7 @@ export default function ExplorePage() {
           </section>
           
           {user && (
-            <section>
+            <section id="history">
               <div className="mb-12">
                 <p className="text-sm uppercase tracking-widest text-neutral-400">YOUR CREATIONS</p>
                 <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">HISTORY</h2>

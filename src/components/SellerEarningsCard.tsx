@@ -136,7 +136,7 @@ export function SellerEarningsCard({ onWithdrawClick }: SellerEarningsCardProps)
           <p className="text-sm text-neutral-500">
             View your{" "}
             <a
-              href="/account?tab=seller"
+              href="/explore#history"
               className="text-[#D4FF4F] underline hover:text-[#c2ef4a]"
             >
               seller history
