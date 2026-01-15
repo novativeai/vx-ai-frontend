@@ -198,29 +198,6 @@ export default function SignIn() {
     }
   };
 
-  const handleBlur = (field: 'email' | 'password', e: React.FocusEvent) => {
-    // Don't validate if Google sign-in is in progress
-    if (isGoogleLoading) return;
-
-    const relatedTarget = e.relatedTarget as HTMLElement | null;
-
-    // Don't validate if focus is moving to the Google sign-in button
-    if (relatedTarget?.closest('[data-google-signin]')) return;
-
-    // Don't validate when clicking buttons (Google sign-in, submit, etc.)
-    if (relatedTarget?.tagName === 'BUTTON') return;
-
-    // Don't validate when clicking navigation links (Sign up, Forgot password)
-    if (relatedTarget?.tagName === 'A') return;
-
-    if (field === 'email') {
-      const error = validateEmail(email);
-      setFieldErrors(prev => ({ ...prev, email: error }));
-    } else {
-      const error = validatePassword(password);
-      setFieldErrors(prev => ({ ...prev, password: error }));
-    }
-  };
 
   const clearFieldError = (field: 'email' | 'password') => {
     if (fieldErrors[field]) {
@@ -279,7 +256,6 @@ export default function SignIn() {
                     setEmail(e.target.value);
                     clearFieldError('email');
                   }}
-                  onBlur={(e) => handleBlur('email', e)}
                   disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.email}
@@ -314,7 +290,6 @@ export default function SignIn() {
                       setPassword(e.target.value);
                       clearFieldError('password');
                     }}
-                    onBlur={(e) => handleBlur('password', e)}
                     disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.password}

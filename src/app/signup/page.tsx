@@ -192,37 +192,6 @@ export default function SignUp() {
     }
   };
 
-  const handleBlur = (field: keyof FormData, e?: React.FocusEvent) => {
-    // Don't validate if Google sign-in is in progress
-    if (isGoogleLoading) return;
-
-    const relatedTarget = e?.relatedTarget as HTMLElement | null;
-
-    // Don't validate if focus is moving to the Google sign-in button
-    if (relatedTarget?.closest('[data-google-signin]')) return;
-
-    // Don't validate when clicking buttons (Google sign-in, submit, etc.)
-    if (relatedTarget?.tagName === 'BUTTON') return;
-
-    // Don't validate when clicking navigation links (Sign in link)
-    if (relatedTarget?.tagName === 'A') return;
-
-    let error: string | undefined;
-    switch (field) {
-      case 'firstName': error = validateFirstName(formData.firstName); break;
-      case 'lastName': error = validateLastName(formData.lastName); break;
-      case 'email': error = validateEmail(formData.email); break;
-      case 'password': error = validatePassword(formData.password); break;
-      case 'phone': error = validatePhone(formData.phone); break;
-      case 'address': error = validateAddress(formData.address); break;
-      case 'city': error = validateCity(formData.city); break;
-      case 'postCode': error = validatePostCode(formData.postCode); break;
-      case 'country': error = validateCountry(formData.country); break;
-    }
-    if (error) {
-      setFieldErrors(prev => ({ ...prev, [field]: error }));
-    }
-  };
 
   const validateForm = (): boolean => {
     const errors: FieldErrors = {};
@@ -513,8 +482,7 @@ export default function SignUp() {
                     placeholder="John"
                     value={formData.firstName}
                     onChange={(e) => updateField('firstName', e.target.value)}
-                    onBlur={(e) => handleBlur('firstName', e)}
-                    disabled={isLoading}
+                                        disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.firstName}
                     aria-describedby={fieldErrors.firstName ? 'firstName-error' : undefined}
@@ -537,8 +505,7 @@ export default function SignUp() {
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={(e) => updateField('lastName', e.target.value)}
-                    onBlur={(e) => handleBlur('lastName', e)}
-                    disabled={isLoading}
+                                        disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.lastName}
                     aria-describedby={fieldErrors.lastName ? 'lastName-error' : undefined}
@@ -565,8 +532,7 @@ export default function SignUp() {
                   placeholder="m@example.com"
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
-                  onBlur={(e) => handleBlur('email', e)}
-                  disabled={isLoading}
+                                    disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.email}
                   aria-describedby={fieldErrors.email ? 'email-error' : undefined}
@@ -592,8 +558,7 @@ export default function SignUp() {
                     placeholder="Min. 8 characters"
                     value={formData.password}
                     onChange={(e) => updateField('password', e.target.value)}
-                    onBlur={(e) => handleBlur('password', e)}
-                    disabled={isLoading}
+                                        disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.password}
                     aria-describedby={fieldErrors.password ? 'password-error' : 'password-help'}
@@ -633,8 +598,7 @@ export default function SignUp() {
                   placeholder="+1 (234) 567-8900"
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
-                  onBlur={(e) => handleBlur('phone', e)}
-                  disabled={isLoading}
+                                    disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.phone}
                   aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
@@ -656,8 +620,7 @@ export default function SignUp() {
                   name="country"
                   value={formData.country}
                   onChange={(e) => updateField('country', e.target.value)}
-                  onBlur={(e) => handleBlur('country', e)}
-                  disabled={isLoading}
+                                    disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.country}
                   aria-describedby={fieldErrors.country ? 'country-error' : undefined}
@@ -689,8 +652,7 @@ export default function SignUp() {
                   placeholder="123 Main Street, Apt 4B"
                   value={formData.address}
                   onChange={(e) => updateField('address', e.target.value)}
-                  onBlur={(e) => handleBlur('address', e)}
-                  disabled={isLoading}
+                                    disabled={isLoading}
                   aria-required="true"
                   aria-invalid={!!fieldErrors.address}
                   aria-describedby={fieldErrors.address ? 'address-error' : undefined}
@@ -716,8 +678,7 @@ export default function SignUp() {
                     placeholder="New York"
                     value={formData.city}
                     onChange={(e) => updateField('city', e.target.value)}
-                    onBlur={(e) => handleBlur('city', e)}
-                    disabled={isLoading}
+                                        disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.city}
                     aria-describedby={fieldErrors.city ? 'city-error' : undefined}
@@ -740,8 +701,7 @@ export default function SignUp() {
                     placeholder="10001"
                     value={formData.postCode}
                     onChange={(e) => updateField('postCode', e.target.value)}
-                    onBlur={(e) => handleBlur('postCode', e)}
-                    disabled={isLoading}
+                                        disabled={isLoading}
                     aria-required="true"
                     aria-invalid={!!fieldErrors.postCode}
                     aria-describedby={fieldErrors.postCode ? 'postCode-error' : undefined}
