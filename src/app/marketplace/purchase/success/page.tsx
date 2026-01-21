@@ -25,10 +25,9 @@ export default function MarketplacePurchaseSuccessPage() {
   const [purchase, setPurchase] = useState<PurchaseDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    async function verifyPurchase() {
+    async function confirmPurchase() {
       if (!user || !purchaseId) {
         router.push("/marketplace");
         return;
@@ -36,53 +35,50 @@ export default function MarketplacePurchaseSuccessPage() {
 
       try {
         const token = await user.getIdToken();
+
+        // Call confirm endpoint to complete the purchase
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/marketplace/purchase/${purchaseId}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/marketplace/confirm-purchase`,
           {
+            method: "POST",
             headers: {
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({ purchaseId }),
           }
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch purchase details");
-        }
-
         const data = await response.json();
 
-        if (data.status === "completed") {
-          setPurchase(data);
+        if (response.ok && data.status === "completed") {
+          setPurchase({
+            id: purchaseId,
+            status: data.status,
+            title: data.title,
+            price: data.price,
+            videoUrl: data.videoUrl,
+          });
           setLoading(false);
-        } else if (data.status === "pending" && retryCount < 10) {
-          // Payment webhook might not have processed yet, retry
-          setTimeout(() => {
-            setRetryCount((prev) => prev + 1);
-          }, 2000);
         } else {
-          setError("Purchase is still being processed. Please check back later.");
+          setError(data.detail || data.message || "Failed to confirm purchase");
           setLoading(false);
         }
       } catch (err) {
-        logger.error("Error verifying purchase", err);
-        setError("Unable to verify purchase. Please contact support.");
+        logger.error("Error confirming purchase", err);
+        setError("Unable to verify purchase. Please check your account.");
         setLoading(false);
       }
     }
 
-    verifyPurchase();
-  }, [user, purchaseId, router, retryCount]);
+    confirmPurchase();
+  }, [user, purchaseId, router]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#D4FF4F] mb-4" />
-        <p className="text-neutral-400">Verifying your purchase...</p>
-        {retryCount > 0 && (
-          <p className="text-sm text-neutral-500 mt-2">
-            Processing payment... ({retryCount}/10)
-          </p>
-        )}
+        <p className="text-neutral-400">Confirming your purchase...</p>
       </div>
     );
   }
