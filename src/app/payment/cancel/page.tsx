@@ -1,13 +1,51 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { XCircle } from 'lucide-react';
+import { XCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function PaymentCancelPage() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const paymentId = searchParams.get('payment_id');
-  const subscriptionId = searchParams.get('subscription_id');
+  const [isUpdating, setIsUpdating] = useState(true);
+
+  // Update payment status to cancelled/failed when user lands on this page
+  useEffect(() => {
+    async function updatePaymentStatus() {
+      if (!user || !paymentId) {
+        setIsUpdating(false);
+        return;
+      }
+
+      try {
+        const paymentRef = doc(db, 'users', user.uid, 'payments', paymentId);
+        await updateDoc(paymentRef, {
+          status: 'cancelled',
+          cancelledAt: new Date()
+        });
+      } catch (error) {
+        // Payment might not exist or already updated - that's okay
+        console.error('Failed to update payment status:', error);
+      } finally {
+        setIsUpdating(false);
+      }
+    }
+
+    updatePaymentStatus();
+  }, [user, paymentId]);
+
+  if (isUpdating) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
