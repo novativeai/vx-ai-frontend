@@ -3,10 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { Loader2, CheckCircle } from 'lucide-react';
-import { logger } from '@/lib/logger';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function PaymentSuccessPage() {
   const { user } = useAuth();
@@ -14,58 +12,88 @@ export default function PaymentSuccessPage() {
   const router = useRouter();
   const paymentId = searchParams.get('payment_id');
 
-  const [verified, setVerified] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [credits, setCredits] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    async function verifyPayment() {
+    async function confirmPayment() {
       if (!user || !paymentId) {
         router.push('/pricing');
         return;
       }
 
       try {
-        const paymentDoc = await getDoc(
-          doc(db, 'users', user.uid, 'payments', paymentId)
+        const token = await user.getIdToken();
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/confirm-payment`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ paymentId })
+          }
         );
 
-        if (paymentDoc.exists()) {
-          const data = paymentDoc.data();
-          if (data.status === 'paid') {
-            setVerified(true);
-            setCredits(data.creditsPurchased || 0);
-          } else {
-            // Payment not confirmed yet
-            router.push('/payment/pending?payment_id=' + paymentId);
-            return;
-          }
+        const data = await response.json();
+
+        if (response.ok && data.status === 'paid') {
+          setStatus('success');
+          setCredits(data.credits || 0);
         } else {
-          router.push('/pricing');
-          return;
+          setStatus('error');
+          setErrorMessage(data.detail || data.message || 'Failed to confirm payment');
         }
       } catch (error) {
-        logger.error('Error verifying payment', error);
-        router.push('/pricing');
-        return;
+        console.error('Error confirming payment:', error);
+        setStatus('error');
+        setErrorMessage('Failed to verify payment. Please check your account.');
       }
-
-      setLoading(false);
     }
 
-    verifyPayment();
+    confirmPayment();
   }, [user, paymentId, router]);
 
-  if (loading) {
+  if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#D4FF4F]" />
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#D4FF4F] mb-4" />
+        <p className="text-neutral-400">Confirming your payment...</p>
       </div>
     );
   }
 
-  if (!verified) {
-    return null;
+  if (status === 'error') {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-12 h-12 text-yellow-500" />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-4">Verification Issue</h1>
+          <p className="text-neutral-400 mb-2">{errorMessage}</p>
+          <p className="text-sm text-neutral-500 mb-8">
+            If you completed the payment, your credits should appear in your account shortly.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/account"
+              className="inline-block px-6 py-3 bg-[#D4FF4F] text-black rounded-lg font-semibold hover:bg-[#D4FF4F]/90"
+            >
+              Check Account
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-block px-6 py-3 bg-neutral-800 text-white rounded-lg font-semibold hover:bg-neutral-700"
+            >
+              Back to Pricing
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -81,12 +109,12 @@ export default function PaymentSuccessPage() {
         <p className="text-sm text-neutral-500 mb-8">
           You can start generating videos right away.
         </p>
-        <a
-          href="/generator"
+        <Link
+          href="/explore"
           className="inline-block px-6 py-3 bg-[#D4FF4F] text-black rounded-lg font-semibold hover:bg-[#D4FF4F]/90"
         >
           Start Creating
-        </a>
+        </Link>
       </div>
     </div>
   );
