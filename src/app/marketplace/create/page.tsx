@@ -94,10 +94,8 @@ function ProductCreationContent() {
       const userName = user.displayName || user.email || "Anonymous";
 
       // Create marketplace product
-      // Only set thumbnailUrl for images - for videos, leave undefined so
-      // the marketplace grid can auto-generate a poster from the first frame
-      const isImage = generation.outputType === 'image';
-
+      // Set thumbnailUrl to the output URL for both images and videos
+      // For videos, the grid will use the video as thumbnail source
       const productData: Omit<MarketplaceProduct, "id"> = {
         sellerId: user.uid,
         sellerName: userName,
@@ -110,7 +108,7 @@ function ProductCreationContent() {
         tags: formData.tags.split(",").map(tag => tag.trim()).filter(Boolean),
         hasAudio: formData.hasAudio,
         useCases: formData.useCases.split(",").map(uc => uc.trim()).filter(Boolean),
-        thumbnailUrl: isImage ? generation.outputUrl : undefined,
+        thumbnailUrl: generation.outputUrl,
         status: "published",
         createdAt: serverTimestamp() as FieldValue,
         updatedAt: serverTimestamp() as FieldValue,
