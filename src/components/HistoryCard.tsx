@@ -3,10 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { DollarSign, Play } from "lucide-react";
 import { memo, useState, useRef, useCallback, useEffect } from "react";
-import { PremiumSkeleton } from "@/components/ui/premium-skeleton";
 
 interface Generation {
   id: string;
@@ -23,9 +21,8 @@ interface HistoryCardProps {
 }
 
 export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item }) {
-  const [isLoading, setIsLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState(16 / 9); // Default to 16:9 for videos
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleMouseEnter = useCallback(() => {
@@ -52,26 +49,14 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     }
   }, []);
 
-  const handleLoadComplete = useCallback(() => {
-    setIsLoading(false);
-  }, []);
-
   // Check if video is already loaded on mount (handles cached videos)
   useEffect(() => {
     if (item.outputType === 'video' && videoRef.current) {
-      // readyState >= 1 means HAVE_METADATA (dimensions available)
       if (videoRef.current.readyState >= 1) {
         handleVideoMetadata();
       }
-      // readyState >= 2 means HAVE_CURRENT_DATA (first frame available)
-      if (videoRef.current.readyState >= 2) {
-        setIsLoading(false);
-      }
     }
   }, [item.outputType, handleVideoMetadata]);
-
-  // For images, use 1:1, for videos use dynamic aspect ratio
-  const displayRatio = item.outputType === 'image' ? 1 : aspectRatio;
 
   return (
     <div className="w-80 flex-shrink-0">
@@ -80,14 +65,11 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <AspectRatio ratio={displayRatio} className="bg-neutral-900 relative overflow-hidden">
-          {/* Loading skeleton - z-10 */}
-          {isLoading && (
-            <div className="absolute inset-0 z-10 overflow-hidden">
-              <PremiumSkeleton className="w-full h-full rounded-none" />
-            </div>
-          )}
-
+        {/* Container adapts to video aspect ratio - no fixed ratio, video fills completely */}
+        <div
+          className="bg-neutral-900 relative overflow-hidden"
+          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : '16/9' }}
+        >
           {item.outputType === 'video' ? (
             <>
               <video
@@ -98,12 +80,10 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
                 playsInline
                 preload="auto"
                 onLoadedMetadata={handleVideoMetadata}
-                onLoadedData={handleLoadComplete}
-                onCanPlay={handleLoadComplete}
-                className={`w-full h-full object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+                className="w-full h-full object-cover"
               />
               {/* Play indicator on hover */}
-              <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered && !isLoading ? 'opacity-100' : 'opacity-0'}`}>
+              <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="bg-[#D4FF4F]/90 rounded-full p-3 backdrop-blur-sm">
                   <Play size={24} className="fill-black text-black" />
                 </div>
@@ -114,18 +94,17 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
               src={item.outputUrl}
               alt={item.prompt || "Generated image"}
               fill
-              className={`object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-              onLoad={handleLoadComplete}
+              className="object-cover"
               sizes="320px"
               loading="lazy"
             />
           )}
-        </AspectRatio>
+        </div>
 
-        {/* Gradient overlay - z-20 to be above skeleton */}
+        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none z-20" />
 
-        {/* Title text - z-30 to always be visible above everything */}
+        {/* Title text */}
         <div className="absolute bottom-0 left-0 p-4 text-white flex-1 pr-16 z-30">
           <p className="font-medium line-clamp-2">{item.prompt}</p>
           <p className="text-xs text-neutral-400 mt-1">
@@ -133,7 +112,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
           </p>
         </div>
 
-        {/* Monetize Button - z-30 */}
+        {/* Monetize Button */}
         <Link href={`/marketplace/create?generationId=${item.id}`} className="z-30">
           <button className="absolute bottom-4 right-4 z-30 bg-[#D4FF4F] hover:bg-[#D4FF4F]/90 text-black rounded-full p-2.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg hover:shadow-xl transform group-hover:scale-110">
             <DollarSign size={18} className="font-bold" />

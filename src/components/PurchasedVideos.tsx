@@ -4,11 +4,9 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback, memo } from "react";
 import { Card } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Loader2, Play, Download } from "lucide-react";
 
 interface PurchasedVideo {
   id: string;
@@ -21,6 +19,138 @@ interface PurchasedVideo {
     toDate: () => Date;
   };
 }
+
+// Memoized video card with dynamic aspect ratio
+const PurchasedVideoCard = memo(function PurchasedVideoCard({
+  video,
+}: {
+  video: PurchasedVideo;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, []);
+
+  const handleVideoMetadata = useCallback(() => {
+    if (videoRef.current) {
+      const { videoWidth, videoHeight } = videoRef.current;
+      if (videoWidth && videoHeight) {
+        setAspectRatio(videoWidth / videoHeight);
+      }
+    }
+  }, []);
+
+  // Check if video is already loaded on mount (handles cached videos)
+  useEffect(() => {
+    if (videoRef.current && videoRef.current.readyState >= 1) {
+      handleVideoMetadata();
+    }
+  }, [handleVideoMetadata]);
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (video.videoUrl) {
+      const link = document.createElement("a");
+      link.href = video.videoUrl;
+      link.download = `${video.title || "video"}.mp4`;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <button
+      className="group text-left w-full"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700">
+        {/* Container adapts to video aspect ratio */}
+        <div
+          className="bg-neutral-800 relative overflow-hidden"
+          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : '16/9' }}
+        >
+          {video.videoUrl ? (
+            <>
+              <video
+                ref={videoRef}
+                src={video.videoUrl}
+                className="w-full h-full object-cover"
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                onLoadedMetadata={handleVideoMetadata}
+              />
+              {/* Play indicator on hover */}
+              <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="bg-[#D4FF4F]/90 rounded-full p-3 backdrop-blur-sm">
+                  <Play size={24} className="fill-black text-black" />
+                </div>
+              </div>
+            </>
+          ) : video.thumbnailUrl ? (
+            <Image
+              src={video.thumbnailUrl}
+              alt={video.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
+            </div>
+          )}
+
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+
+          {/* Download button - top right */}
+          <button
+            onClick={handleDownload}
+            className="absolute top-3 right-3 z-30 bg-[#D4FF4F] hover:bg-[#c2ef4a] text-black rounded-full p-2 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg"
+          >
+            <Download size={16} />
+          </button>
+        </div>
+
+        {/* Product Info - overlaid at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-sm font-medium text-white line-clamp-1">{video.title}</h3>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-sm font-medium text-[#D4FF4F]">€{video.price.toFixed(2)}</span>
+            <span className="text-[10px] text-neutral-400">by {video.sellerName}</span>
+          </div>
+          <p className="text-[10px] text-neutral-500 mt-2">
+            Purchased {video.purchasedAt?.toDate().toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+      </Card>
+    </button>
+  );
+});
 
 export function PurchasedVideos() {
   const { user } = useAuth();
@@ -54,18 +184,8 @@ export function PurchasedVideos() {
     return (
       <div className="space-y-6">
         <h2 className="font-semibold text-lg">Purchased Videos</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Card className="overflow-hidden rounded-2xl bg-transparent">
-                <AspectRatio ratio={16 / 9}>
-                  <Skeleton className="w-full h-full bg-[#1C1C1C]" />
-                </AspectRatio>
-              </Card>
-              <Skeleton className="h-4 bg-[#1C1C1C] w-3/4" />
-              <Skeleton className="h-3 bg-[#1C1C1C] w-1/2" />
-            </div>
-          ))}
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-[#D4FF4F]" />
         </div>
       </div>
     );
@@ -91,47 +211,7 @@ export function PurchasedVideos() {
       <h2 className="font-semibold text-lg">Purchased Videos</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {purchased.map((video) => (
-          <div key={video.id} className="group cursor-pointer">
-            <Card className="overflow-hidden rounded-2xl border-neutral-800 hover:border-neutral-700 transition-colors">
-              <AspectRatio ratio={16 / 9} className="bg-neutral-800 relative">
-                {video.videoUrl ? (
-                  <video
-                    src={video.videoUrl}
-                    className="w-full h-full object-cover"
-                    muted
-                    loop
-                  />
-                ) : video.thumbnailUrl ? (
-                  <Image
-                    src={video.thumbnailUrl}
-                    alt={video.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : null}
-              </AspectRatio>
-            </Card>
-            <div className="mt-3">
-              <h3 className="font-medium text-white line-clamp-2 text-sm">
-                {video.title}
-              </h3>
-              <p className="text-xs text-neutral-400 mt-1">
-                by {video.sellerName}
-              </p>
-              <div className="flex justify-between items-center mt-2">
-                <p className="text-sm font-semibold text-[#D4FF4F]">
-                  €{video.price.toFixed(2)}
-                </p>
-                <p className="text-xs text-neutral-500">
-                  {video.purchasedAt?.toDate().toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-            </div>
-          </div>
+          <PurchasedVideoCard key={video.id} video={video} />
         ))}
       </div>
     </div>

@@ -3,10 +3,8 @@
 import React, { useState, useRef, useCallback, useEffect, memo } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { MarketplaceProduct } from "@/types/types";
-import { Play } from "lucide-react";
-import { VideoCardSkeleton, PremiumSkeleton } from "@/components/ui/premium-skeleton";
+import { Play, Loader2 } from "lucide-react";
 
 interface MarketplaceGridProps {
   products: MarketplaceProduct[];
@@ -26,7 +24,7 @@ const ProductCard = memo(function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [generatedPoster, setGeneratedPoster] = useState<string | null>(null);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Check if thumbnailUrl is actually an image (not a video URL)
@@ -40,22 +38,33 @@ const ProductCard = memo(function ProductCard({
     ? product.thumbnailUrl
     : null;
 
-  // Generate poster from first frame if no valid thumbnailUrl provided
+  // Extract aspect ratio and generate poster from video
   useEffect(() => {
-    if (validThumbnailUrl || generatedPoster) return;
+    if (aspectRatio) return; // Already have aspect ratio
 
     const video = document.createElement("video");
-    video.crossOrigin = "anonymous";
+    // Don't set crossOrigin for metadata - it can cause CORS issues
     video.src = product.videoUrl;
     video.muted = true;
     video.preload = "metadata";
 
-    const handleLoadedData = () => {
-      video.currentTime = 0.1; // Seek to 0.1s to get first frame
+    const handleLoadedMetadata = () => {
+      // Extract aspect ratio from video dimensions
+      if (video.videoWidth && video.videoHeight) {
+        setAspectRatio(video.videoWidth / video.videoHeight);
+      }
+
+      // Try to generate poster (may fail due to CORS, that's ok)
+      if (!generatedPoster && !validThumbnailUrl) {
+        video.currentTime = 0.1;
+      } else {
+        video.remove();
+      }
     };
 
     const handleSeeked = () => {
       try {
+        // Try with crossOrigin for canvas (may fail)
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -66,39 +75,33 @@ const ProductCard = memo(function ProductCard({
           setGeneratedPoster(dataUrl);
         }
       } catch {
-        // CORS or other error - fallback to no poster
+        // CORS error - poster generation failed, but we still have aspect ratio
       }
       video.remove();
     };
 
-    video.addEventListener("loadeddata", handleLoadedData);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("seeked", handleSeeked);
     video.load();
 
     return () => {
-      video.removeEventListener("loadeddata", handleLoadedData);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("seeked", handleSeeked);
       video.remove();
     };
-  }, [product.videoUrl, validThumbnailUrl, generatedPoster]);
+  }, [product.videoUrl, generatedPoster, aspectRatio, validThumbnailUrl]);
 
-  // Fallback timeout to hide skeleton after 5s max (prevents stuck state)
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsImageLoaded(true);
-    }, 5000);
-
-    return () => clearTimeout(timeout);
-  }, []);
+  // Also get aspect ratio from the actual hover video element as backup
+  const handleVideoMetadata = useCallback(() => {
+    if (videoRef.current && !aspectRatio) {
+      const { videoWidth, videoHeight } = videoRef.current;
+      if (videoWidth && videoHeight) {
+        setAspectRatio(videoWidth / videoHeight);
+      }
+    }
+  }, [aspectRatio]);
 
   const posterUrl = validThumbnailUrl || generatedPoster;
-
-  // Mark as loaded when poster becomes available (for generated posters)
-  useEffect(() => {
-    if (generatedPoster) {
-      setIsImageLoaded(true);
-    }
-  }, [generatedPoster]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -128,11 +131,15 @@ const ProductCard = memo(function ProductCard({
       onMouseLeave={handleMouseLeave}
     >
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
-        <AspectRatio ratio={1 / 1} className="bg-neutral-800 relative">
-          {/* Loading skeleton */}
-          {!isImageLoaded && (
-            <div className="absolute inset-0 z-10 transition-opacity duration-300">
-              <PremiumSkeleton className="w-full h-full" variant="card" />
+        {/* Container adapts to video aspect ratio - defaults to 1:1 until video loads */}
+        <div
+          className="bg-neutral-800 relative overflow-hidden"
+          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : '1/1' }}
+        >
+          {/* Loading indicator while video metadata loads */}
+          {!aspectRatio && !posterUrl && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
             </div>
           )}
 
@@ -142,12 +149,9 @@ const ProductCard = memo(function ProductCard({
               src={posterUrl}
               alt={product.title}
               fill
-              className={`object-cover transition-opacity duration-300 ${
-                isImageLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className="object-cover transition-opacity duration-300"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
               priority={false}
-              onLoad={() => setIsImageLoaded(true)}
             />
           )}
 
@@ -160,14 +164,15 @@ const ProductCard = memo(function ProductCard({
               loop
               playsInline
               preload="auto"
+              onLoadedMetadata={handleVideoMetadata}
               className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-200 ${
                 isHovered ? "opacity-100" : "opacity-0"
               }`}
             />
           )}
 
-          {/* Fallback background when no poster (only show after skeleton timeout) */}
-          {!posterUrl && !showVideo && isImageLoaded && (
+          {/* Fallback background when no poster */}
+          {!posterUrl && !showVideo && aspectRatio && (
             <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
               <Play size={32} className="text-neutral-600" />
             </div>
@@ -186,7 +191,7 @@ const ProductCard = memo(function ProductCard({
 
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
-        </AspectRatio>
+        </div>
 
         {/* Product Info */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -240,7 +245,11 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {[...Array(8)].map((_, i) => (
-          <VideoCardSkeleton key={i} />
+          <div key={i} className="bg-neutral-800 rounded-2xl animate-pulse" style={{ aspectRatio: '1/1' }}>
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
+            </div>
+          </div>
         ))}
       </div>
     );
