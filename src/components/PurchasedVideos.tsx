@@ -108,7 +108,7 @@ const PurchasedVideoCard = memo(function PurchasedVideoCard({
       onMouseLeave={handleMouseLeave}
     >
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700">
-        {/* Fixed square container with centered adaptive video */}
+        {/* Square card container with video maintaining its natural aspect ratio inside */}
         <div className="bg-neutral-900 relative overflow-hidden aspect-square flex items-center justify-center">
           {video.videoUrl ? (
             <>
@@ -116,7 +116,6 @@ const PurchasedVideoCard = memo(function PurchasedVideoCard({
                 ref={videoRef}
                 src={video.videoUrl}
                 className="max-w-full max-h-full object-contain"
-                style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : 'auto' }}
                 muted
                 loop
                 playsInline
