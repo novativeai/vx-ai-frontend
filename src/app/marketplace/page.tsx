@@ -221,12 +221,12 @@ function MarketplaceContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {purchased.map((video) => (
                   <div key={video.id} className="group cursor-pointer">
-                    <Card className="overflow-hidden rounded-lg border-neutral-800 hover:border-neutral-700 transition-colors bg-neutral-900/30">
-                      <div className="aspect-square bg-neutral-800 relative overflow-hidden">
+                    <Card className="overflow-hidden rounded-lg border-neutral-800 hover:border-neutral-700 transition-colors bg-transparent">
+                      <div className="aspect-square bg-transparent relative overflow-hidden">
                         {video.videoUrl ? (
                           <video
                             src={video.videoUrl}
-                            className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                            className="absolute inset-0 w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
                             muted
                             loop
                           />
@@ -235,7 +235,7 @@ function MarketplaceContent() {
                             src={video.thumbnailUrl}
                             alt={video.title}
                             fill
-                            className="object-contain group-hover:scale-105 transition-transform duration-300"
+                            className="object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : null}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
