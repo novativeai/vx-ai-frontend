@@ -45,14 +45,40 @@ const PurchasedVideoCard = memo(function PurchasedVideoCard({
     }
   }, []);
 
+  // Backup: extract from actual video element
   const handleVideoMetadata = useCallback(() => {
-    if (videoRef.current) {
+    if (videoRef.current && !aspectRatio) {
       const { videoWidth, videoHeight } = videoRef.current;
       if (videoWidth && videoHeight) {
         setAspectRatio(videoWidth / videoHeight);
       }
     }
-  }, []);
+  }, [aspectRatio]);
+
+  // Proactively extract aspect ratio using offscreen video (like MarketplaceGrid)
+  useEffect(() => {
+    if (aspectRatio || !video.videoUrl) return;
+
+    const offscreenVideo = document.createElement("video");
+    offscreenVideo.src = video.videoUrl;
+    offscreenVideo.muted = true;
+    offscreenVideo.preload = "metadata";
+
+    const handleLoadedMetadata = () => {
+      if (offscreenVideo.videoWidth && offscreenVideo.videoHeight) {
+        setAspectRatio(offscreenVideo.videoWidth / offscreenVideo.videoHeight);
+      }
+      offscreenVideo.remove();
+    };
+
+    offscreenVideo.addEventListener("loadedmetadata", handleLoadedMetadata);
+    offscreenVideo.load();
+
+    return () => {
+      offscreenVideo.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      offscreenVideo.remove();
+    };
+  }, [video.videoUrl, aspectRatio]);
 
   // Check if video is already loaded on mount (handles cached videos)
   useEffect(() => {
