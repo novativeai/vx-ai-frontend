@@ -210,7 +210,7 @@ function MarketplaceContent() {
         <div className="space-y-12">
           {/* Your Purchases Section - Only show if user is logged in and has purchases */}
           {user && purchased.length > 0 && (
-            <section className="pb-12 border-b border-neutral-800">
+            <section id="my-library" className="pb-12 border-b border-neutral-800 scroll-mt-24">
               <div className="mb-8">
                 <p className="text-sm uppercase tracking-widest text-neutral-400">My Library</p>
                 <h2 className="text-3xl md:text-4xl font-regular tracking-tighter mt-2">Your Purchases</h2>

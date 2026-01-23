@@ -168,7 +168,7 @@ export default function MarketplacePurchaseSuccessPage() {
                 Check Again
               </Button>
             )}
-            <Link href="/dashboard" className="block">
+            <Link href="/marketplace#my-library" className="block">
               <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:text-white">
                 Go to My Purchases
               </Button>
@@ -198,7 +198,7 @@ export default function MarketplacePurchaseSuccessPage() {
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
             </Button>
-            <Link href="/dashboard" className="block">
+            <Link href="/marketplace#my-library" className="block">
               <Button variant="outline" className="w-full border-neutral-700 text-neutral-300 hover:text-white">
                 Check My Purchases
               </Button>
@@ -245,7 +245,7 @@ export default function MarketplacePurchaseSuccessPage() {
             )}
 
             <Link
-              href="/dashboard"
+              href="/marketplace#my-library"
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-neutral-800 text-white rounded-lg font-semibold hover:bg-neutral-700 transition-colors"
             >
               View My Purchases
