@@ -20,7 +20,7 @@ import { TipsSection } from "@/components/TipsSection";
 import { Separator } from "@/components/ui/separator";
 
 // Lucide React Icon Imports
-import { Volume2, VolumeX, ChevronDown } from 'lucide-react';
+import { Volume2, VolumeX, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Number of parameters to show before "Advanced Settings"
@@ -76,8 +76,12 @@ function GeneratorComponent() {
 
   // State Management
   const [params, setParams] = useState<{[key: string]: ParamValues}>({});
-  const [outputUrl, setOutputUrl] = useState('');
+  const [outputUrls, setOutputUrls] = useState<string[]>([]);
+  const [currentOutputIndex, setCurrentOutputIndex] = useState(0);
   const [detectedOutputType, setDetectedOutputType] = useState<OutputType>(null);
+
+  // Derived state for current output URL
+  const outputUrl = outputUrls.length > 0 ? outputUrls[currentOutputIndex] : '';
   const [generating, setGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -110,7 +114,8 @@ function GeneratorComponent() {
 
     // Reset all outputs and previews
     setImagePreview(null);
-    setOutputUrl('');
+    setOutputUrls([]);
+    setCurrentOutputIndex(0);
     setGenerating(false);
     setDetectedOutputType(null);
     setGenerationError(null);
@@ -186,7 +191,8 @@ function GeneratorComponent() {
       return;
     }
     setGenerating(true);
-    setOutputUrl('');
+    setOutputUrls([]);
+    setCurrentOutputIndex(0);
     setDetectedOutputType(null);
     setGenerationError(null);
 
@@ -219,10 +225,11 @@ function GeneratorComponent() {
       console.log('[Generation] Success:', { output_urls: data.output_urls });
 
       if (data.output_urls && Array.isArray(data.output_urls) && data.output_urls.length > 0) {
-        const newUrl = data.output_urls[0];
-        setOutputUrl(newUrl);
-        // Detect and set the output type from the resulting URL
-        setDetectedOutputType(getOutputTypeFromUrl(newUrl));
+        // Store all output URLs for navigation
+        setOutputUrls(data.output_urls);
+        setCurrentOutputIndex(0);
+        // Detect and set the output type from the first URL
+        setDetectedOutputType(getOutputTypeFromUrl(data.output_urls[0]));
       } else {
         throw new Error("The model did not return a valid output.");
       }
@@ -339,7 +346,7 @@ function GeneratorComponent() {
                 </div>
               )}
               <div
-                className="relative w-full h-[500px] lg:h-[600px] bg-black rounded-md flex items-center justify-center overflow-hidden transition-all duration-300"
+                className="group relative w-full h-[500px] lg:h-[600px] bg-black rounded-md flex items-center justify-center overflow-hidden transition-all duration-300"
               >
                 {generating ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
@@ -411,6 +418,51 @@ function GeneratorComponent() {
                       <Volume2 className="h-5 w-5 text-white" />
                     )}
                   </button>
+                )}
+
+                {/* Multi-output navigation - show when there are multiple results */}
+                {!generating && outputUrls.length > 1 && (
+                  <>
+                    {/* Left chevron */}
+                    <button
+                      onClick={() => setCurrentOutputIndex(prev => Math.max(0, prev - 1))}
+                      disabled={currentOutputIndex === 0}
+                      className={`absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/60 hover:bg-black/80 rounded-full transition-all z-10 ${
+                        currentOutputIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:scale-110'
+                      }`}
+                      aria-label="Previous result"
+                    >
+                      <ChevronLeft className="h-6 w-6 text-white" />
+                    </button>
+
+                    {/* Right chevron */}
+                    <button
+                      onClick={() => setCurrentOutputIndex(prev => Math.min(outputUrls.length - 1, prev + 1))}
+                      disabled={currentOutputIndex === outputUrls.length - 1}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/60 hover:bg-black/80 rounded-full transition-all z-10 ${
+                        currentOutputIndex === outputUrls.length - 1 ? 'opacity-30 cursor-not-allowed' : 'opacity-0 group-hover:opacity-100 hover:scale-110'
+                      }`}
+                      aria-label="Next result"
+                    >
+                      <ChevronRight className="h-6 w-6 text-white" />
+                    </button>
+
+                    {/* Indicator dots */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                      {outputUrls.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentOutputIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-all ${
+                            index === currentOutputIndex
+                              ? 'bg-[#D4FF4F] w-4'
+                              : 'bg-white/50 hover:bg-white/80'
+                          }`}
+                          aria-label={`View result ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             </CardContent>
