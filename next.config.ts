@@ -42,11 +42,11 @@ const securityHeaders = [
       // Styles - allow self and inline for styled-components/tailwind
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       // Images from various sources
-      "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://replicate.delivery https://*.replicate.delivery https://fal.media https://*.fal.media",
+      "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com https://lh3.googleusercontent.com https://replicate.delivery https://*.replicate.delivery https://fal.media https://*.fal.media https://cdn-images-1.medium.com https://miro.medium.com",
       // Fonts
       "font-src 'self' https://fonts.gstatic.com",
-      // Connect to backend, Firebase, and fal.ai
-      "connect-src 'self' https://aivideogenerator-production.up.railway.app https://*.firebaseio.com https://*.googleapis.com https://api.replicate.com wss://*.firebaseio.com https://fal.media https://*.fal.media",
+      // Connect to backend, Firebase, fal.ai, and rss2json for blog
+      "connect-src 'self' https://aivideogenerator-production.up.railway.app https://*.firebaseio.com https://*.googleapis.com https://api.replicate.com wss://*.firebaseio.com https://fal.media https://*.fal.media https://api.rss2json.com",
       // Frames for Firebase auth
       "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
       // Media from Firebase storage and fal.ai
@@ -91,6 +91,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '*.fal.media',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn-images-1.medium.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'miro.medium.com',
       },
     ],
     formats: ["image/avif", "image/webp"],
