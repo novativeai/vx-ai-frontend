@@ -134,12 +134,12 @@ const ProductCard = memo(function ProductCard({
 
   return (
     <div
-      className="mb-4"
+      className="mb-4 inline-block w-full"
       style={{ breakInside: 'avoid' }}
     >
       <button
         onClick={() => onProductClick(product)}
-        className="group text-left w-full"
+        className="group text-left w-full block"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -260,13 +260,13 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
     const skeletonAspects = ['1/1', '9/16', '16/9', '1/1', '16/9', '9/16', '1/1', '16/9'];
     return (
       <div
-        className="columns-2 md:columns-2 lg:columns-3 xl:columns-4 gap-4"
-        style={{ columnFill: 'balance' }}
+        className="columns-2 md:columns-2 lg:columns-3 xl:columns-4"
+        style={{ columnGap: '1rem' }}
       >
         {skeletonAspects.map((aspect, i) => (
           <div
             key={i}
-            className="mb-4 bg-neutral-800 rounded-2xl animate-pulse"
+            className="mb-4 bg-neutral-800 rounded-2xl animate-pulse inline-block w-full"
             style={{ aspectRatio: aspect, breakInside: 'avoid' }}
           >
             <div className="w-full h-full flex items-center justify-center">
@@ -293,8 +293,8 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
     <div className="space-y-8">
       {/* Masonry layout using CSS columns */}
       <div
-        className="columns-2 md:columns-2 lg:columns-3 xl:columns-4 gap-4"
-        style={{ columnFill: 'balance' }}
+        className="columns-2 md:columns-2 lg:columns-3 xl:columns-4"
+        style={{ columnGap: '1rem' }}
       >
         {displayedProducts.map(product => (
           <ProductCard
