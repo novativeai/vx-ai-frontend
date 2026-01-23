@@ -16,7 +16,7 @@ import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF } from "@/lib/pdfGenerator";
 import { Download, AlertCircle, LogOut } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { FirebaseError } from "firebase/app";
 import { AccountNav, AccountNavMobile, type AccountTab } from "@/components/AccountNav";
@@ -204,7 +204,11 @@ function SubscriptionStatus() {
 export default function AccountPage() {
     const { user, credits } = useAuth();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<AccountTab>("account");
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get("tab");
+    const [activeTab, setActiveTab] = useState<AccountTab>(
+      (tabParam as AccountTab) || "account"
+    );
     const [activePlan, setActivePlan] = useState("Starter");
     const [displayName, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
