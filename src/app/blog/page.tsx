@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { BookOpen, ExternalLink, Calendar, Clock, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,6 +25,12 @@ interface MediumFeed {
     image: string;
   };
   items: MediumArticle[];
+}
+
+// Extract first image from HTML content (Medium embeds images in description)
+function extractImageFromHtml(html: string): string | null {
+  const imgMatch = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return imgMatch ? imgMatch[1] : null;
 }
 
 // Strip HTML tags and truncate text
@@ -106,24 +110,9 @@ export default function BlogPage() {
             Blog
           </h1>
 
-          <p className="text-xl text-neutral-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
             Tips, tutorials, and the latest updates about AI video generation from the Reelzila team.
           </p>
-
-          <Button
-            asChild
-            className="bg-[#D4FF4F] text-black hover:bg-[#c4ef3f] px-6 py-3"
-          >
-            <a
-              href="https://medium.com/@reelzila"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              Follow us on Medium
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          </Button>
         </div>
 
         {/* Loading State */}
@@ -190,22 +179,26 @@ export default function BlogPage() {
               >
                 <article className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden transition-all duration-300 hover:border-neutral-700 hover:shadow-2xl hover:shadow-[#D4FF4F]/10 hover:scale-[1.02] h-full flex flex-col">
                   {/* Thumbnail */}
-                  <div className="relative aspect-video bg-neutral-800 overflow-hidden">
-                    {article.thumbnail ? (
-                      <Image
-                        src={article.thumbnail}
-                        alt={article.title}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="w-12 h-12 text-neutral-700" />
+                  {(() => {
+                    const imageUrl = article.thumbnail || extractImageFromHtml(article.description);
+                    return (
+                      <div className="relative aspect-video bg-neutral-800 overflow-hidden">
+                        {imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={imageUrl}
+                            alt={article.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <BookOpen className="w-12 h-12 text-neutral-700" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  </div>
+                    );
+                  })()}
 
                   {/* Content */}
                   <div className="p-6 flex flex-col flex-grow">
@@ -251,36 +244,18 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* Footer CTA */}
+        {/* Footer */}
         {!loading && !error && articles.length > 0 && (
-          <div className="text-center mt-16">
-            <p className="text-neutral-400 mb-4">
-              Want more content? Follow us on Medium for the latest updates.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                asChild
-                className="bg-[#D4FF4F] text-black hover:bg-[#c4ef3f] px-6 py-3"
-              >
-                <a
-                  href="https://medium.com/@reelzila"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
-                  View all on Medium
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </Button>
-
-              <Button
-                asChild
-                variant="outline"
-                className="border-neutral-700 text-white hover:bg-neutral-900 px-6 py-3"
-              >
-                <Link href="/">Back to Home</Link>
-              </Button>
-            </div>
+          <div className="text-center mt-16 pt-8 border-t border-neutral-800">
+            <a
+              href="https://medium.com/@reelzila"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-neutral-400 hover:text-[#D4FF4F] transition-colors"
+            >
+              View all articles on Medium
+              <ExternalLink className="w-4 h-4" />
+            </a>
           </div>
         )}
       </div>
