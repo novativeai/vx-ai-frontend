@@ -123,19 +123,32 @@ const ProductCard = memo(function ProductCard({
     // Keep video mounted for faster subsequent hovers
   }, []);
 
+  // Convert numeric aspect ratio to CSS-friendly format
+  const getAspectRatioStyle = (): string => {
+    if (!aspectRatio) return '1 / 1'; // Default to square while loading
+    // Classify: portrait (<0.9), square (0.9-1.1), landscape (>1.1)
+    if (aspectRatio < 0.9) return '9 / 16';      // Portrait
+    if (aspectRatio > 1.1) return '16 / 9';      // Landscape
+    return '1 / 1';                               // Square
+  };
+
   return (
-    <button
-      onClick={() => onProductClick(product)}
-      className="group text-left w-full"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <div
+      className="mb-4"
+      style={{ breakInside: 'avoid' }}
     >
-      <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
-        {/* Container adapts to video aspect ratio - defaults to 1:1 until video loads */}
-        <div
-          className="bg-neutral-800 relative overflow-hidden"
-          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : '1/1' }}
-        >
+      <button
+        onClick={() => onProductClick(product)}
+        className="group text-left w-full"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
+          {/* Container adapts to video aspect ratio */}
+          <div
+            className="bg-neutral-800 relative overflow-hidden"
+            style={{ aspectRatio: getAspectRatioStyle() }}
+          >
           {/* Loading indicator while video metadata loads */}
           {!aspectRatio && !posterUrl && (
             <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -218,6 +231,7 @@ const ProductCard = memo(function ProductCard({
         </div>
       </Card>
     </button>
+  </div>
   );
 });
 
@@ -242,10 +256,19 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   };
 
   if (isLoading) {
+    // Masonry loading skeleton with varied aspect ratios
+    const skeletonAspects = ['1/1', '9/16', '16/9', '1/1', '16/9', '9/16', '1/1', '16/9'];
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="bg-neutral-800 rounded-2xl animate-pulse" style={{ aspectRatio: '1/1' }}>
+      <div
+        className="columns-2 md:columns-2 lg:columns-3 xl:columns-4 gap-4"
+        style={{ columnFill: 'balance' }}
+      >
+        {skeletonAspects.map((aspect, i) => (
+          <div
+            key={i}
+            className="mb-4 bg-neutral-800 rounded-2xl animate-pulse"
+            style={{ aspectRatio: aspect, breakInside: 'avoid' }}
+          >
             <div className="w-full h-full flex items-center justify-center">
               <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
             </div>
@@ -268,7 +291,11 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Masonry layout using CSS columns */}
+      <div
+        className="columns-2 md:columns-2 lg:columns-3 xl:columns-4 gap-4"
+        style={{ columnFill: 'balance' }}
+      >
         {displayedProducts.map(product => (
           <ProductCard
             key={product.id}
