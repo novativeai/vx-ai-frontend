@@ -11,7 +11,7 @@ import { MarketplaceSidebar } from "@/components/MarketplaceSidebar";
 import { MarketplaceGrid } from "@/components/MarketplaceGrid";
 import { PurchaseFormModal } from "@/components/PurchaseFormModal";
 import { MarketplaceProduct } from "@/types/types";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Play, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -28,6 +28,112 @@ interface PurchasedVideo {
     toDate: () => Date;
   };
 }
+
+// Memoized purchased video card for marketplace
+const PurchasedVideoCardMarketplace = React.memo(function PurchasedVideoCardMarketplace({
+  video,
+}: {
+  video: PurchasedVideo;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (video.videoUrl) {
+      const link = document.createElement("a");
+      link.href = video.videoUrl;
+      link.download = `${video.title || "video"}.mp4`;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <div
+      className="group text-left w-full"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700">
+        {/* Square card container with video maintaining its natural aspect ratio inside */}
+        <div className="bg-neutral-900 relative overflow-hidden aspect-square">
+          {video.videoUrl ? (
+            <>
+              <video
+                ref={videoRef}
+                src={video.videoUrl}
+                className="absolute inset-0 w-full h-full object-contain"
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+              {/* Play indicator on hover */}
+              <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="bg-[#D4FF4F]/90 rounded-full p-3 backdrop-blur-sm">
+                  <Play size={24} className="fill-black text-black" />
+                </div>
+              </div>
+            </>
+          ) : video.thumbnailUrl ? (
+            <Image
+              src={video.thumbnailUrl}
+              alt={video.title}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
+          ) : null}
+
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+
+          {/* Download button - top right */}
+          <button
+            onClick={handleDownload}
+            className="absolute top-3 right-3 z-30 bg-[#D4FF4F] hover:bg-[#c2ef4a] text-black rounded-full p-2 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg"
+          >
+            <Download size={16} />
+          </button>
+        </div>
+
+        {/* Product Info - overlaid at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="text-sm font-medium text-white line-clamp-1">{video.title}</h3>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-sm font-medium text-[#D4FF4F]">€{video.price.toFixed(2)}</span>
+            <span className="text-[10px] text-neutral-400">by {video.sellerName}</span>
+          </div>
+          <p className="text-[10px] text-neutral-500 mt-2">
+            {video.purchasedAt?.toDate().toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+            })}
+          </p>
+        </div>
+      </Card>
+    </div>
+  );
+});
 
 const bannerSlides: BannerSlide[] = [
   {
@@ -220,45 +326,7 @@ function MarketplaceContent() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {purchased.map((video) => (
-                  <div key={video.id} className="group cursor-pointer">
-                    <Card className="overflow-hidden rounded-lg border-neutral-800 hover:border-neutral-700 transition-colors bg-transparent">
-                      <div className="aspect-square bg-transparent relative overflow-hidden">
-                        {video.videoUrl ? (
-                          <video
-                            src={video.videoUrl}
-                            className="absolute inset-0 w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-                            muted
-                            loop
-                          />
-                        ) : video.thumbnailUrl ? (
-                          <Image
-                            src={video.thumbnailUrl}
-                            alt={video.title}
-                            fill
-                            className="object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : null}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      <div className="p-3">
-                        <h3 className="font-medium text-white line-clamp-2 text-sm group-hover:text-[#D4FF4F] transition-colors">
-                          {video.title}
-                        </h3>
-                        <p className="text-xs text-neutral-400 mt-1">by {video.sellerName}</p>
-                        <div className="flex justify-between items-center mt-2 pt-2 border-t border-neutral-700/30">
-                          <p className="text-xs text-neutral-400">
-                            {video.purchasedAt?.toDate().toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </p>
-                          <p className="text-xs font-medium text-[#D4FF4F]">
-                            €{video.price.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
+                  <PurchasedVideoCardMarketplace key={video.id} video={video} />
                 ))}
               </div>
             </section>
