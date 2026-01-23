@@ -131,8 +131,8 @@ const ProductCard = memo(function ProductCard({
       onMouseLeave={handleMouseLeave}
     >
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
-        {/* Fixed 16:9 aspect ratio for consistent grid */}
-        <div className="bg-neutral-800 relative overflow-hidden aspect-video">
+        {/* Fixed square aspect ratio, video fills completely */}
+        <div className="bg-neutral-800 relative overflow-hidden aspect-square">
           {/* Loading indicator while video metadata loads */}
           {!aspectRatio && !posterUrl && (
             <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -244,7 +244,7 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className="bg-neutral-800 rounded-2xl animate-pulse aspect-video"
+            className="bg-neutral-800 rounded-2xl animate-pulse aspect-square"
           >
             <div className="w-full h-full flex items-center justify-center">
               <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
