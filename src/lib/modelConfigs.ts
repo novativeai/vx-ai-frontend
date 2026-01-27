@@ -276,8 +276,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         name: "resolution",
         label: "Resolution",
         type: "dropdown",
-        defaultValue: "1080p",
-        options: ["720p", "1080p"],
+        defaultValue: "720p",
+        options: ["720p"],
       },
     ],
     tips: [
