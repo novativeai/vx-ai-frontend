@@ -287,10 +287,10 @@ export default function SignUp() {
 
       // Step 2: Handle email verification and Firestore separately
       try {
-        // Configure action code to redirect to our custom handler
+        // Configure action code to redirect to our app after verification
         const actionCodeSettings: ActionCodeSettings = {
-          url: `${window.location.origin}/auth/action`,
-          handleCodeInApp: true,
+          url: 'https://reelzila.studio/',
+          handleCodeInApp: false,
         };
         await sendEmailVerification(user, actionCodeSettings);
       } catch {
