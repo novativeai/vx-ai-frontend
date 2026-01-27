@@ -127,53 +127,14 @@ export const generateTransactionPDF = (
   yPos += 12;
 
   // ============================================
-  // INVOICE DETAILS SECTION (right side)
-  // ============================================
-
-  const detailsLabelX = rightAlign - 90;
-  let detailsY = yPos;
-
-  // Invoice Number
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...grayColor);
-  doc.text('Invoice Number', detailsLabelX, detailsY);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...blackColor);
-  doc.text(invoiceNumber, rightAlign, detailsY, { align: 'right' });
-
-  detailsY += 5;
-
-  // Invoice Date
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...grayColor);
-  doc.text('Invoice Date', detailsLabelX, detailsY);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...blackColor);
-  doc.text(formatDate(invoiceDate), rightAlign, detailsY, { align: 'right' });
-
-  detailsY += 5;
-
-  // Payment Status
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...grayColor);
-  doc.text('Status', detailsLabelX, detailsY);
-  const statusText = transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...blackColor);
-  doc.text(statusText, rightAlign, detailsY, { align: 'right' });
-
-  yPos += 25;
-
-  // ============================================
-  // BILLING DETAILS SECTION (two columns)
+  // BILLING & INVOICE DETAILS SECTION (two columns)
   // ============================================
 
   const colWidth = (pageWidth - margin * 2) / 2 - 5;
   const col1X = margin;
   const col2X = margin + colWidth + 10;
 
-  // --- BILL FROM (Company) ---
+  // --- BILL FROM (Company) - Left Column ---
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...grayColor);
@@ -200,7 +161,7 @@ export const generateTransactionPDF = (
   billFromY += 4;
   doc.text(COMPANY_INFO.email, col1X, billFromY);
 
-  // --- BILL TO (Customer) ---
+  // --- BILL TO (Customer) - Right Column ---
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...grayColor);
@@ -253,6 +214,35 @@ export const generateTransactionPDF = (
     doc.setTextColor(...darkGrayColor);
     doc.text(userBilling.country.trim(), col2X, billToY);
   }
+
+  // --- INVOICE DETAILS (Right Column, below BILL TO) ---
+  billToY += 8;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...grayColor);
+  doc.text('INVOICE DETAILS', col2X, billToY);
+
+  billToY += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...grayColor);
+  doc.text('Invoice Number', col2X, billToY);
+  doc.setTextColor(...blackColor);
+  doc.text(invoiceNumber, rightAlign, billToY, { align: 'right' });
+
+  billToY += 4;
+  doc.setTextColor(...grayColor);
+  doc.text('Invoice Date', col2X, billToY);
+  doc.setTextColor(...blackColor);
+  doc.text(formatDate(invoiceDate), rightAlign, billToY, { align: 'right' });
+
+  billToY += 4;
+  doc.setTextColor(...grayColor);
+  doc.text('Status', col2X, billToY);
+  const statusText = transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...blackColor);
+  doc.text(statusText, rightAlign, billToY, { align: 'right' });
 
   yPos = Math.max(billFromY, billToY) + 12;
 
