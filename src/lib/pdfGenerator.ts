@@ -8,7 +8,7 @@ const COMPANY_INFO = {
   tagline: 'AI Video Generation Platform',
   address: 'Digital Services',
   website: 'https://reelzila.studio',
-  email: 'support@reelzila.studio',
+  email: 'contact@reelzila.studio',
 };
 
 // Helper to format currency
@@ -332,7 +332,7 @@ export const generateTransactionPDF = (
 
   const notes = [
     'Thank you for your purchase! Your credits have been added to your account.',
-    'For any questions about this invoice, please contact support@reelzila.studio',
+    'For any questions about this invoice, please contact contact@reelzila.studio',
     'Digital services are non-refundable as per our terms of service.',
   ];
 
