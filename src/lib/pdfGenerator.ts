@@ -11,9 +11,9 @@ const COMPANY_INFO = {
   email: 'contact@reelzila.studio',
 };
 
-// Helper to format currency
+// Helper to format currency (amount followed by € with space)
 const formatCurrency = (amount: number): string => {
-  return `€${amount.toFixed(2)}`;
+  return `${amount.toFixed(2)} €`;
 };
 
 // Helper to format date
@@ -75,11 +75,11 @@ export const generateTransactionPDF = (
   const invoiceDate = transaction.createdAt.toDate();
   const invoiceNumber = generateInvoiceNumber(transaction.id, invoiceDate);
 
-  // Colors
-  const primaryColor: [number, number, number] = [212, 255, 79]; // #D4FF4F
-  const darkColor: [number, number, number] = [20, 20, 20];
-  const grayColor: [number, number, number] = [100, 100, 100];
-  const lightGrayColor: [number, number, number] = [240, 240, 240];
+  // Colors (black and white only)
+  const blackColor: [number, number, number] = [0, 0, 0];
+  const darkGrayColor: [number, number, number] = [55, 55, 55];
+  const grayColor: [number, number, number] = [120, 120, 120];
+  const lightGrayColor: [number, number, number] = [245, 245, 245];
 
   let yPos = margin;
 
@@ -88,96 +88,90 @@ export const generateTransactionPDF = (
   // ============================================
 
   // Company name (brand)
-  doc.setFontSize(28);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...darkColor);
-  doc.text(COMPANY_INFO.name, margin, yPos + 8);
+  doc.setTextColor(...blackColor);
+  doc.text(COMPANY_INFO.name, margin, yPos + 6);
 
   // Tagline
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...grayColor);
-  doc.text(COMPANY_INFO.tagline, margin, yPos + 15);
+  doc.text(COMPANY_INFO.tagline, margin, yPos + 12);
 
   // INVOICE label (right side)
-  doc.setFontSize(32);
+  doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...darkColor);
-  doc.text('INVOICE', rightAlign, yPos + 10, { align: 'right' });
+  doc.setTextColor(...blackColor);
+  doc.text('INVOICE', rightAlign, yPos + 8, { align: 'right' });
 
-  yPos += 30;
+  yPos += 22;
 
-  // Horizontal line with brand color
-  doc.setDrawColor(...primaryColor);
-  doc.setLineWidth(3);
+  // Horizontal line (thin, black)
+  doc.setDrawColor(...blackColor);
+  doc.setLineWidth(0.5);
   doc.line(margin, yPos, rightAlign, yPos);
 
-  yPos += 15;
+  yPos += 12;
 
   // ============================================
   // INVOICE DETAILS & BILL TO SECTION
   // ============================================
 
   // Left column: Bill To
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...grayColor);
   doc.text('BILL TO', margin, yPos);
 
-  yPos += 6;
+  yPos += 5;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(...darkColor);
+  doc.setFontSize(10);
+  doc.setTextColor(...blackColor);
   doc.text(userName || 'Customer', margin, yPos);
 
-  yPos += 5;
+  yPos += 4;
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(...grayColor);
+  doc.setFontSize(9);
+  doc.setTextColor(...darkGrayColor);
   doc.text(userEmail, margin, yPos);
 
-  // Right column: Invoice details
-  const detailsX = rightAlign - 60;
-  let detailsY = yPos - 11;
+  // Right column: Invoice details (pushed left by 30px more)
+  const detailsLabelX = rightAlign - 90;
+  let detailsY = yPos - 9;
 
   // Invoice Number
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(...grayColor);
-  doc.text('Invoice Number:', detailsX, detailsY);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...darkColor);
+  doc.text('Invoice Number', detailsLabelX, detailsY);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...blackColor);
   doc.text(invoiceNumber, rightAlign, detailsY, { align: 'right' });
 
-  detailsY += 6;
+  detailsY += 5;
 
   // Invoice Date
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...grayColor);
-  doc.text('Invoice Date:', detailsX, detailsY);
+  doc.text('Invoice Date', detailsLabelX, detailsY);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...darkColor);
+  doc.setTextColor(...blackColor);
   doc.text(formatDate(invoiceDate), rightAlign, detailsY, { align: 'right' });
 
-  detailsY += 6;
+  detailsY += 5;
 
-  // Payment Status
+  // Payment Status (black and white only)
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...grayColor);
-  doc.text('Status:', detailsX, detailsY);
+  doc.text('Status', detailsLabelX, detailsY);
 
   const statusText = transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1);
-  if (transaction.status === 'paid') {
-    doc.setTextColor(34, 197, 94); // Green
-  } else if (transaction.status === 'pending') {
-    doc.setTextColor(234, 179, 8); // Yellow
-  } else {
-    doc.setTextColor(239, 68, 68); // Red
-  }
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...blackColor);
   doc.text(statusText, rightAlign, detailsY, { align: 'right' });
 
-  yPos += 20;
+  yPos += 16;
 
   // ============================================
   // ITEMS TABLE
@@ -218,14 +212,15 @@ export const generateTransactionPDF = (
     body: tableBody,
     theme: 'plain',
     styles: {
-      fontSize: 10,
-      cellPadding: 8,
+      fontSize: 9,
+      cellPadding: 6,
+      textColor: darkGrayColor,
     },
     headStyles: {
       fillColor: lightGrayColor,
-      textColor: darkColor,
+      textColor: blackColor,
       fontStyle: 'bold',
-      fontSize: 10,
+      fontSize: 8,
     },
     columnStyles: {
       0: { cellWidth: 80 },
@@ -234,7 +229,7 @@ export const generateTransactionPDF = (
       3: { cellWidth: 35, halign: 'right' },
     },
     alternateRowStyles: {
-      fillColor: [250, 250, 250],
+      fillColor: [252, 252, 252],
     },
   });
 
@@ -250,114 +245,114 @@ export const generateTransactionPDF = (
 
   // Subtotal
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(...grayColor);
-  doc.text('Subtotal:', totalsX, yPos);
-  doc.setTextColor(...darkColor);
-  doc.text(formatCurrency(transaction.amount), rightAlign, yPos, { align: 'right' });
-
-  yPos += 6;
-
-  // VAT (0% for digital services or included)
-  doc.setTextColor(...grayColor);
-  doc.text('VAT (Included):', totalsX, yPos);
-  doc.setTextColor(...darkColor);
-  doc.text('€0.00', rightAlign, yPos, { align: 'right' });
-
-  yPos += 2;
-
-  // Divider line
-  doc.setDrawColor(200, 200, 200);
-  doc.setLineWidth(0.5);
-  doc.line(totalsX, yPos, rightAlign, yPos);
-
-  yPos += 8;
-
-  // Total
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(...darkColor);
-  doc.text('TOTAL:', totalsX, yPos);
+  doc.text('Subtotal', totalsX, yPos);
+  doc.setTextColor(...darkGrayColor);
   doc.text(formatCurrency(transaction.amount), rightAlign, yPos, { align: 'right' });
 
   yPos += 5;
 
-  // Paid badge if applicable
+  // VAT (0% for digital services or included)
+  doc.setTextColor(...grayColor);
+  doc.text('VAT (Included)', totalsX, yPos);
+  doc.setTextColor(...darkGrayColor);
+  doc.text('0.00 €', rightAlign, yPos, { align: 'right' });
+
+  yPos += 3;
+
+  // Divider line
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.line(totalsX, yPos, rightAlign, yPos);
+
+  yPos += 6;
+
+  // Total
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...blackColor);
+  doc.text('Total', totalsX, yPos);
+  doc.text(formatCurrency(transaction.amount), rightAlign, yPos, { align: 'right' });
+
+  yPos += 4;
+
+  // Paid badge if applicable (black and white)
   if (transaction.status === 'paid') {
-    yPos += 10;
-    doc.setFillColor(34, 197, 94);
-    doc.roundedRect(rightAlign - 40, yPos - 6, 40, 12, 2, 2, 'F');
-    doc.setFontSize(10);
+    yPos += 8;
+    doc.setFillColor(...blackColor);
+    doc.roundedRect(rightAlign - 32, yPos - 5, 32, 10, 1, 1, 'F');
+    doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
-    doc.text('PAID', rightAlign - 20, yPos + 2, { align: 'center' });
+    doc.text('PAID', rightAlign - 16, yPos + 1.5, { align: 'center' });
   }
 
-  yPos += 25;
+  yPos += 20;
 
   // ============================================
   // PAYMENT INFORMATION
   // ============================================
 
   doc.setFillColor(...lightGrayColor);
-  doc.roundedRect(margin, yPos, pageWidth - (margin * 2), 25, 3, 3, 'F');
+  doc.roundedRect(margin, yPos, pageWidth - (margin * 2), 22, 2, 2, 'F');
 
-  yPos += 10;
+  yPos += 8;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...darkColor);
+  doc.setFontSize(8);
+  doc.setTextColor(...blackColor);
   doc.text('Payment Information', margin + 8, yPos);
 
-  yPos += 6;
+  yPos += 5;
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...grayColor);
+  doc.setFontSize(8);
+  doc.setTextColor(...darkGrayColor);
   doc.text(`Transaction ID: ${transaction.id}`, margin + 8, yPos);
   doc.text(`Payment Method: Online Payment`, margin + 100, yPos);
 
-  yPos += 20;
+  yPos += 18;
 
   // ============================================
   // NOTES SECTION
   // ============================================
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...darkColor);
+  doc.setFontSize(8);
+  doc.setTextColor(...blackColor);
   doc.text('Notes', margin, yPos);
 
-  yPos += 6;
+  yPos += 5;
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(...grayColor);
 
   const notes = [
-    'Thank you for your purchase! Your credits have been added to your account.',
-    'For any questions about this invoice, please contact contact@reelzila.studio',
+    'Thank you for your purchase. Your credits have been added to your account.',
+    'For questions about this invoice, contact contact@reelzila.studio',
     'Digital services are non-refundable as per our terms of service.',
   ];
 
   notes.forEach((note) => {
     doc.text(`• ${note}`, margin, yPos);
-    yPos += 5;
+    yPos += 4;
   });
 
   // ============================================
   // FOOTER
   // ============================================
 
-  const footerY = pageHeight - 20;
+  const footerY = pageHeight - 18;
 
   // Footer line
   doc.setDrawColor(220, 220, 220);
-  doc.setLineWidth(0.5);
-  doc.line(margin, footerY - 10, rightAlign, footerY - 10);
+  doc.setLineWidth(0.3);
+  doc.line(margin, footerY - 8, rightAlign, footerY - 8);
 
   // Footer text
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   doc.setTextColor(...grayColor);
   doc.text(COMPANY_INFO.website, margin, footerY);
   doc.text(COMPANY_INFO.email, pageWidth / 2, footerY, { align: 'center' });
-  doc.text(`Page 1 of 1`, rightAlign, footerY, { align: 'right' });
+  doc.text('Page 1 of 1', rightAlign, footerY, { align: 'right' });
 
   // ============================================
   // SAVE THE PDF
