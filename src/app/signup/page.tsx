@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification, ActionCodeSettings } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -287,7 +287,12 @@ export default function SignUp() {
 
       // Step 2: Handle email verification and Firestore separately
       try {
-        await sendEmailVerification(user);
+        // Configure action code to redirect to our custom handler
+        const actionCodeSettings: ActionCodeSettings = {
+          url: `${window.location.origin}/auth/action`,
+          handleCodeInApp: true,
+        };
+        await sendEmailVerification(user, actionCodeSettings);
       } catch {
         // Email verification failed but continue - user can request again
       }

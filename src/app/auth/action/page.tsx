@@ -35,10 +35,10 @@ export default function AuthActionPage() {
             await applyActionCode(auth, oobCode);
             setStatus('success');
             setMessage('Your email has been verified successfully!');
-            // Auto redirect to signin after 3 seconds
+            // Auto redirect to home after 2 seconds
             setTimeout(() => {
-              router.push('/signin');
-            }, 3000);
+              router.push('/');
+            }, 2000);
             break;
 
           case 'resetPassword':
@@ -95,9 +95,9 @@ export default function AuthActionPage() {
             <CheckCircle className="w-16 h-16 text-[#D4FF4F] mx-auto" />
             <h1 className="text-2xl font-bold text-white">Success!</h1>
             <p className="text-neutral-400">{message}</p>
-            <p className="text-sm text-neutral-500">Redirecting to sign in...</p>
+            <p className="text-sm text-neutral-500">Redirecting to Reelzila...</p>
             <Link
-              href="/signin"
+              href="/"
               className="inline-block mt-4 text-[#D4FF4F] hover:underline"
             >
               Click here if not redirected
