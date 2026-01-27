@@ -6,10 +6,23 @@ import { PaymentTransaction } from '@/types/types';
 const COMPANY_INFO = {
   name: 'Reelzila',
   tagline: 'AI Video Generation Platform',
-  address: 'Digital Services',
+  address: '128 City Road',
+  city: 'London',
+  postCode: 'EC1V 2NX',
+  country: 'United Kingdom',
   website: 'https://reelzila.studio',
   email: 'contact@reelzila.studio',
 };
+
+// User billing details interface
+export interface UserBillingDetails {
+  name: string;
+  email: string;
+  address?: string;
+  city?: string;
+  postCode?: string;
+  country?: string;
+}
 
 // Helper to format currency (amount followed by € with space)
 const formatCurrency = (amount: number): string => {
@@ -63,8 +76,7 @@ const getCreditsFromAmount = (amount: number, type?: string): number | null => {
 
 export const generateTransactionPDF = (
   transaction: PaymentTransaction,
-  userName: string,
-  userEmail: string
+  userBilling: UserBillingDetails
 ) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -115,30 +127,11 @@ export const generateTransactionPDF = (
   yPos += 12;
 
   // ============================================
-  // INVOICE DETAILS & BILL TO SECTION
+  // INVOICE DETAILS SECTION (right side)
   // ============================================
 
-  // Left column: Bill To
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...grayColor);
-  doc.text('BILL TO', margin, yPos);
-
-  yPos += 5;
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...blackColor);
-  doc.text(userName || 'Customer', margin, yPos);
-
-  yPos += 4;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...darkGrayColor);
-  doc.text(userEmail, margin, yPos);
-
-  // Right column: Invoice details (pushed left by 30px more)
   const detailsLabelX = rightAlign - 90;
-  let detailsY = yPos - 9;
+  let detailsY = yPos;
 
   // Invoice Number
   doc.setFont('helvetica', 'normal');
@@ -161,17 +154,87 @@ export const generateTransactionPDF = (
 
   detailsY += 5;
 
-  // Payment Status (black and white only)
+  // Payment Status
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...grayColor);
   doc.text('Status', detailsLabelX, detailsY);
-
   const statusText = transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...blackColor);
   doc.text(statusText, rightAlign, detailsY, { align: 'right' });
 
-  yPos += 16;
+  yPos += 25;
+
+  // ============================================
+  // BILLING DETAILS SECTION (two columns)
+  // ============================================
+
+  const colWidth = (pageWidth - margin * 2) / 2 - 5;
+  const col1X = margin;
+  const col2X = margin + colWidth + 10;
+
+  // --- BILL FROM (Company) ---
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...grayColor);
+  doc.text('FROM', col1X, yPos);
+
+  let billFromY = yPos + 5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...blackColor);
+  doc.text(COMPANY_INFO.name, col1X, billFromY);
+
+  billFromY += 4;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...darkGrayColor);
+  doc.text(COMPANY_INFO.address, col1X, billFromY);
+
+  billFromY += 4;
+  doc.text(`${COMPANY_INFO.city}, ${COMPANY_INFO.postCode}`, col1X, billFromY);
+
+  billFromY += 4;
+  doc.text(COMPANY_INFO.country, col1X, billFromY);
+
+  billFromY += 4;
+  doc.text(COMPANY_INFO.email, col1X, billFromY);
+
+  // --- BILL TO (Customer) ---
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...grayColor);
+  doc.text('BILL TO', col2X, yPos);
+
+  let billToY = yPos + 5;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...blackColor);
+  doc.text(userBilling.name || 'Customer', col2X, billToY);
+
+  billToY += 4;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...darkGrayColor);
+  doc.text(userBilling.email, col2X, billToY);
+
+  if (userBilling.address) {
+    billToY += 4;
+    doc.text(userBilling.address, col2X, billToY);
+  }
+
+  if (userBilling.city || userBilling.postCode) {
+    billToY += 4;
+    const cityPostCode = [userBilling.city, userBilling.postCode].filter(Boolean).join(', ');
+    doc.text(cityPostCode, col2X, billToY);
+  }
+
+  if (userBilling.country) {
+    billToY += 4;
+    doc.text(userBilling.country, col2X, billToY);
+  }
+
+  yPos = Math.max(billFromY, billToY) + 12;
 
   // ============================================
   // ITEMS TABLE

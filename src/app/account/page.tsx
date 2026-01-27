@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { PaymentTransaction } from "@/types/types";
-import { generateTransactionPDF } from "@/lib/pdfGenerator";
+import { generateTransactionPDF, UserBillingDetails } from "@/lib/pdfGenerator";
 import { Download, AlertCircle, LogOut } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -77,14 +77,41 @@ function UsageStats() {
 function BillingHistory() {
   const { user } = useAuth();
   const [history, setHistory] = useState<PaymentTransaction[]>([]);
+  const [userBilling, setUserBilling] = useState<UserBillingDetails | null>(null);
+
   useEffect(() => {
     if (!user) return;
+
+    // Fetch user billing details
+    const fetchUserBilling = async () => {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setUserBilling({
+          name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || user.displayName || 'Customer',
+          email: data.email || user.email || '',
+          address: data.address,
+          city: data.city,
+          postCode: data.postCode,
+          country: data.country,
+        });
+      } else {
+        setUserBilling({
+          name: user.displayName || 'Customer',
+          email: user.email || '',
+        });
+      }
+    };
+    fetchUserBilling();
+
+    // Fetch payment history
     const q = query(collection(db, "users", user.uid, "payments"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, (snapshot) => {
       setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PaymentTransaction)));
     });
     return () => unsub();
   }, [user]);
+
   if (history.length === 0) {
     return (
       <div>
@@ -104,20 +131,18 @@ function BillingHistory() {
                     <div>
                         <p className="text-sm text-neutral-300">{item.createdAt?.toDate().toLocaleDateString()}</p>
                         <p className="font-medium">€{item.amount} - {item.type || 'Purchase'}</p>
-                        <Badge 
+                        <Badge
                           variant={item.status === 'paid' ? 'default' : 'secondary'}
                           className={item.status === 'paid' ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-600 hover:bg-yellow-700'}
                         >
                           {item.status}
                         </Badge>
                     </div>
-                    {item.status === 'paid' && (
-                      <button 
-                        onClick={() => { 
-                          if (user) { 
-                            generateTransactionPDF(item, user.displayName || user.email!, user.email!); 
-                          } 
-                        }} 
+                    {item.status === 'paid' && userBilling && (
+                      <button
+                        onClick={() => {
+                          generateTransactionPDF(item, userBilling);
+                        }}
                         className="text-sm text-white hover:text-neutral-300 flex items-center gap-1.5"
                       >
                         <Download className="w-4 h-4"/> Invoice
