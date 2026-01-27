@@ -196,6 +196,10 @@ function GeneratorComponent() {
     setDetectedOutputType(null);
     setGenerationError(null);
 
+    // Create AbortController for 10-minute timeout (long generations like Veo 3.1 can take 6+ minutes)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate-video`
@@ -207,6 +211,7 @@ function GeneratorComponent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.uid, model_id: modelId, params }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -238,7 +243,14 @@ function GeneratorComponent() {
       // credits state when the database changes, ensuring the frontend always shows
       // the accurate balance from the database.
     } catch (err) {
-      const errorMessage = (err as Error).message;
+      const error = err as Error;
+      let errorMessage = error.message;
+
+      // Handle timeout/abort specifically
+      if (error.name === 'AbortError') {
+        errorMessage = 'Generation timed out. The video was likely created - check your History.';
+      }
+
       console.error('[Generation] Failed:', {
         error: err,
         message: errorMessage,
@@ -248,6 +260,7 @@ function GeneratorComponent() {
       setGenerationError(errorMessage);
       toast.error('Generation failed', errorMessage);
     } finally {
+      clearTimeout(timeoutId);
       setGenerating(false);
     }
   }, [user, credits, modelId, params, currentModelConfig, calculatedCredits]);
