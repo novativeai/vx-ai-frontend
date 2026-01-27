@@ -210,28 +210,48 @@ export const generateTransactionPDF = (
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(...blackColor);
-  doc.text(userBilling.name || 'Customer', col2X, billToY);
 
-  billToY += 4;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...darkGrayColor);
-  doc.text(userBilling.email, col2X, billToY);
+  // Name - always show, with fallback
+  const customerName = userBilling.name?.trim() || 'Customer';
+  doc.text(customerName, col2X, billToY);
 
-  if (userBilling.address) {
+  // Email - only show if present
+  if (userBilling.email?.trim()) {
     billToY += 4;
-    doc.text(userBilling.address, col2X, billToY);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...darkGrayColor);
+    doc.text(userBilling.email.trim(), col2X, billToY);
   }
 
-  if (userBilling.city || userBilling.postCode) {
+  // Address - only show if present
+  if (userBilling.address?.trim()) {
     billToY += 4;
-    const cityPostCode = [userBilling.city, userBilling.postCode].filter(Boolean).join(', ');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...darkGrayColor);
+    doc.text(userBilling.address.trim(), col2X, billToY);
+  }
+
+  // City/PostCode - only show if at least one is present
+  const city = userBilling.city?.trim();
+  const postCode = userBilling.postCode?.trim();
+  if (city || postCode) {
+    billToY += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...darkGrayColor);
+    const cityPostCode = [city, postCode].filter(Boolean).join(', ');
     doc.text(cityPostCode, col2X, billToY);
   }
 
-  if (userBilling.country) {
+  // Country - only show if present
+  if (userBilling.country?.trim()) {
     billToY += 4;
-    doc.text(userBilling.country, col2X, billToY);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...darkGrayColor);
+    doc.text(userBilling.country.trim(), col2X, billToY);
   }
 
   yPos = Math.max(billFromY, billToY) + 12;

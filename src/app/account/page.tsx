@@ -82,20 +82,37 @@ function BillingHistory() {
   useEffect(() => {
     if (!user) return;
 
-    // Fetch user billing details
+    // Fetch user billing details from Firestore
     const fetchUserBilling = async () => {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        setUserBilling({
-          name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || user.displayName || 'Customer',
-          email: data.email || user.email || '',
-          address: data.address,
-          city: data.city,
-          postCode: data.postCode,
-          country: data.country,
-        });
-      } else {
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          // Build full name from firstName + lastName
+          const fullName = [data.firstName, data.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .trim();
+
+          setUserBilling({
+            name: fullName || user.displayName || 'Customer',
+            email: data.email || user.email || '',
+            // Convert empty strings to undefined to avoid visual bugs
+            address: data.address?.trim() || undefined,
+            city: data.city?.trim() || undefined,
+            postCode: data.postCode?.trim() || undefined,
+            country: data.country?.trim() || undefined,
+          });
+        } else {
+          // Fallback if user document doesn't exist
+          setUserBilling({
+            name: user.displayName || 'Customer',
+            email: user.email || '',
+          });
+        }
+      } catch (error) {
+        // Fallback on error - still allow invoice generation
+        logger.error('Error fetching user billing details:', error);
         setUserBilling({
           name: user.displayName || 'Customer',
           email: user.email || '',
