@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import ReactPlayer from "react-player";
 import {
   DollarSign,
   Download,
@@ -23,10 +24,10 @@ interface VideoViewerModalProps {
 
 export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<HTMLVideoElement | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const rafIdRef = useRef<number>(0);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const lastTimeRef = useRef(0);
 
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -35,39 +36,38 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [showControls, setShowControls] = useState(true);
 
-  // Smooth progress bar via requestAnimationFrame
-  // Reads currentTime every frame for perfectly linear movement on all browsers
-  useEffect(() => {
-    let lastDisplayedSecond = -1;
+  // ── CSS-driven smooth progress animation ──────────────────────────
+  // Uses a single CSS transition from current position to 100%,
+  // running at the display's native refresh rate with zero JS overhead.
+  const startProgressAnimation = useCallback(() => {
+    const video = playerRef.current;
+    const bar = progressBarRef.current;
+    if (!video || !bar || !video.duration || !isFinite(video.duration)) return;
 
-    const tick = () => {
-      const video = videoRef.current;
-      if (video && !video.paused && video.duration > 0) {
-        const pct = (video.currentTime / video.duration) * 100;
-        // Write directly to DOM to avoid React re-render overhead at 60fps
-        if (progressBarRef.current) {
-          progressBarRef.current.style.width = `${pct}%`;
-        }
-        // Only trigger React re-render when the displayed second changes
-        const sec = Math.floor(video.currentTime);
-        if (sec !== lastDisplayedSecond) {
-          lastDisplayedSecond = sec;
-          setCurrentTime(video.currentTime);
-        }
-      }
-      rafIdRef.current = requestAnimationFrame(tick);
-    };
+    const pct = (video.currentTime / video.duration) * 100;
+    const remaining = Math.max(0.01, video.duration - video.currentTime);
 
-    if (isPlaying) {
-      rafIdRef.current = requestAnimationFrame(tick);
-    }
+    // Set current position instantly
+    bar.style.transition = "none";
+    bar.style.width = `${pct}%`;
+    // Force reflow so the instant position applies before the transition
+    void bar.offsetWidth;
+    // Animate linearly to 100% over the remaining duration
+    bar.style.transition = `width ${remaining}s linear`;
+    bar.style.width = "100%";
+  }, []);
 
-    return () => {
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-    };
-  }, [isPlaying]);
+  const stopProgressAnimation = useCallback(() => {
+    const video = playerRef.current;
+    const bar = progressBarRef.current;
+    if (!video || !bar || !video.duration) return;
 
-  // Prevent body scroll when modal is open
+    const pct = (video.currentTime / video.duration) * 100;
+    bar.style.transition = "none";
+    bar.style.width = `${pct}%`;
+  }, []);
+
+  // ── Prevent body scroll ───────────────────────────────────────────
   useEffect(() => {
     const original = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -76,11 +76,10 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
     };
   }, []);
 
-  // ESC to close
+  // ── Keyboard shortcuts ────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        // If in fullscreen, exit fullscreen first, otherwise close modal
         if (document.fullscreenElement) {
           document.exitFullscreen().catch(() => {});
         } else {
@@ -89,10 +88,10 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
       }
       if (e.key === " ") {
         e.preventDefault();
-        togglePlay();
+        setIsPlaying((p) => !p);
       }
       if (e.key === "m" || e.key === "M") {
-        toggleMute();
+        setIsMuted((p) => !p);
       }
       if (e.key === "f" || e.key === "F") {
         toggleFullscreen();
@@ -101,31 +100,30 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onClose, isPlaying, isMuted, isFullscreen]);
+  }, [onClose]);
 
-  // Track fullscreen changes
+  // ── Fullscreen tracking ───────────────────────────────────────────
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    document.addEventListener("webkitfullscreenchange", handler);
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handler);
+      document.removeEventListener("webkitfullscreenchange", handler);
     };
   }, []);
 
-  // Auto-hide controls after 3s of no interaction
+  // ── Auto-hide controls after 3 s ─────────────────────────────────
+  const isPlayingRef = useRef(isPlaying);
+  isPlayingRef.current = isPlaying;
+
   const resetControlsTimeout = useCallback(() => {
     setShowControls(true);
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
-      if (isPlaying) setShowControls(false);
+      if (isPlayingRef.current) setShowControls(false);
     }, 3000);
-  }, [isPlaying]);
+  }, []);
 
   useEffect(() => {
     resetControlsTimeout();
@@ -134,21 +132,7 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
     };
   }, [resetControlsTimeout]);
 
-  const togglePlay = useCallback(() => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play().catch(() => {});
-    } else {
-      videoRef.current.pause();
-    }
-  }, []);
-
-  const toggleMute = useCallback(() => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !videoRef.current.muted;
-    setIsMuted(videoRef.current.muted);
-  }, []);
-
+  // ── Fullscreen toggle ─────────────────────────────────────────────
   const toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
     try {
@@ -162,29 +146,25 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
     }
   }, []);
 
-  // Sync progress bar position after seeking or when paused
-  const syncProgressBar = useCallback(() => {
-    const video = videoRef.current;
-    if (!video || !video.duration) return;
-    const pct = (video.currentTime / video.duration) * 100;
-    if (progressBarRef.current) {
-      progressBarRef.current.style.width = `${pct}%`;
-    }
-    setCurrentTime(video.currentTime);
-  }, []);
-
+  // ── Seek via progress bar click ───────────────────────────────────
   const handleProgressClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!videoRef.current) return;
+      e.stopPropagation();
+      const video = playerRef.current;
+      if (!video || !video.duration) return;
       const rect = e.currentTarget.getBoundingClientRect();
-      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      videoRef.current.currentTime = pos * videoRef.current.duration;
-      syncProgressBar();
+      const pos = Math.max(
+        0,
+        Math.min(1, (e.clientX - rect.left) / rect.width)
+      );
+      video.currentTime = pos * video.duration;
+      setCurrentTime(video.currentTime);
       resetControlsTimeout();
     },
-    [syncProgressBar, resetControlsTimeout]
+    [resetControlsTimeout]
   );
 
+  // ── Download ──────────────────────────────────────────────────────
   const handleDownload = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -204,16 +184,15 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
     [item.outputUrl, item.prompt, item.outputType]
   );
 
+  // ── Overlay click (close modal) ──────────────────────────────────
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
-      // Close only when clicking the dark overlay, not the content
-      if (e.target === e.currentTarget) {
-        onClose();
-      }
+      if (e.target === e.currentTarget) onClose();
     },
     [onClose]
   );
 
+  // ── Time formatter ────────────────────────────────────────────────
   const formatTime = (seconds: number): string => {
     if (!seconds || !isFinite(seconds)) return "0:00";
     const m = Math.floor(seconds / 60);
@@ -236,13 +215,12 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
       aria-modal="true"
       aria-label="Video viewer"
     >
-      {/* Top bar - always visible */}
+      {/* ── Top bar ─────────────────────────────────────────────── */}
       <div
         className={`absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 sm:px-6 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* Left: Video info */}
         <div className="min-w-0 flex-1 pr-4">
           <h2 className="text-white text-sm sm:text-base font-medium line-clamp-1">
             {item.prompt}
@@ -250,9 +228,7 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
           <p className="text-neutral-400 text-xs mt-0.5">{dateStr}</p>
         </div>
 
-        {/* Right: Action buttons */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Monetize / Sell on Marketplace */}
           <Link
             href={`/marketplace/create?generationId=${item.id}`}
             onClick={(e) => e.stopPropagation()}
@@ -263,7 +239,6 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
             <span className="sm:hidden">Sell</span>
           </Link>
 
-          {/* Download */}
           <button
             onClick={handleDownload}
             className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
@@ -272,7 +247,6 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
             <Download size={18} />
           </button>
 
-          {/* Close */}
           <button
             onClick={onClose}
             className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
@@ -283,7 +257,7 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
         </div>
       </div>
 
-      {/* Main content area */}
+      {/* ── Main content area ───────────────────────────────────── */}
       <div
         ref={containerRef}
         className="relative w-full h-full flex items-center justify-center"
@@ -291,32 +265,80 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
       >
         {isVideo ? (
           <>
-            {/* Video element */}
-            <video
-              ref={videoRef}
-              src={item.outputUrl}
-              className="max-w-full max-h-[calc(100vh-140px)] w-auto h-auto object-contain cursor-pointer"
-              autoPlay
-              loop
-              muted={isMuted}
-              playsInline
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => {
-                setIsPlaying(false);
-                syncProgressBar();
-              }}
-              onSeeked={syncProgressBar}
-              onLoadedMetadata={() => {
-                if (videoRef.current) setDuration(videoRef.current.duration);
-              }}
+            {/* Video wrapper — clicks on <video> toggle play, others bubble to overlay */}
+            <div
+              className="w-full h-full flex items-center justify-center [&_video]:max-w-full [&_video]:max-h-[calc(100vh-140px)] [&_video]:object-contain [&_video]:cursor-pointer"
               onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-                resetControlsTimeout();
+                const target = e.target as HTMLElement;
+                if (target.tagName === "VIDEO") {
+                  e.stopPropagation();
+                  setIsPlaying((p) => !p);
+                  resetControlsTimeout();
+                }
               }}
-            />
+            >
+              <ReactPlayer
+                ref={playerRef}
+                src={item.outputUrl}
+                playing={isPlaying}
+                muted={isMuted}
+                loop
+                playsInline
+                controls={false}
+                width="100%"
+                height="100%"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                onReady={() => {
+                  if (playerRef.current) {
+                    setDuration(playerRef.current.duration || 0);
+                  }
+                  // Kick off the progress animation on autoplay
+                  setTimeout(startProgressAnimation, 50);
+                }}
+                onPlay={() => {
+                  setIsPlaying(true);
+                  startProgressAnimation();
+                }}
+                onPause={() => {
+                  setIsPlaying(false);
+                  stopProgressAnimation();
+                }}
+                onDurationChange={() => {
+                  if (playerRef.current) {
+                    setDuration(playerRef.current.duration || 0);
+                  }
+                }}
+                onSeeked={() => {
+                  const video = playerRef.current;
+                  if (video && !video.paused) {
+                    startProgressAnimation();
+                  } else {
+                    stopProgressAnimation();
+                  }
+                }}
+                onTimeUpdate={() => {
+                  const video = playerRef.current;
+                  if (!video) return;
 
-            {/* Play/pause indicator center overlay */}
+                  // Detect loop restart: currentTime jumps backward significantly
+                  if (
+                    video.currentTime < lastTimeRef.current - 0.5 &&
+                    !video.paused
+                  ) {
+                    startProgressAnimation();
+                  }
+                  lastTimeRef.current = video.currentTime;
+
+                  // Only re-render when the displayed second changes
+                  const sec = Math.floor(video.currentTime);
+                  setCurrentTime((prev) =>
+                    Math.floor(prev) !== sec ? video.currentTime : prev
+                  );
+                }}
+              />
+            </div>
+
+            {/* Center play indicator */}
             {!isPlaying && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="bg-black/50 rounded-full p-5 backdrop-blur-sm">
@@ -325,7 +347,7 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
               </div>
             )}
 
-            {/* Bottom controls bar */}
+            {/* ── Bottom controls bar ────────────────────────────── */}
             <div
               className={`absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent px-4 pb-4 pt-12 sm:px-6 transition-opacity duration-300 ${
                 showControls ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -334,14 +356,11 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
               {/* Progress bar */}
               <div
                 className="w-full h-1.5 bg-neutral-700 rounded-full cursor-pointer mb-3 group"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleProgressClick(e);
-                }}
+                onClick={handleProgressClick}
               >
                 <div
                   ref={progressBarRef}
-                  className="h-full bg-[#D4FF4F] rounded-full relative will-change-[width]"
+                  className="h-full bg-[#D4FF4F] rounded-full relative"
                   style={{ width: "0%" }}
                 >
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[#D4FF4F] rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
@@ -354,7 +373,7 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      togglePlay();
+                      setIsPlaying((p) => !p);
                     }}
                     className="text-white hover:text-[#D4FF4F] transition-colors p-1"
                     aria-label={isPlaying ? "Pause" : "Play"}
@@ -364,7 +383,7 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleMute();
+                      setIsMuted((p) => !p);
                     }}
                     className="text-white hover:text-[#D4FF4F] transition-colors p-1"
                     aria-label={isMuted ? "Unmute" : "Mute"}
@@ -382,15 +401,21 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
                     toggleFullscreen();
                   }}
                   className="text-white hover:text-[#D4FF4F] transition-colors p-1"
-                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                  aria-label={
+                    isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
+                  }
                 >
-                  {isFullscreen ? <Minimize size={22} /> : <Maximize size={22} />}
+                  {isFullscreen ? (
+                    <Minimize size={22} />
+                  ) : (
+                    <Maximize size={22} />
+                  )}
                 </button>
               </div>
             </div>
           </>
         ) : (
-          /* Image viewer */
+          /* ── Image viewer ──────────────────────────────────────── */
           <div
             className="relative max-w-[90vw] max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
