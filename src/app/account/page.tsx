@@ -14,13 +14,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { PaymentTransaction } from "@/types/types";
 import { generateTransactionPDF, UserBillingDetails } from "@/lib/pdfGenerator";
-import { Download, AlertCircle, LogOut } from "lucide-react";
+import { Download, LogOut, CreditCard } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRouter, useSearchParams } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { FirebaseError } from "firebase/app";
+import { COUNTRIES } from "@/lib/countries";
 import { AccountNav, AccountNavMobile, type AccountTab } from "@/components/AccountNav";
 import { HistoryCard } from "@/components/HistoryCard";
+import { VideoViewerModal } from "@/components/VideoViewerModal";
 import { PurchasedVideos } from "@/components/PurchasedVideos";
 import { SellerEarningsCard } from "@/components/SellerEarningsCard";
 import { SellerTransactions } from "@/components/SellerTransactions";
@@ -242,6 +244,105 @@ function SubscriptionStatus() {
   );
 }
 
+// Map known card brands to display labels and badge text
+const CARD_BRANDS: Record<string, { label: string; badge: string }> = {
+  VISA: { label: 'Visa', badge: 'VISA' },
+  MASTERCARD: { label: 'Mastercard', badge: 'MC' },
+  AMEX: { label: 'American Express', badge: 'AMEX' },
+  DISCOVER: { label: 'Discover', badge: 'DISC' },
+  DINERS: { label: 'Diners Club', badge: 'DC' },
+  JCB: { label: 'JCB', badge: 'JCB' },
+  UNIONPAY: { label: 'UnionPay', badge: 'UP' },
+};
+
+function PaymentMethodOnFile() {
+  const { userProfile } = useAuth();
+  const card = userProfile?.lastPaymentMethod;
+
+  // No card data at all, or object exists but has no usable fields
+  if (!card || (!card.last4 && !card.maskedPan && !card.cardBrand)) {
+    return (
+      <div>
+        <h2 className="font-semibold text-lg mb-4">Payment Method</h2>
+        <Card className="bg-[#1C1C1C] border-neutral-800 p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center">
+              <CreditCard className="w-5 h-5 text-neutral-500" />
+            </div>
+            <div>
+              <p className="text-sm text-neutral-400">No payment method on file</p>
+              <p className="text-xs text-neutral-500">Your card details will appear here after your first purchase.</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Resolve brand info with fallback for unknown brands
+  const rawBrand = card.cardBrand?.toUpperCase()?.trim() || '';
+  const knownBrand = CARD_BRANDS[rawBrand];
+  const brandLabel = knownBrand?.label
+    || (rawBrand ? rawBrand.charAt(0) + rawBrand.slice(1).toLowerCase() : 'Card');
+  const brandBadge = knownBrand?.badge || null;
+
+  // Derive last4 from maskedPan if last4 is missing
+  const last4 = card.last4
+    || (card.maskedPan && card.maskedPan.length >= 4
+      ? card.maskedPan.slice(-4)
+      : null);
+
+  // Build expiry string only if both month and year are present
+  const expiryMonth = card.expiryMonth ? String(card.expiryMonth).padStart(2, '0') : null;
+  const expiryYear = card.expiryYear ? String(card.expiryYear) : null;
+  const expiry = expiryMonth && expiryYear ? `${expiryMonth}/${expiryYear}` : null;
+
+  // Primary label: "Visa ending in 1234" or "Visa" or "Card ending in 1234"
+  const primaryLabel = last4
+    ? `${brandLabel} ending in ${last4}`
+    : brandLabel;
+
+  // Whether we have any secondary details to show
+  const hasDetails = expiry || card.cardholderName;
+
+  return (
+    <div>
+      <h2 className="font-semibold text-lg mb-4">Payment Method</h2>
+      <Card className="bg-[#1C1C1C] border-neutral-800 p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Brand badge: known brand text or generic card icon */}
+            <div className="w-12 h-8 rounded bg-neutral-800 flex items-center justify-center flex-shrink-0">
+              {brandBadge ? (
+                <span className="text-xs font-bold text-neutral-300 tracking-wider">{brandBadge}</span>
+              ) : (
+                <CreditCard className="w-5 h-5 text-neutral-400" />
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-white">{primaryLabel}</p>
+              {hasDetails && (
+                <div className="flex items-center gap-3 mt-0.5">
+                  {expiry && (
+                    <p className="text-xs text-neutral-400">Expires {expiry}</p>
+                  )}
+                  {card.cardholderName && (
+                    <p className="text-xs text-neutral-500">{card.cardholderName}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <CreditCard className="w-5 h-5 text-neutral-600 flex-shrink-0" />
+        </div>
+      </Card>
+      <p className="text-xs text-neutral-500 mt-2">
+        This is the last card used for a payment. To use a different card, select it on your next purchase.
+      </p>
+    </div>
+  );
+}
+
 // --- Main Page Component ---
 export default function AccountPage() {
     const { user, credits } = useAuth();
@@ -257,13 +358,21 @@ export default function AccountPage() {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [billingAddress, setBillingAddress] = useState("");
+    const [billingCity, setBillingCity] = useState("");
+    const [billingPostCode, setBillingPostCode] = useState("");
+    const [billingCountry, setBillingCountry] = useState("");
+    const [billingPhone, setBillingPhone] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+    const [isSavingBilling, setIsSavingBilling] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [billingMessage, setBillingMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [history, setHistory] = useState<Generation[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(true);
     const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
     const [sellerBalance, setSellerBalance] = useState(0);
+    const [viewerItem, setViewerItem] = useState<Generation | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -277,6 +386,11 @@ export default function AccountPage() {
         if (doc.exists()) {
           const userData = doc.data();
           setActivePlan(userData?.activePlan || "Starter");
+          setBillingAddress(userData?.address || "");
+          setBillingCity(userData?.city || "");
+          setBillingPostCode(userData?.postCode || "");
+          setBillingCountry(userData?.country || "");
+          setBillingPhone(userData?.phone || "");
         }
       });
 
@@ -440,6 +554,31 @@ export default function AccountPage() {
       }
     };
 
+    const handleSaveBilling = async () => {
+      if (!user) return;
+      setIsSavingBilling(true);
+      setBillingMessage(null);
+
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const { updateDoc } = await import('firebase/firestore');
+        await updateDoc(userDocRef, {
+          address: billingAddress.trim(),
+          city: billingCity.trim(),
+          postCode: billingPostCode.trim(),
+          country: billingCountry,
+          phone: billingPhone.trim(),
+        });
+        setBillingMessage({ type: 'success', text: 'Billing details updated successfully!' });
+        setTimeout(() => setBillingMessage(null), 3000);
+      } catch (error) {
+        logger.error("Error updating billing details", error);
+        setBillingMessage({ type: 'error', text: 'Failed to update billing details.' });
+      } finally {
+        setIsSavingBilling(false);
+      }
+    };
+
     const handleCancel = () => {
       setDisplayName(user?.displayName || "");
       setEmail(user?.email || "");
@@ -557,8 +696,99 @@ export default function AccountPage() {
 
                                 <Separator className="bg-neutral-800" />
 
+                                {/* Payment Method on File */}
+                                <PaymentMethodOnFile />
+
+                                <Separator className="bg-neutral-800" />
+
                                 {/* Billing History */}
                                 <BillingHistory />
+
+                                <Separator className="bg-neutral-800" />
+
+                                {/* Billing Details */}
+                                <div>
+                                     <h2 className="font-semibold text-lg mb-4">Billing Details</h2>
+                                     <p className="text-xs text-neutral-500 mb-4">
+                                       This information appears on your invoices.
+                                     </p>
+
+                                     {billingMessage && (
+                                       <Alert className={`mb-4 ${billingMessage.type === 'success' ? 'bg-green-900/20 border-green-700' : 'bg-red-900/20 border-red-700'}`}>
+                                         <AlertDescription className={billingMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}>
+                                           {billingMessage.text}
+                                         </AlertDescription>
+                                       </Alert>
+                                     )}
+
+                                     <div className="space-y-4">
+                                        <div>
+                                          <label className="text-sm text-neutral-400 mb-1 block">Street Address</label>
+                                          <Input
+                                            placeholder="123 Main Street, Apt 4B"
+                                            value={billingAddress}
+                                            onChange={(e) => setBillingAddress(e.target.value)}
+                                            className={inputStyles}
+                                          />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <label className="text-sm text-neutral-400 mb-1 block">City</label>
+                                            <Input
+                                              placeholder="London"
+                                              value={billingCity}
+                                              onChange={(e) => setBillingCity(e.target.value)}
+                                              className={inputStyles}
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="text-sm text-neutral-400 mb-1 block">Post / ZIP Code</label>
+                                            <Input
+                                              placeholder="EC1V 2NX"
+                                              value={billingPostCode}
+                                              onChange={(e) => setBillingPostCode(e.target.value)}
+                                              className={inputStyles}
+                                            />
+                                          </div>
+                                        </div>
+
+                                        <div>
+                                          <label className="text-sm text-neutral-400 mb-1 block">Country</label>
+                                          <select
+                                            value={billingCountry}
+                                            onChange={(e) => setBillingCountry(e.target.value)}
+                                            className="flex h-10 w-full bg-transparent border-0 border-b border-neutral-700 rounded-none px-0 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-0 focus-visible:border-b-white"
+                                          >
+                                            <option value="" disabled>Select your country</option>
+                                            {COUNTRIES.map(country => (
+                                              <option key={country} value={country} className="bg-black text-white">{country}</option>
+                                            ))}
+                                          </select>
+                                        </div>
+
+                                        <div>
+                                          <label className="text-sm text-neutral-400 mb-1 block">Phone Number</label>
+                                          <Input
+                                            type="tel"
+                                            placeholder="+44 20 1234 5678"
+                                            value={billingPhone}
+                                            onChange={(e) => setBillingPhone(e.target.value)}
+                                            className={inputStyles}
+                                          />
+                                        </div>
+
+                                        <div className="flex justify-end pt-2">
+                                            <Button
+                                              className="bg-white text-black hover:bg-neutral-200 font-semibold"
+                                              onClick={handleSaveBilling}
+                                              disabled={isSavingBilling}
+                                            >
+                                              {isSavingBilling ? "Saving..." : "Save Billing Details"}
+                                            </Button>
+                                        </div>
+                                     </div>
+                                </div>
 
                                 <Separator className="bg-neutral-800" />
 
@@ -658,19 +888,6 @@ export default function AccountPage() {
                                         </div>
                                      </div>
 
-                                     {/* Payment Info Notice */}
-                                     <Card className="bg-neutral-900 border-neutral-800 p-4 mt-8">
-                                        <div className="flex gap-3">
-                                          <AlertCircle className="h-5 w-5 text-neutral-400 flex-shrink-0 mt-0.5" />
-                                          <div>
-                                            <p className="text-sm font-medium mb-1">Payment Management</p>
-                                            <p className="text-xs text-neutral-400">
-                                              All payments are securely processed through our trusted payment partners. Your payment information is encrypted and never stored on our servers. To update your payment method, simply use your preferred option on your next purchase.
-                                            </p>
-                                          </div>
-                                        </div>
-                                     </Card>
-
                                      {/* Logout Section */}
                                      <Separator className="bg-neutral-800 my-8" />
 
@@ -736,10 +953,17 @@ export default function AccountPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {history.map(item => (
                                             <div key={item.id} className="w-full">
-                                                <HistoryCard item={item} />
+                                                <HistoryCard item={item} onClick={setViewerItem} />
                                             </div>
                                         ))}
                                     </div>
+                                )}
+
+                                {viewerItem && (
+                                    <VideoViewerModal
+                                        item={viewerItem}
+                                        onClose={() => setViewerItem(null)}
+                                    />
                                 )}
                             </div>
                         )}

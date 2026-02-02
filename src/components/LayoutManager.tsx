@@ -1,9 +1,32 @@
 // FILE: ./src/components/LayoutManager.tsx
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+// Pages that should NOT trigger the profile-completion redirect
+const PUBLIC_PATHS = [
+  '/signin',
+  '/signup',
+  '/complete-profile',
+  '/terms',
+  '/privacy',
+  '/legal',
+  '/verify-email',
+  '/forgot-password',
+  '/payment/success',
+  '/payment/cancel',
+  '/payment/pending',
+  '/marketplace/purchase/success',
+  '/marketplace/purchase/cancel',
+  '/about',
+  '/blog',
+  '/contact',
+  '/refund',
+];
 
 export default function LayoutManager({
   children,
@@ -11,9 +34,24 @@ export default function LayoutManager({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, profileComplete } = useAuth();
 
   // Hide external footer on homepage (it has its own integrated footer)
   const hideFooter = pathname === "/";
+
+  // Redirect authenticated users with incomplete profiles
+  useEffect(() => {
+    if (loading) return;
+    if (!user) return;
+
+    const isPublicPath = PUBLIC_PATHS.some(p => pathname.startsWith(p));
+    if (isPublicPath) return;
+
+    if (!profileComplete) {
+      router.push('/complete-profile');
+    }
+  }, [user, loading, profileComplete, pathname, router]);
 
   return (
     <>

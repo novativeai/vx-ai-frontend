@@ -86,7 +86,7 @@ export default function SignIn() {
         const userDoc = await getUserDocWithRetry(user.uid);
 
         if (!userDoc.exists()) {
-          // New user - create profile with profileComplete: false
+          // New user via Google on signin page - create profile with profileComplete: false
           const newUserDocRef = doc(db, "users", user.uid);
           await setDoc(newUserDocRef, {
             email: user.email,
@@ -99,18 +99,19 @@ export default function SignIn() {
             profileComplete: false,
             createdAt: new Date(),
           });
-          router.push('/');
+          // New Google user needs to complete their profile
+          router.push('/complete-profile');
         } else {
           // Existing user - check if profile is complete
           const userData = userDoc.data();
           if (isProfileComplete(userData)) {
             router.push('/');
           } else {
-            router.push('/');
+            router.push('/complete-profile');
           }
         }
       } catch {
-        // Firestore failed but auth succeeded - AuthContext will handle state
+        // Firestore failed but auth succeeded - LayoutManager will redirect if needed
         router.push('/');
       }
     } catch (err) {
@@ -160,7 +161,7 @@ export default function SignIn() {
           if (isProfileComplete(userData)) {
             router.push('/');
           } else {
-            router.push('/');
+            router.push('/complete-profile');
           }
         } else {
           // User exists in Auth but not in Firestore - create document
@@ -176,11 +177,10 @@ export default function SignIn() {
             profileComplete: false,
             createdAt: new Date(),
           });
-          router.push('/');
+          router.push('/complete-profile');
         }
       } catch {
-        // Firestore operation failed but auth succeeded - just redirect
-        // AuthContext will handle the user state
+        // Firestore operation failed but auth succeeded - LayoutManager will redirect if needed
         router.push('/');
       }
     } catch (err) {

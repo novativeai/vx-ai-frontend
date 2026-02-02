@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase";
 // --- Component Imports ---
 import { HistoryCard } from "@/components/HistoryCard";
 import { ModelCard } from "@/components/ModelCard";
+import { VideoViewerModal } from "@/components/VideoViewerModal";
 import { DynamicBanner, BannerSlide } from "@/components/DynamicBanner";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -49,6 +50,7 @@ function HistorySection() {
   const { user } = useAuth();
   const [history, setHistory] = useState<Generation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewerItem, setViewerItem] = useState<Generation | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -99,13 +101,22 @@ function HistorySection() {
   }
 
   return (
-    <div className={gridContainerClasses}>
-      {history.map(item => (
-        <div key={item.id} className="w-80 flex-shrink-0 sm:w-72 md:w-80 lg:w-auto">
-          <HistoryCard item={item} />
-        </div>
-      ))}
-    </div>
+    <>
+      <div className={gridContainerClasses}>
+        {history.map(item => (
+          <div key={item.id} className="w-80 flex-shrink-0 sm:w-72 md:w-80 lg:w-auto">
+            <HistoryCard item={item} onClick={setViewerItem} />
+          </div>
+        ))}
+      </div>
+
+      {viewerItem && (
+        <VideoViewerModal
+          item={viewerItem}
+          onClose={() => setViewerItem(null)}
+        />
+      )}
+    </>
   );
 }
 

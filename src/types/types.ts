@@ -137,6 +137,17 @@ export interface StudentVerification {
   rejectionReason?: string;
 }
 
+// Last payment method stored from PayTrust webhook
+export interface LastPaymentMethod {
+  last4?: string;
+  maskedPan?: string;
+  cardBrand?: string;
+  cardholderName?: string;
+  expiryMonth?: string;
+  expiryYear?: string;
+  updatedAt?: Timestamp | FieldValue | Date;
+}
+
 // User Profile Type - represents all user data in Firestore
 export interface UserProfile {
   email: string;
@@ -152,6 +163,7 @@ export interface UserProfile {
   isAdmin: boolean;
   emailVerified: boolean;
   profileComplete: boolean;
+  lastPaymentMethod?: LastPaymentMethod;
   createdAt: Timestamp | FieldValue | Date;
   updatedAt?: Timestamp | FieldValue | Date;
 }

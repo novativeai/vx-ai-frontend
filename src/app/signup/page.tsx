@@ -239,18 +239,19 @@ export default function SignUp() {
             profileComplete: false,
             createdAt: new Date(),
           });
-          router.push('/');
+          // New Google user needs to complete their profile
+          router.push('/complete-profile');
         } else {
           // Existing user - check if profile is complete
           const userData = userDoc.data();
           if (isProfileComplete(userData)) {
             router.push('/');
           } else {
-            router.push('/');
+            router.push('/complete-profile');
           }
         }
       } catch {
-        // Firestore failed but auth succeeded - AuthContext will handle state
+        // Firestore failed but auth succeeded - LayoutManager will redirect if needed
         router.push('/');
       }
     } catch (err) {

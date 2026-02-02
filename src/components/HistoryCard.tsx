@@ -18,9 +18,10 @@ interface Generation {
 
 interface HistoryCardProps {
   item: Generation;
+  onClick?: (item: Generation) => void;
 }
 
-export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item }) {
+export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -54,13 +55,20 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     }
   }, [item.outputUrl, item.prompt, item.outputType]);
 
+  const handleCardClick = useCallback(() => {
+    onClick?.(item);
+  }, [onClick, item]);
+
   return (
     <div
       className="group text-left w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700">
+      <Card
+        className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700"
+        onClick={handleCardClick}
+      >
         {/* Square card container with video maintaining its natural aspect ratio inside */}
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
           {item.outputType === 'video' ? (
@@ -103,7 +111,11 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
           </button>
 
           {/* Monetize button - top left */}
-          <Link href={`/marketplace/create?generationId=${item.id}`} className="z-30">
+          <Link
+            href={`/marketplace/create?generationId=${item.id}`}
+            className="z-30"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button className="absolute top-3 left-3 z-30 bg-white/90 hover:bg-white text-black rounded-full p-2 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg">
               <DollarSign size={16} />
             </button>
