@@ -25,14 +25,47 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafIdRef = useRef<number>(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [showControls, setShowControls] = useState(true);
+
+  // Smooth progress bar via requestAnimationFrame
+  // Reads currentTime every frame for perfectly linear movement on all browsers
+  useEffect(() => {
+    let lastDisplayedSecond = -1;
+
+    const tick = () => {
+      const video = videoRef.current;
+      if (video && !video.paused && video.duration > 0) {
+        const pct = (video.currentTime / video.duration) * 100;
+        // Write directly to DOM to avoid React re-render overhead at 60fps
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width = `${pct}%`;
+        }
+        // Only trigger React re-render when the displayed second changes
+        const sec = Math.floor(video.currentTime);
+        if (sec !== lastDisplayedSecond) {
+          lastDisplayedSecond = sec;
+          setCurrentTime(video.currentTime);
+        }
+      }
+      rafIdRef.current = requestAnimationFrame(tick);
+    };
+
+    if (isPlaying) {
+      rafIdRef.current = requestAnimationFrame(tick);
+    }
+
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [isPlaying]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -129,24 +162,27 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
     }
   }, []);
 
-  const handleTimeUpdate = useCallback(() => {
-    if (!videoRef.current) return;
-    const t = videoRef.current.currentTime;
-    const d = videoRef.current.duration;
-    setCurrentTime(t);
-    setDuration(d);
-    setProgress(d > 0 ? (t / d) * 100 : 0);
+  // Sync progress bar position after seeking or when paused
+  const syncProgressBar = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !video.duration) return;
+    const pct = (video.currentTime / video.duration) * 100;
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = `${pct}%`;
+    }
+    setCurrentTime(video.currentTime);
   }, []);
 
   const handleProgressClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!videoRef.current) return;
       const rect = e.currentTarget.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
+      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       videoRef.current.currentTime = pos * videoRef.current.duration;
+      syncProgressBar();
       resetControlsTimeout();
     },
-    [resetControlsTimeout]
+    [syncProgressBar, resetControlsTimeout]
   );
 
   const handleDownload = useCallback(
@@ -264,9 +300,12 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
               loop
               muted={isMuted}
               playsInline
-              onTimeUpdate={handleTimeUpdate}
               onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
+              onPause={() => {
+                setIsPlaying(false);
+                syncProgressBar();
+              }}
+              onSeeked={syncProgressBar}
               onLoadedMetadata={() => {
                 if (videoRef.current) setDuration(videoRef.current.duration);
               }}
@@ -301,8 +340,9 @@ export function VideoViewerModal({ item, onClose }: VideoViewerModalProps) {
                 }}
               >
                 <div
-                  className="h-full bg-[#D4FF4F] rounded-full relative transition-[width] duration-100"
-                  style={{ width: `${progress}%` }}
+                  ref={progressBarRef}
+                  className="h-full bg-[#D4FF4F] rounded-full relative will-change-[width]"
+                  style={{ width: "0%" }}
                 >
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[#D4FF4F] rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md" />
                 </div>
