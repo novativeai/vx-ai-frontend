@@ -29,12 +29,7 @@ import { SellerTransactions } from "@/components/SellerTransactions";
 import { PayoutRequestsTable } from "@/components/PayoutRequestsTable";
 import { WithdrawalRequestModal } from "@/components/WithdrawalRequestModal";
 import { SellerSettingsCard } from "@/components/SellerSettingsCard";
-import { Generation } from "@/types/types"; 
-// --- THE FIX: Define a specific type for the subscription state ---
-interface SubscriptionState {
-  planName: string;
-  status: 'active' | 'inactive' | 'pending' | string; // Allow for other potential statuses
-}
+import { Generation } from "@/types/types";
 
 // --- Sub-components ---
 function UsageStats() {
@@ -174,76 +169,6 @@ function BillingHistory() {
   );
 }
 
-function SubscriptionStatus() {
-  const { user } = useAuth();
-  const [subscription, setSubscription] = useState<SubscriptionState|null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    
-    const fetchSubscription = async () => {
-      try {
-        // Get user document to check active plan and subscription status
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.data();
-        
-        if (userData?.activePlan && userData.activePlan !== "Starter") {
-          setSubscription({
-            planName: userData.activePlan,
-            status: userData.subscriptionStatus || "active",
-          });
-        }
-      } catch (error) {
-        logger.error("Error fetching subscription", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubscription();
-  }, [user]);
-
-  if (loading) return null;
-
-  if (!subscription || subscription.planName === "Starter") {
-    return (
-<div className="mb-8">
-</div>
-
-    );
-  }
-
-  return (
-    <div className="mb-8">
-      <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-700/50 p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-sm text-neutral-400">Active Subscription</p>
-            <h3 className="text-2xl font-bold text-white">{subscription.planName} Plan</h3>
-          </div>
-          <Badge 
-            variant={subscription.status === 'active' ? 'default' : 'secondary'}
-            className={subscription.status === 'active' ? 'bg-green-600' : 'bg-yellow-600'}
-          >
-            {subscription.status}
-          </Badge>
-        </div>
-        <p className="text-sm text-neutral-300 mb-4">
-          Your subscription renews automatically each month. Credits are added to your account upon successful payment.
-        </p>
-        <div className="flex gap-3">
-          <Link href="/pricing">
-            <Button variant="outline" className="border-neutral-700">
-              Change Plan
-            </Button>
-          </Link>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
 // Map known card brands to display labels and badge text
 const CARD_BRANDS: Record<string, { label: string; badge: string }> = {
   VISA: { label: 'Visa', badge: 'VISA' },
@@ -352,7 +277,6 @@ export default function AccountPage() {
     const [activeTab, setActiveTab] = useState<AccountTab>(
       (tabParam as AccountTab) || "account"
     );
-    const [activePlan, setActivePlan] = useState("Starter");
     const [displayName, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
     const [currentPassword, setCurrentPassword] = useState("");
@@ -385,7 +309,6 @@ export default function AccountPage() {
       const unsubscribe = onSnapshot(userDocRef, (doc) => {
         if (doc.exists()) {
           const userData = doc.data();
-          setActivePlan(userData?.activePlan || "Starter");
           setBillingAddress(userData?.address || "");
           setBillingCity(userData?.city || "");
           setBillingPostCode(userData?.postCode || "");
@@ -644,9 +567,6 @@ export default function AccountPage() {
                     <div className="flex-1">
                         {activeTab === "account" && (
                             <div className="space-y-8">
-                                {/* Subscription Status */}
-                                <SubscriptionStatus />
-
                                 {/* Student Verification Card */}
                                 <Card className="bg-gradient-to-br from-[#D4FF4F]/10 to-transparent border-[#D4FF4F]/30 p-6">
                                     <div className="flex items-start justify-between">
@@ -681,15 +601,10 @@ export default function AccountPage() {
 
                                     {/* Right Column - Credits Display */}
                                     <Card className="bg-[#111111FF] border-neutral-800 p-8 text-center h-fit">
-                                        <p className="text-neutral-400 mb-2">Active Plan</p>
-                                        <p className="text-4xl font-bold mb-6">{activePlan}</p>
-                                        <Separator className="bg-neutral-800 mb-6" />
                                         <p className="text-neutral-400 mb-2">Available Credits</p>
                                         <p className="text-7xl font-bold mb-4">{credits}</p>
                                         <p className="text-sm text-neutral-500">
-                                          {activePlan === "Starter"
-                                            ? "One-time credits. Purchase more anytime."
-                                            : "Monthly credits refresh automatically with your subscription."}
+                                          One-time credits. Purchase more anytime.
                                         </p>
                                     </Card>
                                 </div>
