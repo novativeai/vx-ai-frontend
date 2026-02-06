@@ -13,6 +13,23 @@ interface MarketplaceGridProps {
   initialDisplayCount?: number;
 }
 
+// Check if a URL points to a video file rather than an image
+const isVideoUrl = (url: string): boolean => {
+  const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
+  return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+};
+
+// Check if a URL is a Firebase Storage image thumbnail (not a video)
+const isStaticThumbnail = (url?: string): boolean => {
+  if (!url) return false;
+  // Firebase Storage download URLs with tokens are static images
+  if (url.includes("firebasestorage.googleapis.com") && url.includes("token="))
+    return true;
+  if (url.includes("storage.googleapis.com") && !isVideoUrl(url)) return true;
+  // Any non-video URL is a valid static thumbnail
+  return !isVideoUrl(url);
+};
+
 // Memoized product card for better performance
 const ProductCard = memo(function ProductCard({
   product,
@@ -23,90 +40,88 @@ const ProductCard = memo(function ProductCard({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const [generatedPoster, setGeneratedPoster] = useState<string | null>(null);
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [fallbackPoster, setFallbackPoster] = useState<string | null>(null);
+  const [posterLoading, setPosterLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Check if thumbnailUrl is actually an image (not a video URL)
-  // Video URLs should be ignored so we can generate a proper poster
-  const isVideoUrl = (url: string) => {
-    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
-    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
-  };
+  // Determine if we have a real static thumbnail (image, not video URL)
+  const hasStaticThumb = isStaticThumbnail(product.thumbnailUrl);
+  const posterUrl = hasStaticThumb ? product.thumbnailUrl : fallbackPoster;
 
-  const validThumbnailUrl = product.thumbnailUrl && !isVideoUrl(product.thumbnailUrl)
-    ? product.thumbnailUrl
-    : null;
-
-  // Extract aspect ratio and generate poster from video
+  // Only generate a fallback poster if no static thumbnail exists
+  // This runs once per card for legacy listings that lack a real thumbnail
   useEffect(() => {
-    if (aspectRatio) return; // Already have aspect ratio
+    if (hasStaticThumb || fallbackPoster || posterLoading) return;
+
+    setPosterLoading(true);
 
     const video = document.createElement("video");
-    // Don't set crossOrigin for metadata - it can cause CORS issues
-    video.src = product.videoUrl;
     video.muted = true;
+    video.playsInline = true;
+    // Only load metadata — much lighter than full video download
     video.preload = "metadata";
+    video.src = product.videoUrl;
 
-    const handleLoadedMetadata = () => {
-      // Extract aspect ratio from video dimensions
-      if (video.videoWidth && video.videoHeight) {
-        setAspectRatio(video.videoWidth / video.videoHeight);
-      }
+    let cleaned = false;
 
-      // Try to generate poster (may fail due to CORS, that's ok)
-      if (!generatedPoster && !validThumbnailUrl) {
-        video.currentTime = 0.1;
-      } else {
-        video.remove();
-      }
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("loadedmetadata", handleMetadata);
+      video.removeEventListener("error", handleError);
+      video.remove();
     };
 
     const handleSeeked = () => {
       try {
-        // Try with crossOrigin for canvas (may fail)
         const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 360;
         const ctx = canvas.getContext("2d");
         if (ctx) {
-          ctx.drawImage(video, 0, 0);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-          setGeneratedPoster(dataUrl);
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          if (dataUrl.length > 3000) {
+            setFallbackPoster(dataUrl);
+          }
         }
       } catch {
-        // CORS error - poster generation failed, but we still have aspect ratio
+        // CORS failure — expected for fal.ai URLs
       }
-      video.remove();
+      setPosterLoading(false);
+      cleanup();
     };
 
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    const handleMetadata = () => {
+      video.currentTime = Math.min(0.5, video.duration * 0.1);
+    };
+
+    const handleError = () => {
+      setPosterLoading(false);
+      cleanup();
+    };
+
+    video.addEventListener("loadedmetadata", handleMetadata);
     video.addEventListener("seeked", handleSeeked);
+    video.addEventListener("error", handleError);
     video.load();
 
+    // Timeout: abort after 5s to avoid lingering downloads
+    const timeout = setTimeout(() => {
+      setPosterLoading(false);
+      cleanup();
+    }, 5000);
+
     return () => {
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      video.removeEventListener("seeked", handleSeeked);
-      video.remove();
+      clearTimeout(timeout);
+      cleanup();
     };
-  }, [product.videoUrl, generatedPoster, aspectRatio, validThumbnailUrl]);
-
-  // Also get aspect ratio from the actual hover video element as backup
-  const handleVideoMetadata = useCallback(() => {
-    if (videoRef.current && !aspectRatio) {
-      const { videoWidth, videoHeight } = videoRef.current;
-      if (videoWidth && videoHeight) {
-        setAspectRatio(videoWidth / videoHeight);
-      }
-    }
-  }, [aspectRatio]);
-
-  const posterUrl = validThumbnailUrl || generatedPoster;
+  }, [product.videoUrl, hasStaticThumb, fallbackPoster, posterLoading]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
     setShowVideo(true);
-    // Small delay to allow video element to mount before playing
     setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.play().catch(() => {});
@@ -120,7 +135,6 @@ const ProductCard = memo(function ProductCard({
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-    // Keep video mounted for faster subsequent hovers
   }, []);
 
   return (
@@ -133,8 +147,8 @@ const ProductCard = memo(function ProductCard({
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
         {/* Fixed square aspect ratio, video fills completely */}
         <div className="bg-neutral-800 relative overflow-hidden aspect-square">
-          {/* Loading indicator while video metadata loads */}
-          {!aspectRatio && !posterUrl && (
+          {/* Loading indicator while poster loads (only for legacy items) */}
+          {!posterUrl && !showVideo && posterLoading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center">
               <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
             </div>
@@ -147,12 +161,13 @@ const ProductCard = memo(function ProductCard({
               alt={product.title}
               fill
               className="object-cover transition-opacity duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               priority={false}
+              unoptimized={posterUrl.startsWith("data:")}
             />
           )}
 
-          {/* Video loads on hover */}
+          {/* Video loads on hover — preload="none" so it doesn't download until hovered */}
           {showVideo && (
             <video
               ref={videoRef}
@@ -161,15 +176,14 @@ const ProductCard = memo(function ProductCard({
               loop
               playsInline
               preload="auto"
-              onLoadedMetadata={handleVideoMetadata}
               className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-200 ${
                 isHovered ? "opacity-100" : "opacity-0"
               }`}
             />
           )}
 
-          {/* Fallback background when no poster */}
-          {!posterUrl && !showVideo && aspectRatio && (
+          {/* Fallback background when no poster at all */}
+          {!posterUrl && !showVideo && !posterLoading && (
             <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
               <Play size={32} className="text-neutral-600" />
             </div>
@@ -192,15 +206,21 @@ const ProductCard = memo(function ProductCard({
 
         {/* Product Info */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="text-sm font-medium text-white line-clamp-1">{product.title}</h3>
+          <h3 className="text-sm font-medium text-white line-clamp-1">
+            {product.title}
+          </h3>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-sm font-medium text-[#D4FF4F]">€{product.price.toFixed(2)}</span>
-            <span className="text-[10px] text-neutral-500">{product.sold} sold</span>
+            <span className="text-sm font-medium text-[#D4FF4F]">
+              €{product.price.toFixed(2)}
+            </span>
+            <span className="text-[10px] text-neutral-500">
+              {product.sold} sold
+            </span>
           </div>
 
           {/* Tags - Premium Style */}
           <div className="flex flex-wrap gap-2 mt-3">
-            {product.tags.slice(0, 2).map(tag => (
+            {product.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
                 className="inline-block text-[10px] uppercase tracking-wider text-neutral-400 px-2.5 py-1 rounded border border-neutral-700/60 bg-neutral-900/80"
@@ -209,7 +229,9 @@ const ProductCard = memo(function ProductCard({
               </span>
             ))}
             {product.tags.length > 2 && (
-              <span className="inline-block text-[10px] text-neutral-600 uppercase tracking-wider self-center">+{product.tags.length - 2}</span>
+              <span className="inline-block text-[10px] text-neutral-600 uppercase tracking-wider self-center">
+                +{product.tags.length - 2}
+              </span>
             )}
           </div>
         </div>
@@ -235,7 +257,7 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
   const hasMoreProducts = displayCount < products.length;
 
   const handleLoadMore = () => {
-    setDisplayCount(prev => prev + initialDisplayCount);
+    setDisplayCount((prev) => prev + initialDisplayCount);
   };
 
   if (isLoading) {
@@ -260,7 +282,9 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
       <div className="flex justify-center items-center min-h-96">
         <div className="text-center">
           <p className="text-neutral-400 text-lg">No videos found</p>
-          <p className="text-neutral-600 text-sm mt-2">Try adjusting your filters</p>
+          <p className="text-neutral-600 text-sm mt-2">
+            Try adjusting your filters
+          </p>
         </div>
       </div>
     );
@@ -270,7 +294,7 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
     <div className="space-y-8">
       {/* Standard CSS Grid layout */}
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {displayedProducts.map(product => (
+        {displayedProducts.map((product) => (
           <ProductCard
             key={product.id}
             product={product}

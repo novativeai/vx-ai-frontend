@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useRef, useState, Suspense } from "react";
 import { CreateProductSkeleton } from "@/components/ui/premium-skeleton";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { collection, doc, getDoc, addDoc, serverTimestamp, type FieldValue } from "firebase/firestore";
+import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { Generation, MarketplaceProduct } from "@/types/types";
 import { logger } from "@/lib/logger";
@@ -28,6 +29,9 @@ function ProductCreationContent() {
   const [generation, setGeneration] = useState<Generation | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [thumbnailDataUrl, setThumbnailDataUrl] = useState<string | null>(null);
+  const [thumbnailStatus, setThumbnailStatus] = useState<"idle" | "generating" | "ready" | "failed">("idle");
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -65,6 +69,69 @@ function ProductCreationContent() {
     fetchGeneration();
   }, [user, generationId, router]);
 
+  // Auto-generate thumbnail from preview video once generation loads
+  useEffect(() => {
+    if (!generation || generation.outputType !== "video" || thumbnailStatus !== "idle") return;
+
+    setThumbnailStatus("generating");
+
+    const video = document.createElement("video");
+    video.crossOrigin = "anonymous";
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.src = generation.outputUrl;
+
+    const handleSeeked = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 1280;
+        canvas.height = video.videoHeight || 720;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          // Verify it's not a blank frame (very small data URLs indicate blank/black frames)
+          if (dataUrl.length > 5000) {
+            setThumbnailDataUrl(dataUrl);
+            setThumbnailStatus("ready");
+          } else {
+            setThumbnailStatus("failed");
+          }
+        } else {
+          setThumbnailStatus("failed");
+        }
+      } catch (err) {
+        // CORS error or canvas tainted — fallback to video URL as thumbnail
+        logger.warn("Thumbnail generation failed (CORS)");
+        setThumbnailStatus("failed");
+      }
+      video.remove();
+    };
+
+    const handleError = () => {
+      setThumbnailStatus("failed");
+      video.remove();
+    };
+
+    const handleMetadata = () => {
+      // Seek to 0.5s for a better frame (avoids black intro frames)
+      video.currentTime = Math.min(0.5, video.duration * 0.1);
+    };
+
+    video.addEventListener("loadedmetadata", handleMetadata);
+    video.addEventListener("seeked", handleSeeked);
+    video.addEventListener("error", handleError);
+    video.load();
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleMetadata);
+      video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("error", handleError);
+      video.remove();
+    };
+  }, [generation, thumbnailStatus]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
@@ -93,9 +160,21 @@ function ProductCreationContent() {
       // Get user name from auth
       const userName = user.displayName || user.email || "Anonymous";
 
+      // Upload thumbnail to Firebase Storage if we captured one
+      let finalThumbnailUrl = generation.outputUrl; // fallback to video URL
+      if (thumbnailDataUrl && thumbnailStatus === "ready") {
+        try {
+          const storage = getStorage();
+          const thumbPath = `marketplace/thumbnails/${user.uid}/${Date.now()}.jpg`;
+          const thumbRef = storageRef(storage, thumbPath);
+          await uploadString(thumbRef, thumbnailDataUrl, "data_url");
+          finalThumbnailUrl = await getDownloadURL(thumbRef);
+        } catch (err) {
+          logger.warn("Failed to upload thumbnail, using video URL");
+        }
+      }
+
       // Create marketplace product
-      // Set thumbnailUrl to the output URL for both images and videos
-      // For videos, the grid will use the video as thumbnail source
       const productData: Omit<MarketplaceProduct, "id"> = {
         sellerId: user.uid,
         sellerName: userName,
@@ -108,7 +187,7 @@ function ProductCreationContent() {
         tags: formData.tags.split(",").map(tag => tag.trim()).filter(Boolean),
         hasAudio: formData.hasAudio,
         useCases: formData.useCases.split(",").map(uc => uc.trim()).filter(Boolean),
-        thumbnailUrl: generation.outputUrl,
+        thumbnailUrl: finalThumbnailUrl,
         status: "published",
         createdAt: serverTimestamp() as FieldValue,
         updatedAt: serverTimestamp() as FieldValue,
@@ -177,9 +256,11 @@ function ProductCreationContent() {
                     <AspectRatio ratio={1 / 1} className="bg-neutral-800">
                       {generation.outputType === "video" ? (
                         <video
+                          ref={previewVideoRef}
                           src={generation.outputUrl}
                           controls
                           className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
                         />
                       ) : (
                         <Image
@@ -191,6 +272,25 @@ function ProductCreationContent() {
                       )}
                     </AspectRatio>
                   </Card>
+                )}
+                {generation?.outputType === "video" && (
+                  <div className="mt-3 flex items-center gap-2 text-xs">
+                    {thumbnailStatus === "generating" && (
+                      <>
+                        <div className="w-3 h-3 border border-[#D4FF4F] border-t-transparent rounded-full animate-spin" />
+                        <span className="text-neutral-400">Generating thumbnail...</span>
+                      </>
+                    )}
+                    {thumbnailStatus === "ready" && (
+                      <>
+                        <CheckCircle size={14} className="text-green-500" />
+                        <span className="text-green-400">Thumbnail ready</span>
+                      </>
+                    )}
+                    {thumbnailStatus === "failed" && (
+                      <span className="text-neutral-500">Thumbnail will use video frame</span>
+                    )}
+                  </div>
                 )}
                 <div className="mt-6 p-4 bg-neutral-900 rounded-lg">
                   <p className="text-sm text-neutral-400 mb-2">Original Prompt</p>
