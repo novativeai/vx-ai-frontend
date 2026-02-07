@@ -1,43 +1,53 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { XCircle, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { XCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
-export default function PaymentCancelPage() {
+function PaymentCancelContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const paymentId = searchParams.get('payment_id');
+  const paymentId = searchParams.get("payment_id");
+  const subscriptionId = searchParams.get("subscription_id");
   const [isUpdating, setIsUpdating] = useState(true);
 
-  // Update payment status to cancelled/failed when user lands on this page
+  // Cancel payment via backend API (not client-side Firestore)
   useEffect(() => {
-    async function updatePaymentStatus() {
-      if (!user || !paymentId) {
+    async function cancelPayment() {
+      if (!user || (!paymentId && !subscriptionId)) {
         setIsUpdating(false);
         return;
       }
 
       try {
-        const paymentRef = doc(db, 'users', user.uid, 'payments', paymentId);
-        await updateDoc(paymentRef, {
-          status: 'cancelled',
-          cancelledAt: new Date()
-        });
-      } catch (error) {
-        // Payment might not exist or already updated - that's okay
-        console.error('Failed to update payment status:', error);
+        const token = await user.getIdToken();
+
+        if (paymentId) {
+          await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/cancel-payment`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+              },
+              body: JSON.stringify({ paymentId }),
+            }
+          );
+        }
+        // For subscriptions, the pending subscription will time out or
+        // be cleaned up by the backend — no explicit cancel needed
+      } catch {
+        // Cancel is best-effort — payment might not exist or already updated
       } finally {
         setIsUpdating(false);
       }
     }
 
-    updatePaymentStatus();
-  }, [user, paymentId]);
+    cancelPayment();
+  }, [user, paymentId, subscriptionId]);
 
   if (isUpdating) {
     return (
@@ -76,5 +86,19 @@ export default function PaymentCancelPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentCancelPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+        </div>
+      }
+    >
+      <PaymentCancelContent />
+    </Suspense>
   );
 }
