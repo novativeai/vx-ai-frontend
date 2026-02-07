@@ -1,44 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { XCircle, ShoppingBag, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
-export default function MarketplacePurchaseCancelPage() {
+function MarketplacePurchaseCancelContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const purchaseId = searchParams.get("purchase_id");
   const [isUpdating, setIsUpdating] = useState(true);
 
-  // Update purchase status to cancelled when user lands on this page
+  // Cancel purchase via backend API (not client-side Firestore)
   useEffect(() => {
-    async function updatePurchaseStatus() {
-      if (!purchaseId) {
+    async function cancelPurchase() {
+      if (!user || !purchaseId) {
         setIsUpdating(false);
         return;
       }
 
       try {
-        const purchaseRef = doc(db, "marketplace_purchases", purchaseId);
-        await updateDoc(purchaseRef, {
-          status: "cancelled",
-          cancelledAt: new Date()
-        });
-      } catch (error) {
-        // Purchase might not exist or already updated - that's okay
-        console.error("Failed to update purchase status:", error);
+        const token = await user.getIdToken();
+        await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/marketplace/cancel-purchase`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ purchaseId }),
+          }
+        );
+      } catch {
+        // Cancel is best-effort — purchase might not exist or already updated
       } finally {
         setIsUpdating(false);
       }
     }
 
-    updatePurchaseStatus();
-  }, [purchaseId]);
+    cancelPurchase();
+  }, [user, purchaseId]);
 
   if (isUpdating) {
     return (
@@ -69,5 +73,19 @@ export default function MarketplacePurchaseCancelPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function MarketplacePurchaseCancelPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
+        </div>
+      }
+    >
+      <MarketplacePurchaseCancelContent />
+    </Suspense>
   );
 }

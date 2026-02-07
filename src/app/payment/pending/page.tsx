@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { doc, onSnapshot, getDoc } from 'firebase/firestore';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 
 const TIMEOUT_SECONDS = 60;
 
-export default function PaymentPendingPage() {
+function PaymentPendingContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -184,5 +184,20 @@ export default function PaymentPendingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PaymentPendingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[#D4FF4F] mb-4" />
+          <p className="text-neutral-400">Loading...</p>
+        </div>
+      }
+    >
+      <PaymentPendingContent />
+    </Suspense>
   );
 }
