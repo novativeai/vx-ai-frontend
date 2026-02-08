@@ -40,6 +40,7 @@ const ProductCard = memo(function ProductCard({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   const [fallbackPoster, setFallbackPoster] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -122,6 +123,7 @@ const ProductCard = memo(function ProductCard({
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
     setShowVideo(true);
+    // Play is triggered after mount; onPlaying callback handles the crossfade
     setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.play().catch(() => {});
@@ -131,10 +133,16 @@ const ProductCard = memo(function ProductCard({
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
+    setVideoPlaying(false);
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
+  }, []);
+
+  // Fires when the video is actually rendering frames — safe to crossfade
+  const handleVideoPlaying = useCallback(() => {
+    setVideoPlaying(true);
   }, []);
 
   return (
@@ -154,20 +162,22 @@ const ProductCard = memo(function ProductCard({
             </div>
           )}
 
-          {/* Thumbnail/Poster shown by default */}
-          {posterUrl && !isHovered && (
+          {/* Thumbnail/Poster — stays mounted as base layer, fades out after video plays */}
+          {posterUrl && (
             <Image
               src={posterUrl}
               alt={product.title}
               fill
-              className="object-cover transition-opacity duration-300"
+              className={`object-cover transition-opacity duration-300 ${
+                videoPlaying ? "opacity-0" : "opacity-100"
+              }`}
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               priority={false}
               unoptimized={posterUrl.startsWith("data:")}
             />
           )}
 
-          {/* Video loads on hover — preload="none" so it doesn't download until hovered */}
+          {/* Video overlays on top — starts invisible, fades in when actually playing */}
           {showVideo && (
             <video
               ref={videoRef}
@@ -176,8 +186,9 @@ const ProductCard = memo(function ProductCard({
               loop
               playsInline
               preload="auto"
-              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-200 ${
-                isHovered ? "opacity-100" : "opacity-0"
+              onPlaying={handleVideoPlaying}
+              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${
+                videoPlaying && isHovered ? "opacity-100" : "opacity-0"
               }`}
             />
           )}
@@ -189,10 +200,10 @@ const ProductCard = memo(function ProductCard({
             </div>
           )}
 
-          {/* Play Icon on Hover with smooth animation */}
+          {/* Play Icon — visible when hovered but video not yet playing, fades out once playing */}
           <div
             className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-300 ${
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered && !videoPlaying ? "opacity-100" : "opacity-0"
             }`}
           >
             <div className="bg-[#D4FF4F] rounded-full p-3 transform transition-transform duration-300 scale-90 group-hover:scale-100">
