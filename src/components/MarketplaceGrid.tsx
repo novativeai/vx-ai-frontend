@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback, useEffect, memo } from "react";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { MarketplaceProduct } from "@/types/types";
-import { Play, Loader2 } from "lucide-react";
+import { Play } from "lucide-react";
 
 interface MarketplaceGridProps {
   products: MarketplaceProduct[];
@@ -41,6 +41,7 @@ const ProductCard = memo(function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [fallbackPoster, setFallbackPoster] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -145,6 +146,10 @@ const ProductCard = memo(function ProductCard({
     setVideoPlaying(true);
   }, []);
 
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+  }, []);
+
   return (
     <button
       onClick={() => onProductClick(product)}
@@ -154,26 +159,28 @@ const ProductCard = memo(function ProductCard({
     >
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
         {/* Fixed square aspect ratio, video fills completely */}
-        <div className="bg-neutral-800 relative overflow-hidden aspect-square">
-          {/* Loading indicator while poster loads (only for legacy items) */}
-          {!posterUrl && !showVideo && posterLoading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
+        <div className="bg-neutral-900 relative overflow-hidden aspect-square">
+          {/* Skeleton shimmer — lowest layer, visible until image loads */}
+          {(!imageLoaded || !posterUrl) && !videoPlaying && (
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute inset-0 bg-neutral-800" />
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
             </div>
           )}
 
-          {/* Thumbnail/Poster — stays mounted as base layer, fades out after video plays */}
+          {/* Thumbnail/Poster — stays mounted as base layer, fades in on load, fades out when video plays */}
           {posterUrl && (
             <Image
               src={posterUrl}
               alt={product.title}
               fill
               className={`object-cover transition-opacity duration-300 ${
-                videoPlaying ? "opacity-0" : "opacity-100"
+                videoPlaying ? "opacity-0" : imageLoaded ? "opacity-100" : "opacity-0"
               }`}
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               priority={false}
               unoptimized={posterUrl.startsWith("data:")}
+              onLoad={handleImageLoad}
             />
           )}
 
@@ -193,13 +200,6 @@ const ProductCard = memo(function ProductCard({
             />
           )}
 
-          {/* Fallback background when no poster at all */}
-          {!posterUrl && !showVideo && !posterLoading && (
-            <div className="absolute inset-0 bg-neutral-800 flex items-center justify-center">
-              <Play size={32} className="text-neutral-600" />
-            </div>
-          )}
-
           {/* Play Icon — visible when hovered but video not yet playing, fades out once playing */}
           <div
             className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-300 ${
@@ -212,7 +212,7 @@ const ProductCard = memo(function ProductCard({
           </div>
 
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
         </div>
 
         {/* Product Info */}
@@ -275,14 +275,32 @@ export const MarketplaceGrid: React.FC<MarketplaceGridProps> = ({
     return (
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-neutral-800 rounded-2xl animate-pulse aspect-square"
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-neutral-600" />
+          <Card key={i} className="overflow-hidden rounded-2xl relative p-0 gap-0">
+            <div className="bg-neutral-900 relative overflow-hidden aspect-square">
+              {/* Shimmer */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 bg-neutral-800" />
+                <div
+                  className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                />
+              </div>
+              {/* Gradient to match real cards */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
             </div>
-          </div>
+            {/* Text placeholders matching real card layout */}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <div className="h-3.5 w-3/4 bg-neutral-700/50 rounded" />
+              <div className="flex items-baseline gap-2 mt-2">
+                <div className="h-3 w-12 bg-neutral-700/30 rounded" />
+                <div className="h-2.5 w-8 bg-neutral-800/50 rounded" />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <div className="h-5 w-14 rounded border border-neutral-700/30 bg-neutral-800/40" />
+                <div className="h-5 w-10 rounded border border-neutral-700/30 bg-neutral-800/40" />
+              </div>
+            </div>
+          </Card>
         ))}
       </div>
     );
