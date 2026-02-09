@@ -17,6 +17,7 @@ import Link from "next/link";
 import { Generation, MarketplaceProduct } from "@/types/types";
 import { logger } from "@/lib/logger";
 import { toast } from "@/hooks/use-toast";
+import { MARKETPLACE_CATEGORIES, MARKETPLACE_USE_CASES } from "@/lib/marketplaceCategories";
 
 function ProductCreationContent() {
   const router = useRouter();
@@ -37,10 +38,10 @@ function ProductCreationContent() {
     title: "",
     description: "",
     price: "",
-    tags: "",
     hasAudio: true,
-    useCases: "",
   });
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedUseCases, setSelectedUseCases] = useState<string[]>([]);
 
   // Fetch the generation details
   useEffect(() => {
@@ -148,8 +149,8 @@ function ProductCreationContent() {
 
     try {
       // Validate form
-      if (!formData.title || !formData.price || !formData.tags) {
-        throw new Error("Please fill in all required fields");
+      if (!formData.title || !formData.price || selectedTags.length === 0) {
+        throw new Error("Please fill in all required fields and select at least one category");
       }
 
       const price = parseFloat(formData.price);
@@ -184,9 +185,9 @@ function ProductCreationContent() {
         generationId: generation.id,
         prompt: generation.prompt,
         price: price,
-        tags: formData.tags.split(",").map(tag => tag.trim()).filter(Boolean),
+        tags: selectedTags,
         hasAudio: formData.hasAudio,
-        useCases: formData.useCases.split(",").map(uc => uc.trim()).filter(Boolean),
+        useCases: selectedUseCases,
         thumbnailUrl: finalThumbnailUrl,
         status: "published",
         createdAt: serverTimestamp() as FieldValue,
@@ -347,17 +348,31 @@ function ProductCreationContent() {
                   </div>
                 </div>
 
-                {/* Tags */}
+                {/* Categories */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Tags * (comma separated)</label>
-                  <Input
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleInputChange}
-                    placeholder="e.g., futuristic, cinematic, intro, tech"
-                    className="bg-neutral-900/50 border-neutral-800 text-white"
-                    required
-                  />
+                  <label className="block text-sm font-medium mb-2">Category * (select up to 3)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {MARKETPLACE_CATEGORIES.map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTags(prev =>
+                            prev.includes(tag)
+                              ? prev.filter(t => t !== tag)
+                              : prev.length < 3 ? [...prev, tag] : prev
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                          selectedTags.includes(tag)
+                            ? 'bg-[#D4FF4F] text-black border-[#D4FF4F]'
+                            : 'bg-neutral-900/50 text-neutral-400 border-neutral-700 hover:border-neutral-500 hover:text-white'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Audio */}
@@ -377,15 +392,29 @@ function ProductCreationContent() {
 
                 {/* Use Cases */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Use Cases (comma separated)</label>
-                  <textarea
-                    name="useCases"
-                    value={formData.useCases}
-                    onChange={handleInputChange}
-                    placeholder="e.g., YouTube intro, TikTok transition, web background"
-                    rows={3}
-                    className="w-full bg-neutral-900/50 border border-neutral-800 rounded-lg px-4 py-2 text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-700 resize-none"
-                  />
+                  <label className="block text-sm font-medium mb-2">Use Cases (select any)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {MARKETPLACE_USE_CASES.map(useCase => (
+                      <button
+                        key={useCase}
+                        type="button"
+                        onClick={() => {
+                          setSelectedUseCases(prev =>
+                            prev.includes(useCase)
+                              ? prev.filter(uc => uc !== useCase)
+                              : [...prev, useCase]
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                          selectedUseCases.includes(useCase)
+                            ? 'bg-[#D4FF4F] text-black border-[#D4FF4F]'
+                            : 'bg-neutral-900/50 text-neutral-400 border-neutral-700 hover:border-neutral-500 hover:text-white'
+                        }`}
+                      >
+                        {useCase}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Submit Button */}

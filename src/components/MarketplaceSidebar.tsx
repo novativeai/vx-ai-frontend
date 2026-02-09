@@ -15,7 +15,7 @@ interface MarketplaceSidebarProps {
   productCount: number;
 }
 
-const INITIAL_VISIBLE_COUNT = 3;
+const INITIAL_VISIBLE_COUNT = 5;
 
 export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
   availableTags,
@@ -46,7 +46,7 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
   };
 
   return (
-    <div className="w-full md:w-80 flex-shrink-0">
+    <div className="w-full md:w-80 shrink-0">
       {/* Sidebar Container */}
       <div className="sticky top-24 space-y-8">
         {/* Header */}
@@ -62,7 +62,7 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
               </button>
             )}
           </div>
-          <div className="h-px bg-gradient-to-r from-[#D4FF4F]/20 to-transparent" />
+          <div className="h-px bg-linear-to-r from-[#D4FF4F]/20 to-transparent" />
           <p className="text-xs text-neutral-500">
             {productCount} {productCount === 1 ? "video" : "videos"} available
           </p>
