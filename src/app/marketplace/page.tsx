@@ -29,13 +29,14 @@ interface PurchasedVideo {
   };
 }
 
-// Memoized purchased video card for marketplace
+// Memoized purchased video card for marketplace with shimmer loading
 const PurchasedVideoCardMarketplace = React.memo(function PurchasedVideoCardMarketplace({
   video,
 }: {
   video: PurchasedVideo;
 }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
   const handleMouseEnter = () => {
@@ -52,6 +53,10 @@ const PurchasedVideoCardMarketplace = React.memo(function PurchasedVideoCardMark
       videoRef.current.currentTime = 0;
     }
   };
+
+  const handleMediaReady = React.useCallback(() => {
+    setMediaLoaded(true);
+  }, []);
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -76,16 +81,25 @@ const PurchasedVideoCardMarketplace = React.memo(function PurchasedVideoCardMark
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700">
         {/* Square card container with video maintaining its natural aspect ratio inside */}
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
+          {/* Skeleton shimmer — visible until media loads */}
+          {!mediaLoaded && (
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute inset-0 bg-neutral-800" />
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
+            </div>
+          )}
+
           {video.videoUrl ? (
             <>
               <video
                 ref={videoRef}
                 src={video.videoUrl}
-                className="absolute inset-0 w-full h-full object-contain"
+                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${mediaLoaded ? "opacity-100" : "opacity-0"}`}
                 muted
                 loop
                 playsInline
                 preload="metadata"
+                onLoadedData={handleMediaReady}
               />
               {/* Play indicator on hover */}
               <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
@@ -99,13 +113,14 @@ const PurchasedVideoCardMarketplace = React.memo(function PurchasedVideoCardMark
               src={video.thumbnailUrl}
               alt={video.title}
               fill
-              className="object-contain"
+              className={`object-contain transition-opacity duration-300 ${mediaLoaded ? "opacity-100" : "opacity-0"}`}
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              onLoad={handleMediaReady}
             />
           ) : null}
 
           {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
           {/* Download button - top right */}
           <button
@@ -289,7 +304,7 @@ function MarketplaceContent() {
           }}>
             {purchaseStatus === "success" ? (
               <>
-                <CheckCircle size={20} className="text-green-400 mt-0.5 flex-shrink-0" />
+                <CheckCircle size={20} className="text-green-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold text-green-200">Purchase Successful!</p>
                   <p className="text-sm text-green-100">Check your email for download details and rights of use information.</p>
@@ -297,7 +312,7 @@ function MarketplaceContent() {
               </>
             ) : purchaseStatus === "cancelled" ? (
               <>
-                <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+                <AlertCircle size={20} className="text-red-400 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold text-red-200">Purchase Cancelled</p>
                   <p className="text-sm text-red-100">The payment was cancelled. Feel free to try again.</p>

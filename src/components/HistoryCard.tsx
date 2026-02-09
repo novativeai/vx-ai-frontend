@@ -23,6 +23,7 @@ interface HistoryCardProps {
 
 export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleMouseEnter = useCallback(() => {
@@ -39,6 +40,10 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
       videoRef.current.currentTime = 0;
     }
   }, [item.outputType]);
+
+  const handleMediaReady = useCallback(() => {
+    setMediaLoaded(true);
+  }, []);
 
   const handleDownload = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -71,16 +76,25 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
       >
         {/* Square card container with video maintaining its natural aspect ratio inside */}
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
+          {/* Skeleton shimmer — visible until media loads */}
+          {!mediaLoaded && (
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute inset-0 bg-neutral-800" />
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
+            </div>
+          )}
+
           {item.outputType === 'video' ? (
             <>
               <video
                 ref={videoRef}
                 src={item.outputUrl}
-                className="absolute inset-0 w-full h-full object-contain"
+                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${mediaLoaded ? "opacity-100" : "opacity-0"}`}
                 muted
                 loop
                 playsInline
                 preload="metadata"
+                onLoadedData={handleMediaReady}
               />
               {/* Play indicator on hover */}
               <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
@@ -94,13 +108,14 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
               src={item.outputUrl}
               alt={item.prompt || "Generated image"}
               fill
-              className="object-contain"
+              className={`object-contain transition-opacity duration-300 ${mediaLoaded ? "opacity-100" : "opacity-0"}`}
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              onLoad={handleMediaReady}
             />
           )}
 
           {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
           {/* Download button - top right */}
           <button

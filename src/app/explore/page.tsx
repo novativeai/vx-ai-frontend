@@ -14,7 +14,6 @@ import { VideoViewerModal } from "@/components/VideoViewerModal";
 import { DynamicBanner, BannerSlide } from "@/components/DynamicBanner";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // --- Shared Type Imports ---
 import { Generation, ModelConfig } from "@/types/types";
@@ -70,12 +69,27 @@ function HistorySection() {
   if (isLoading) {
     return (
       <div className={gridContainerClasses}>
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="w-80 flex-shrink-0 lg:w-auto">
-            <Card className="overflow-hidden rounded-2xl bg-transparent">
-              <AspectRatio ratio={1 / 1}>
-                <Skeleton className="w-full h-full bg-[#1C1C1C]" />
-              </AspectRatio>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="w-80 shrink-0 lg:w-auto">
+            <Card className="overflow-hidden rounded-2xl relative p-0 gap-0 border-neutral-800">
+              <div className="bg-neutral-900 relative overflow-hidden aspect-square">
+                {/* Shimmer */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 bg-neutral-800" />
+                  <div
+                    className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent"
+                    style={{ animationDelay: `${i * 150}ms` }}
+                  />
+                </div>
+                {/* Gradient to match real cards */}
+                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+              </div>
+              {/* Text placeholders matching HistoryCard layout */}
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <div className="h-3.5 w-full bg-neutral-700/50 rounded" />
+                <div className="h-3 w-2/3 bg-neutral-700/30 rounded mt-1.5" />
+                <div className="h-2 w-16 bg-neutral-800/40 rounded mt-2" />
+              </div>
             </Card>
           </div>
         ))}
@@ -86,7 +100,7 @@ function HistorySection() {
   if (history.length === 0) {
     return (
       <div className="flex justify-center lg:justify-start w-full">
-        <div className="w-80 flex-shrink-0">
+        <div className="w-80 shrink-0">
           <Link href="/generator" className="group block h-full">
             <Card className="overflow-hidden rounded-2xl h-full border-neutral-800 bg-[#1C1C1C] hover:border-neutral-700 transition-colors">
               <AspectRatio ratio={1 / 1} className="flex flex-col items-center justify-center text-center text-neutral-500 p-6">
@@ -104,7 +118,7 @@ function HistorySection() {
     <>
       <div className={gridContainerClasses}>
         {history.map(item => (
-          <div key={item.id} className="w-80 flex-shrink-0 sm:w-72 md:w-80 lg:w-auto">
+          <div key={item.id} className="w-80 shrink-0 sm:w-72 md:w-80 lg:w-auto">
             <HistoryCard item={item} onClick={setViewerItem} />
           </div>
         ))}
