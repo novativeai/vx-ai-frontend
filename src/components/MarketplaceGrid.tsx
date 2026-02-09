@@ -220,12 +220,9 @@ const ProductCard = memo(function ProductCard({
           <h3 className="text-sm font-medium text-white line-clamp-1">
             {product.title}
           </h3>
-          <div className="flex items-baseline gap-2 mt-1">
+          <div className="mt-1">
             <span className="text-sm font-medium text-[#D4FF4F]">
               €{product.price.toFixed(2)}
-            </span>
-            <span className="text-[10px] text-neutral-500">
-              {product.sold} sold
             </span>
           </div>
 

@@ -120,19 +120,21 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
           {/* Download button - top right */}
           <button
             onClick={handleDownload}
-            className="absolute top-3 right-3 z-30 bg-[#D4FF4F] hover:bg-[#c2ef4a] text-black rounded-full p-2 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg"
+            className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-white/80 hover:bg-[#D4FF4F] text-black rounded-full pl-3 pr-3.5 py-1.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg text-xs font-semibold"
           >
-            <Download size={16} />
+            <Download size={14} />
+            <span>Save</span>
           </button>
 
-          {/* Monetize button - top left */}
+          {/* Sell button - top left */}
           <Link
             href={`/marketplace/create?generationId=${item.id}`}
             className="z-30"
             onClick={(e) => e.stopPropagation()}
           >
-            <button className="absolute top-3 left-3 z-30 bg-white/90 hover:bg-white text-black rounded-full p-2 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg">
-              <DollarSign size={16} />
+            <button className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-white/80 hover:bg-[#D4FF4F] text-black rounded-full pl-3 pr-3.5 py-1.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg text-xs font-semibold">
+              <DollarSign size={14} />
+              <span>Sell</span>
             </button>
           </Link>
         </div>

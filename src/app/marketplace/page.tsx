@@ -156,7 +156,7 @@ const bannerSlides: BannerSlide[] = [
     title: "Best Community",
     subtitle: "Join thousands of creators selling premium video content. Build your business with full usage rights.",
     buttonText: "Start Selling",
-    buttonLink: "/explore",
+    buttonLink: "/account?tab=history",
   },
 ];
 

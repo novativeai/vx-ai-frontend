@@ -15,7 +15,7 @@ interface MarketplaceSidebarProps {
   productCount: number;
 }
 
-const INITIAL_VISIBLE_COUNT = 5;
+const INITIAL_VISIBLE_COUNT = 3;
 
 export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
   availableTags,
