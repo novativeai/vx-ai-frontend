@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Facebook, Instagram, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export function HomeFooterSection() {
@@ -140,22 +140,42 @@ export function HomeFooterSection() {
             &copy; {new Date().getFullYear()} reelzila. All Rights Reserved.
           </p>
           <div className="flex space-x-4">
-            <span title="Coming soon" className="cursor-not-allowed">
-              <Twitter className="h-5 w-5 text-muted-foreground/50" aria-hidden="true" />
-              <span className="sr-only">Twitter (Coming soon)</span>
-            </span>
             <Link
-              href="https://instagram.com/reelzila"
+              href="https://medium.com/@reelzila"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Follow us on Instagram (opens in new tab)"
+              aria-label="Follow us on Medium"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-muted-foreground hover:text-primary" aria-hidden="true">
+                <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z" />
+              </svg>
+            </Link>
+            <Link
+              href="https://www.instagram.com/reelzila.studio/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow us on Instagram"
             >
               <Instagram className="h-5 w-5 text-muted-foreground hover:text-primary" aria-hidden="true" />
             </Link>
-            <span title="Coming soon" className="cursor-not-allowed">
-              <Linkedin className="h-5 w-5 text-muted-foreground/50" aria-hidden="true" />
-              <span className="sr-only">LinkedIn (Coming soon)</span>
-            </span>
+            <Link
+              href="https://www.facebook.com/reelzila.studio/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow us on Facebook"
+            >
+              <Facebook className="h-5 w-5 text-muted-foreground hover:text-primary" aria-hidden="true" />
+            </Link>
+            <Link
+              href="https://www.tiktok.com/@reelzila.studio"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Follow us on TikTok"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-muted-foreground hover:text-primary" aria-hidden="true">
+                <path d="M12.53.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>

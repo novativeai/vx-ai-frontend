@@ -71,7 +71,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
       onMouseLeave={handleMouseLeave}
     >
       <Card
-        className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-neutral-700"
+        className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-[#D4FF4F]/60"
         onClick={handleCardClick}
       >
         {/* Square card container with video maintaining its natural aspect ratio inside */}
@@ -94,6 +94,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
                 loop
                 playsInline
                 preload="metadata"
+                onLoadedMetadata={handleMediaReady}
                 onLoadedData={handleMediaReady}
               />
               {/* Play indicator on hover */}
@@ -132,7 +133,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
             className="z-30"
             onClick={(e) => e.stopPropagation()}
           >
-            <button className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-white/80 hover:bg-[#D4FF4F] text-black rounded-full pl-3 pr-3.5 py-1.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg text-xs font-semibold">
+            <button className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-[#D4FF4F] hover:bg-[#c2ef3d] text-black rounded-full pl-3 pr-3.5 py-1.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg text-xs font-semibold">
               <DollarSign size={14} />
               <span>Sell</span>
             </button>

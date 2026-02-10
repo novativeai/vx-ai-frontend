@@ -15,6 +15,7 @@ import { CheckCircle, AlertCircle, Play, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { MARKETPLACE_ALLOWED_TAGS } from "@/lib/marketplaceCategories";
 import { logger } from "@/lib/logger";
 
 interface PurchasedVideo {
@@ -255,7 +256,9 @@ function MarketplaceContent() {
     });
 
     return {
-      allTags: Array.from(tagSet).sort(),
+      allTags: Array.from(tagSet)
+        .filter(tag => MARKETPLACE_ALLOWED_TAGS.has(tag.toLowerCase()))
+        .sort(),
       allUseCases: Array.from(useCaseSet).sort(),
       filteredProducts: filtered
     };

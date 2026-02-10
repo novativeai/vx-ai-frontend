@@ -85,6 +85,7 @@ function GeneratorComponent() {
   const [generating, setGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [videoLoadError, setVideoLoadError] = useState(false);
 
   // Video preview state
   const [videoAspectRatio, setVideoAspectRatio] = useState<number>(16/9);
@@ -119,6 +120,7 @@ function GeneratorComponent() {
     setGenerating(false);
     setDetectedOutputType(null);
     setGenerationError(null);
+    setVideoLoadError(false);
 
     // Reset video state
     setVideoAspectRatio(16/9);
@@ -150,6 +152,19 @@ function GeneratorComponent() {
       setHasAudio(currentModelConfig?.tags?.includes('audio') || false);
     }
   }, [currentModelConfig]);
+
+  // Handle video load error — ad blockers or CDN delays can silently block fal.media
+  const handleVideoError = useCallback(() => {
+    setVideoLoadError(true);
+  }, []);
+
+  const retryVideoLoad = useCallback(() => {
+    setVideoLoadError(false);
+    // Force React to recreate the video element by appending a cache-buster
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
+  }, []);
 
   // Toggle mute/unmute
   const toggleMute = useCallback(() => {
@@ -195,6 +210,7 @@ function GeneratorComponent() {
     setCurrentOutputIndex(0);
     setDetectedOutputType(null);
     setGenerationError(null);
+    setVideoLoadError(false);
 
     // Create AbortController for 10-minute timeout (long generations like Veo 3.1 can take 6+ minutes)
     const controller = new AbortController();
@@ -368,8 +384,25 @@ function GeneratorComponent() {
                   </div>
                 ) : outputUrl ? (
                   <>
-                    {detectedOutputType === 'video' && (
+                    {videoLoadError ? (
+                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4">
+                        <p className="text-sm text-center max-w-xs">
+                          Video failed to load. This can happen if a browser extension is blocking the video source.
+                        </p>
+                        <div className="flex gap-3">
+                          <Button variant="outline" size="sm" onClick={retryVideoLoad}>
+                            Retry
+                          </Button>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={outputUrl} target="_blank" rel="noopener noreferrer">
+                              Open Directly
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (detectedOutputType === 'video' || detectedOutputType === null) ? (
                       <video
+                        key={outputUrl}
                         ref={videoRef}
                         src={outputUrl}
                         controls
@@ -378,25 +411,12 @@ function GeneratorComponent() {
                         muted={isMuted}
                         playsInline
                         onLoadedMetadata={(e) => handleVideoMetadata(e, false)}
+                        onError={handleVideoError}
                         className="w-full h-full object-contain"
                       />
-                    )}
-                    {detectedOutputType === 'image' && (
+                    ) : detectedOutputType === 'image' ? (
                       <Image src={outputUrl} alt="Generated result" fill className="object-contain rounded-md" />
-                    )}
-                    {detectedOutputType === null && (
-                      <video
-                        ref={videoRef}
-                        src={outputUrl}
-                        controls
-                        autoPlay
-                        loop
-                        muted={isMuted}
-                        playsInline
-                        onLoadedMetadata={(e) => handleVideoMetadata(e, false)}
-                        className="w-full h-full object-contain"
-                      />
-                    )}
+                    ) : null}
                   </>
                 ) : currentModelConfig.exampleImage ? (
                   <Image
