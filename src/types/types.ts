@@ -52,6 +52,7 @@ export interface Generation {
   };
   status?: 'completed' | 'pending' | 'failed';
   modelId?: string;
+  thumbnailUrl?: string;
 }
 
 // The type for a single payment transaction from Firestore

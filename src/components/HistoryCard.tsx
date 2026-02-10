@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { DollarSign, Play, Download } from "lucide-react";
-import { memo, useState, useRef, useCallback, useEffect } from "react";
+import { memo, useState, useRef, useCallback } from "react";
 
 interface Generation {
   id: string;
@@ -14,7 +14,18 @@ interface Generation {
   createdAt: {
     toDate: () => Date;
   };
+  thumbnailUrl?: string;
 }
+
+// Check if a URL is a static image (Firebase Storage), not a video
+const isStaticThumbnail = (url?: string): boolean => {
+  if (!url) return false;
+  const videoExts = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+  if (videoExts.some(ext => url.toLowerCase().includes(ext))) return false;
+  if (url.includes('storage.googleapis.com')) return true;
+  if (url.includes('firebasestorage.googleapis.com')) return true;
+  return false;
+};
 
 interface HistoryCardProps {
   item: Generation;
@@ -87,6 +98,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
   }, [onClick, item]);
 
   const isVideo = item.outputType === 'video';
+  const hasStaticThumb = isVideo && isStaticThumbnail(item.thumbnailUrl);
   // Shimmer visible until poster frame loads (video) or image loads
   const shimmerVisible = isVideo ? !posterReady : !imageLoaded;
 
@@ -111,19 +123,32 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
 
           {isVideo ? (
             <>
-              {/* Poster layer — lightweight video with preload="metadata" for first frame */}
-              <video
-                ref={posterVideoRef}
-                src={item.outputUrl}
-                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
-                  videoPlaying ? "opacity-0" : posterReady ? "opacity-100" : "opacity-0"
-                }`}
-                muted
-                playsInline
-                preload="metadata"
-                onLoadedMetadata={handlePosterReady}
-                onLoadedData={handlePosterReady}
-              />
+              {/* Poster layer — static <Image> if thumbnail exists, otherwise lightweight <video> */}
+              {hasStaticThumb ? (
+                <Image
+                  src={item.thumbnailUrl!}
+                  alt={item.prompt || "Video thumbnail"}
+                  fill
+                  className={`object-contain transition-opacity duration-300 ${
+                    videoPlaying ? "opacity-0" : posterReady ? "opacity-100" : "opacity-0"
+                  }`}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  onLoad={handlePosterReady}
+                />
+              ) : (
+                <video
+                  ref={posterVideoRef}
+                  src={item.outputUrl}
+                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                    videoPlaying ? "opacity-0" : posterReady ? "opacity-100" : "opacity-0"
+                  }`}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onLoadedMetadata={handlePosterReady}
+                  onLoadedData={handlePosterReady}
+                />
+              )}
 
               {/* Playback layer — only mounted on hover, crossfades in when actually playing */}
               {showVideo && (
