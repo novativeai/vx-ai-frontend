@@ -22,7 +22,7 @@ import { MARKETPLACE_CATEGORIES, MARKETPLACE_USE_CASES } from "@/lib/marketplace
 function ProductCreationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
 
   const generationId = searchParams.get("generationId");
 
@@ -158,8 +158,11 @@ function ProductCreationContent() {
         throw new Error("Price must be a valid positive number");
       }
 
-      // Get user name from auth
-      const userName = user.displayName || user.email || "Anonymous";
+      // Get user name from Firestore profile first, then Firebase Auth fallback
+      const profileName = userProfile?.firstName && userProfile?.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`.trim()
+        : null;
+      const userName = profileName || user.displayName || user.email || "Anonymous";
 
       // Upload thumbnail to Firebase Storage if we captured one
       let finalThumbnailUrl = generation.outputUrl; // fallback to video URL
