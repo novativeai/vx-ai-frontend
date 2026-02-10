@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { DollarSign, Play, Download } from "lucide-react";
-import { memo, useState, useRef, useCallback } from "react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
 
 interface Generation {
   id: string;
@@ -34,31 +34,98 @@ interface HistoryCardProps {
 
 export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [posterReady, setPosterReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [fallbackPoster, setFallbackPoster] = useState<string | null>(null);
+  const [posterLoading, setPosterLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const posterVideoRef = useRef<HTMLVideoElement>(null);
 
-  // For videos: use a hidden <video> with preload="metadata" to render a poster frame
-  // This is much lighter than loading the full video and works on Chrome
-  const handlePosterReady = useCallback(() => {
-    setPosterReady(true);
-  }, []);
+  const isVideo = item.outputType === 'video';
+  const hasStaticThumb = isVideo && isStaticThumbnail(item.thumbnailUrl);
+  const posterUrl = hasStaticThumb ? item.thumbnailUrl : fallbackPoster;
+
+  // Generate a fallback poster via canvas capture when no static thumbnail exists
+  // Matches MarketplaceGrid ProductCard pattern exactly
+  useEffect(() => {
+    if (!isVideo || hasStaticThumb || fallbackPoster || posterLoading) return;
+
+    setPosterLoading(true);
+
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.src = item.outputUrl;
+
+    let cleaned = false;
+
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("loadedmetadata", handleMetadata);
+      video.removeEventListener("error", handleError);
+      video.remove();
+    };
+
+    const handleSeeked = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 360;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          if (dataUrl.length > 3000) {
+            setFallbackPoster(dataUrl);
+          }
+        }
+      } catch {
+        // CORS failure — expected for fal.ai URLs
+      }
+      setPosterLoading(false);
+      cleanup();
+    };
+
+    const handleMetadata = () => {
+      video.currentTime = Math.min(0.5, video.duration * 0.1);
+    };
+
+    const handleError = () => {
+      setPosterLoading(false);
+      cleanup();
+    };
+
+    video.addEventListener("loadedmetadata", handleMetadata);
+    video.addEventListener("seeked", handleSeeked);
+    video.addEventListener("error", handleError);
+    video.load();
+
+    // Timeout: abort after 5s to avoid lingering downloads
+    const timeout = setTimeout(() => {
+      setPosterLoading(false);
+      cleanup();
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeout);
+      cleanup();
+    };
+  }, [item.outputUrl, isVideo, hasStaticThumb, fallbackPoster, posterLoading]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    if (item.outputType === 'video') {
+    if (isVideo) {
       setShowVideo(true);
-      // Small delay to let the video element mount before playing
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.play().catch(() => {});
         }
       }, 50);
     }
-  }, [item.outputType]);
+  }, [isVideo]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
@@ -69,7 +136,6 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     }
   }, []);
 
-  // Fires when the video is actually rendering frames — safe to crossfade
   const handleVideoPlaying = useCallback(() => {
     setVideoPlaying(true);
   }, []);
@@ -97,11 +163,6 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     onClick?.(item);
   }, [onClick, item]);
 
-  const isVideo = item.outputType === 'video';
-  const hasStaticThumb = isVideo && isStaticThumbnail(item.thumbnailUrl);
-  // Shimmer visible until poster frame loads (video) or image loads
-  const shimmerVisible = isVideo ? !posterReady : !imageLoaded;
-
   return (
     <div
       className="group text-left w-full"
@@ -114,39 +175,37 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
       >
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
           {/* Skeleton shimmer — visible until poster/image loads */}
-          {shimmerVisible && !videoPlaying && (
-            <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute inset-0 bg-neutral-800" />
-              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
-            </div>
+          {isVideo ? (
+            (!imageLoaded || !posterUrl) && !videoPlaying && (
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 bg-neutral-800" />
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
+              </div>
+            )
+          ) : (
+            !imageLoaded && (
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 bg-neutral-800" />
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
+              </div>
+            )
           )}
 
           {isVideo ? (
             <>
-              {/* Poster layer — static <Image> if thumbnail exists, otherwise lightweight <video> */}
-              {hasStaticThumb ? (
+              {/* Poster layer — <Image> with static thumbnail or canvas-captured fallback */}
+              {posterUrl && (
                 <Image
-                  src={item.thumbnailUrl!}
+                  src={posterUrl}
                   alt={item.prompt || "Video thumbnail"}
                   fill
                   className={`object-contain transition-opacity duration-300 ${
-                    videoPlaying ? "opacity-0" : posterReady ? "opacity-100" : "opacity-0"
+                    videoPlaying ? "opacity-0" : imageLoaded ? "opacity-100" : "opacity-0"
                   }`}
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  onLoad={handlePosterReady}
-                />
-              ) : (
-                <video
-                  ref={posterVideoRef}
-                  src={item.outputUrl}
-                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
-                    videoPlaying ? "opacity-0" : posterReady ? "opacity-100" : "opacity-0"
-                  }`}
-                  muted
-                  playsInline
-                  preload="metadata"
-                  onLoadedMetadata={handlePosterReady}
-                  onLoadedData={handlePosterReady}
+                  priority={false}
+                  unoptimized={posterUrl.startsWith("data:")}
+                  onLoad={handleImageLoad}
                 />
               )}
 
