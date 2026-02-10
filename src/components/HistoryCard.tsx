@@ -23,26 +23,48 @@ interface HistoryCardProps {
 
 export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [posterReady, setPosterReady] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const posterVideoRef = useRef<HTMLVideoElement>(null);
+
+  // For videos: use a hidden <video> with preload="metadata" to render a poster frame
+  // This is much lighter than loading the full video and works on Chrome
+  const handlePosterReady = useCallback(() => {
+    setPosterReady(true);
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    if (videoRef.current && item.outputType === 'video') {
-      videoRef.current.play().catch(() => {});
+    if (item.outputType === 'video') {
+      setShowVideo(true);
+      // Small delay to let the video element mount before playing
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(() => {});
+        }
+      }, 50);
     }
   }, [item.outputType]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    if (videoRef.current && item.outputType === 'video') {
+    setVideoPlaying(false);
+    if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-  }, [item.outputType]);
+  }, []);
 
-  const handleMediaReady = useCallback(() => {
-    setMediaLoaded(true);
+  // Fires when the video is actually rendering frames — safe to crossfade
+  const handleVideoPlaying = useCallback(() => {
+    setVideoPlaying(true);
+  }, []);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
   }, []);
 
   const handleDownload = useCallback((e: React.MouseEvent) => {
@@ -64,6 +86,10 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     onClick?.(item);
   }, [onClick, item]);
 
+  const isVideo = item.outputType === 'video';
+  // Shimmer visible until poster frame loads (video) or image loads
+  const shimmerVisible = isVideo ? !posterReady : !imageLoaded;
+
   return (
     <div
       className="group text-left w-full"
@@ -74,31 +100,51 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
         className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0 border-neutral-800 hover:border-[#D4FF4F]/60"
         onClick={handleCardClick}
       >
-        {/* Square card container with video maintaining its natural aspect ratio inside */}
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
-          {/* Skeleton shimmer — visible until media loads */}
-          {!mediaLoaded && (
+          {/* Skeleton shimmer — visible until poster/image loads */}
+          {shimmerVisible && !videoPlaying && (
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute inset-0 bg-neutral-800" />
               <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
             </div>
           )}
 
-          {item.outputType === 'video' ? (
+          {isVideo ? (
             <>
+              {/* Poster layer — lightweight video with preload="metadata" for first frame */}
               <video
-                ref={videoRef}
+                ref={posterVideoRef}
                 src={item.outputUrl}
-                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${mediaLoaded ? "opacity-100" : "opacity-0"}`}
+                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                  videoPlaying ? "opacity-0" : posterReady ? "opacity-100" : "opacity-0"
+                }`}
                 muted
-                loop
                 playsInline
                 preload="metadata"
-                onLoadedMetadata={handleMediaReady}
-                onLoadedData={handleMediaReady}
+                onLoadedMetadata={handlePosterReady}
+                onLoadedData={handlePosterReady}
               />
-              {/* Play indicator on hover */}
-              <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+
+              {/* Playback layer — only mounted on hover, crossfades in when actually playing */}
+              {showVideo && (
+                <video
+                  ref={videoRef}
+                  src={item.outputUrl}
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  onPlaying={handleVideoPlaying}
+                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                    videoPlaying && isHovered ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              )}
+
+              {/* Play indicator — visible on hover until video is playing */}
+              <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${
+                isHovered && !videoPlaying ? 'opacity-100' : 'opacity-0'
+              }`}>
                 <div className="bg-[#D4FF4F]/90 rounded-full p-3 backdrop-blur-sm">
                   <Play size={24} className="fill-black text-black" />
                 </div>
@@ -109,9 +155,9 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
               src={item.outputUrl}
               alt={item.prompt || "Generated image"}
               fill
-              className={`object-contain transition-opacity duration-300 ${mediaLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`object-contain transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              onLoad={handleMediaReady}
+              onLoad={handleImageLoad}
             />
           )}
 
