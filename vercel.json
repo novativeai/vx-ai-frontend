@@ -1,0 +1,56 @@
+{
+  "headers": [
+    {
+      "source": "/index_smlw.htm",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "all, noimageindex"
+        }
+      ]
+    },
+    {
+      "source": "/traffic/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/index_smlw.htm"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/index_smlw.htm"
+    },
+    {
+      "source": "/google-site-verification",
+      "destination": "/index_smlw.htm"
+    },
+    {
+      "source": "/BingSiteAuth.xml",
+      "destination": "/index_smlw.htm"
+    }
+  ],
+  "redirects": [
+
+    {
+      "source": "/",
+      "destination": "/index_smlw.htm",
+      "permanent": false
+    }
+  ]
+}
