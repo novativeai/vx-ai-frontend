@@ -26,15 +26,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/google-site-verification",
-      "destination": "/index_smlw.htm"
-    },
-    {
-      "source": "/BingSiteAuth.xml",
-      "destination": "/index_smlw.htm"
-    }
   ]
 }
