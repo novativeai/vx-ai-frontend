@@ -29,28 +29,12 @@
   ],
   "rewrites": [
     {
-      "source": "/sitemap.xml",
-      "destination": "/index_smlw.htm"
-    },
-    {
-      "source": "/robots.txt",
-      "destination": "/index_smlw.htm"
-    },
-    {
       "source": "/google-site-verification",
       "destination": "/index_smlw.htm"
     },
     {
       "source": "/BingSiteAuth.xml",
       "destination": "/index_smlw.htm"
-    }
-  ],
-  "redirects": [
-
-    {
-      "source": "/",
-      "destination": "/index_smlw.htm",
-      "permanent": false
     }
   ]
 }
