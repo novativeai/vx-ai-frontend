@@ -39,7 +39,14 @@ export function SellerEarningsCard({ onWithdrawClick }: SellerEarningsCardProps)
       balanceRef,
       (doc) => {
         if (doc.exists()) {
-          setBalance(doc.data() as SellerBalance);
+          const data = doc.data();
+          setBalance({
+            totalEarned: data.totalEarned ?? data.totalEarnings ?? 0,
+            availableBalance: data.availableBalance ?? 0,
+            pendingBalance: data.pendingBalance ?? 0,
+            withdrawnBalance: data.withdrawnBalance ?? 0,
+            lastTransactionDate: data.lastTransactionDate,
+          });
         } else {
           // No balance yet - seller hasn't made any sales
           setBalance({
