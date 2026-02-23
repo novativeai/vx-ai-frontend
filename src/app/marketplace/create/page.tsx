@@ -18,6 +18,7 @@ import { Generation, MarketplaceProduct } from "@/types/types";
 import { logger } from "@/lib/logger";
 import { toast } from "@/hooks/use-toast";
 import { MARKETPLACE_CATEGORIES, MARKETPLACE_USE_CASES } from "@/lib/marketplaceCategories";
+import { apiClient } from "@/lib/apiClient";
 
 function ProductCreationContent() {
   const router = useRouter();
@@ -83,6 +84,20 @@ function ProductCreationContent() {
     video.preload = "auto";
     video.src = generation.outputUrl;
 
+    const fallbackToServer = () => {
+      // Canvas capture failed (CORS) — use backend to generate thumbnail server-side
+      video.remove();
+      apiClient.generateThumbnail(generation.outputUrl)
+        .then((res) => {
+          setThumbnailDataUrl(res.thumbnailUrl);
+          setThumbnailStatus("ready");
+        })
+        .catch(() => {
+          logger.warn("Server-side thumbnail generation also failed");
+          setThumbnailStatus("failed");
+        });
+    };
+
     const handleSeeked = () => {
       try {
         const canvas = document.createElement("canvas");
@@ -97,17 +112,15 @@ function ProductCreationContent() {
             setThumbnailDataUrl(dataUrl);
             setThumbnailStatus("ready");
           } else {
-            setThumbnailStatus("failed");
+            fallbackToServer();
           }
         } else {
-          setThumbnailStatus("failed");
+          fallbackToServer();
         }
-      } catch (err) {
-        // CORS error or canvas tainted — fallback to video URL as thumbnail
-        logger.warn("Thumbnail generation failed (CORS)");
-        setThumbnailStatus("failed");
+      } catch {
+        // CORS error or canvas tainted — fall back to server-side generation
+        fallbackToServer();
       }
-      video.remove();
     };
 
     const handleError = () => {
@@ -167,14 +180,20 @@ function ProductCreationContent() {
       // Upload thumbnail to Firebase Storage if we captured one
       let finalThumbnailUrl = generation.outputUrl; // fallback to video URL
       if (thumbnailDataUrl && thumbnailStatus === "ready") {
-        try {
-          const storage = getStorage();
-          const thumbPath = `marketplace/thumbnails/${user.uid}/${Date.now()}.jpg`;
-          const thumbRef = storageRef(storage, thumbPath);
-          await uploadString(thumbRef, thumbnailDataUrl, "data_url");
-          finalThumbnailUrl = await getDownloadURL(thumbRef);
-        } catch (err) {
-          logger.warn("Failed to upload thumbnail, using video URL");
+        if (thumbnailDataUrl.startsWith("data:")) {
+          // Canvas-captured data URL — upload to Firebase Storage
+          try {
+            const storage = getStorage();
+            const thumbPath = `marketplace/thumbnails/${user.uid}/${Date.now()}.jpg`;
+            const thumbRef = storageRef(storage, thumbPath);
+            await uploadString(thumbRef, thumbnailDataUrl, "data_url");
+            finalThumbnailUrl = await getDownloadURL(thumbRef);
+          } catch (err) {
+            logger.warn("Failed to upload thumbnail, using video URL");
+          }
+        } else {
+          // Server-generated URL (already on Firebase Storage)
+          finalThumbnailUrl = thumbnailDataUrl;
         }
       }
 

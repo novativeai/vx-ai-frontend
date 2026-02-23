@@ -230,6 +230,13 @@ export const apiClient = {
   },
 
   /**
+   * Generate a thumbnail from a video URL (server-side, no CORS issues)
+   */
+  generateThumbnail: async (videoUrl: string) => {
+    return apiClient.post<{ thumbnailUrl: string }>('/generate-thumbnail', { videoUrl });
+  },
+
+  /**
    * Create one-time payment
    */
   createPayment: async (userId: string, customAmount: number) => {
