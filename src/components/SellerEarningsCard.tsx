@@ -7,11 +7,13 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Wallet, ArrowUpRight, Clock } from "lucide-react";
+import { ArrowUpRight, Clock, Info, TrendingUp, Wallet } from "lucide-react";
 import { logger } from "@/lib/logger";
 
 interface SellerBalance {
   totalEarned: number;
+  grossEarned: number;
+  totalFees: number;
   availableBalance: number;
   pendingBalance: number;
   withdrawnBalance: number;
@@ -40,8 +42,13 @@ export function SellerEarningsCard({ onWithdrawClick }: SellerEarningsCardProps)
       (doc) => {
         if (doc.exists()) {
           const data = doc.data();
+          const netEarned = data.totalEarned ?? data.totalEarnings ?? 0;
+          const grossEarned = data.grossEarned ?? (netEarned > 0 ? netEarned / 0.85 : 0);
+          const totalFees = data.totalFees ?? (grossEarned - netEarned);
           setBalance({
-            totalEarned: data.totalEarned ?? data.totalEarnings ?? 0,
+            totalEarned: netEarned,
+            grossEarned: grossEarned,
+            totalFees: totalFees,
             availableBalance: data.availableBalance ?? 0,
             pendingBalance: data.pendingBalance ?? 0,
             withdrawnBalance: data.withdrawnBalance ?? 0,
@@ -51,6 +58,8 @@ export function SellerEarningsCard({ onWithdrawClick }: SellerEarningsCardProps)
           // No balance yet - seller hasn't made any sales
           setBalance({
             totalEarned: 0,
+            grossEarned: 0,
+            totalFees: 0,
             availableBalance: 0,
             pendingBalance: 0,
             withdrawnBalance: 0,
@@ -81,25 +90,35 @@ export function SellerEarningsCard({ onWithdrawClick }: SellerEarningsCardProps)
 
   return (
     <div className="space-y-6">
+      {/* Commission Info */}
+      {balance.totalEarned > 0 && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-neutral-900/50 border border-neutral-800 rounded-lg">
+          <Info className="w-4 h-4 text-neutral-400 shrink-0" />
+          <p className="text-sm text-neutral-400">
+            Reelzila takes a <span className="text-white font-medium">15% platform fee</span> on each sale. You receive <span className="text-white font-medium">85%</span> of every transaction.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Earned */}
+        {/* Total Sales (Gross) */}
         <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-700/50 p-6">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-neutral-400">Total Earned</p>
+            <p className="text-sm text-neutral-400">Total Sales</p>
             <TrendingUp className="w-5 h-5 text-purple-400" />
           </div>
-          <p className="text-3xl font-bold text-white">€{balance.totalEarned.toFixed(2)}</p>
-          <p className="text-xs text-neutral-500 mt-2">From marketplace sales</p>
+          <p className="text-3xl font-bold text-white">€{balance.grossEarned.toFixed(2)}</p>
+          <p className="text-xs text-neutral-500 mt-2">Gross revenue from sales</p>
         </Card>
 
-        {/* Available Balance */}
+        {/* Available Balance (Net) */}
         <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-700/50 p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm text-neutral-400">Available</p>
             <Wallet className="w-5 h-5 text-green-400" />
           </div>
           <p className="text-3xl font-bold text-white">€{balance.availableBalance.toFixed(2)}</p>
-          <p className="text-xs text-neutral-500 mt-2">Ready to withdraw</p>
+          <p className="text-xs text-neutral-500 mt-2">Ready to withdraw (after 15% fee)</p>
         </Card>
 
         {/* Pending Payout */}

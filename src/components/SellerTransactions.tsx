@@ -14,11 +14,15 @@ import { logger } from "@/lib/logger";
 interface SellerTransaction {
   id: string;
   videoId: string;
+  productId: string;
+  productTitle: string;
   buyerId: string;
   amount: number;
-  timestamp?: Date | { toDate: () => Date };
+  grossAmount?: number;
+  platformFee?: number;
+  createdAt?: Date | { toDate: () => Date };
   status: "completed" | "pending";
-  paytrustTransactionId?: string;
+  purchaseId?: string;
 }
 
 export function SellerTransactions() {
@@ -35,7 +39,7 @@ export function SellerTransactions() {
 
     const q = query(
       collection(db, "users", user.uid, "seller_transactions"),
-      orderBy("timestamp", "desc"),
+      orderBy("createdAt", "desc"),
       limit(20)
     );
 
@@ -165,43 +169,49 @@ export function SellerTransactions() {
 
       {/* Transaction List */}
       <div className="space-y-3">
-        {transactions.map((transaction) => (
-          <Card
-            key={transaction.id}
-            className="bg-neutral-950/50 border-neutral-700 p-4 hover:bg-neutral-900/50 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div>
-                    <p className="text-sm text-neutral-500 mb-1">Video Sale</p>
-                    <p className="text-sm font-mono text-neutral-300">
-                      Buyer: {transaction.buyerId?.substring(0, 8)}...
+        {transactions.map((transaction) => {
+          const grossAmount = transaction.grossAmount ?? (transaction.amount / 0.85);
+          const fee = transaction.platformFee ?? (grossAmount - transaction.amount);
+
+          return (
+            <Card
+              key={transaction.id}
+              className="bg-neutral-950/50 border-neutral-700 p-4 hover:bg-neutral-900/50 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-white mb-1">
+                    {transaction.productTitle || "Video Sale"}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Buyer: {transaction.buyerId?.substring(0, 8)}...
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    {transaction.createdAt && typeof transaction.createdAt === 'object' && 'toDate' in transaction.createdAt ? transaction.createdAt.toDate().toLocaleDateString() : "Date pending"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 ml-4">
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-green-400">€{transaction.amount.toFixed(2)}</p>
+                    <p className="text-xs text-neutral-500">
+                      Sale: €{grossAmount.toFixed(2)} · Fee: €{fee.toFixed(2)}
                     </p>
+                    <Badge
+                      variant={transaction.status === "completed" ? "default" : "secondary"}
+                      className={
+                        transaction.status === "completed"
+                          ? "bg-green-600/20 text-green-400"
+                          : "bg-yellow-600/20 text-yellow-400"
+                      }
+                    >
+                      {transaction.status}
+                    </Badge>
                   </div>
                 </div>
-                <p className="text-xs text-neutral-500">
-                  {transaction.timestamp && typeof transaction.timestamp === 'object' && 'toDate' in transaction.timestamp ? transaction.timestamp.toDate().toLocaleDateString() : "Date pending"}
-                </p>
               </div>
-              <div className="flex items-center gap-4 ml-4">
-                <div className="text-right">
-                  <p className="text-lg font-bold text-green-400">€{transaction.amount.toFixed(2)}</p>
-                  <Badge
-                    variant={transaction.status === "completed" ? "default" : "secondary"}
-                    className={
-                      transaction.status === "completed"
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-yellow-600/20 text-yellow-400"
-                    }
-                  >
-                    {transaction.status}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
