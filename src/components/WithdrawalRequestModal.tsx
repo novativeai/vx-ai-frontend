@@ -44,6 +44,7 @@ export function WithdrawalRequestModal({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedAmount, setSubmittedAmount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -81,9 +82,12 @@ export function WithdrawalRequestModal({
     setError(null);
 
     try {
+      // Capture the amount before the backend call changes the balance
+      const withdrawAmount = availableBalance;
+
       // Use backend API for secure payout request creation
       await apiClient.createPayoutRequest({
-        amount: availableBalance,
+        amount: withdrawAmount,
         bankDetails: {
           iban: bankDetails.iban,
           accountHolder: bankDetails.accountHolder,
@@ -92,6 +96,7 @@ export function WithdrawalRequestModal({
         },
       });
 
+      setSubmittedAmount(withdrawAmount);
       setSubmitted(true);
       onSuccess?.();
     } catch (err) {
@@ -108,6 +113,7 @@ export function WithdrawalRequestModal({
 
   const handleClose = () => {
     setSubmitted(false);
+    setSubmittedAmount(0);
     setError(null);
     onClose();
   };
@@ -148,7 +154,7 @@ export function WithdrawalRequestModal({
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Withdrawal Requested!</h3>
               <p className="text-neutral-400 mb-6">
-                Your request for €{availableBalance.toFixed(2)} has been submitted. We&apos;ll process it within 2-5 business days.
+                Your request for €{submittedAmount.toFixed(2)} has been submitted. We&apos;ll process it within 2-5 business days.
               </p>
               <Button
                 onClick={handleClose}
