@@ -15,18 +15,6 @@ interface MediumArticle {
   categories: string[];
 }
 
-interface MediumFeed {
-  status: string;
-  feed: {
-    title: string;
-    link: string;
-    author: string;
-    description: string;
-    image: string;
-  };
-  items: MediumArticle[];
-}
-
 // Extract first image from HTML content (Medium embeds images in description)
 function extractImageFromHtml(html: string): string | null {
   const imgMatch = html.match(/<img[^>]+src=["']([^"']+)["']/i);
@@ -70,21 +58,15 @@ export default function BlogPage() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@reelzila`
-      );
+      // Fetch RSS directly via Next.js API route to avoid CORS and third-party caching
+      const response = await fetch("/api/medium-feed");
 
       if (!response.ok) {
         throw new Error("Failed to fetch articles");
       }
 
-      const data: MediumFeed = await response.json();
-
-      if (data.status !== "ok") {
-        throw new Error("Invalid feed response");
-      }
-
-      setArticles(data.items);
+      const data = await response.json();
+      setArticles(data.articles as MediumArticle[]);
     } catch (err) {
       console.error("Error fetching Medium articles:", err);
       setError("Unable to load articles. Please try again later.");
