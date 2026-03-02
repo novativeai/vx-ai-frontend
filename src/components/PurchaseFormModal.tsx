@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MarketplaceProduct } from "@/types/types";
 import { X, Loader2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,11 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  // Reset checkbox when modal closes so it never persists across opens
+  useEffect(() => {
+    if (!isOpen) setAcceptedTerms(false);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
