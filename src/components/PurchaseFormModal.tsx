@@ -53,6 +53,7 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
             price: product.price,
             sellerName: product.sellerName,
             sellerId: product.sellerId,
+            termsAccepted: true,
           }),
         }
       );

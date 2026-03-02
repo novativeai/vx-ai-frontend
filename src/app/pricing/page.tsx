@@ -30,7 +30,7 @@ export default function PricingPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.uid, customAmount: amount }),
+        body: JSON.stringify({ userId: user.uid, customAmount: amount, termsAccepted: true }),
       });
 
       if (!response.ok) {
