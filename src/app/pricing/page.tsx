@@ -27,9 +27,13 @@ export default function PricingPage() {
     setIsProcessing(true);
 
     try {
+      const token = await user.getIdToken();
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/create-payment`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ userId: user.uid, customAmount: amount, termsAccepted: true }),
       });
 
