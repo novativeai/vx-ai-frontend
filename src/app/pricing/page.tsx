@@ -9,12 +9,14 @@ import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function PricingPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [customAmount, setCustomAmount] = useState(10);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const processPurchase = async (amount: number) => {
     if (!user) {
@@ -135,6 +137,27 @@ export default function PricingPage() {
               ))}
             </div>
 
+            {/* Terms & Conditions */}
+            <div className="flex items-start justify-center gap-3 mb-8">
+              <input
+                type="checkbox"
+                id="acceptTerms"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded bg-neutral-900 border border-neutral-700 accent-[#D4FF4F] cursor-pointer shrink-0"
+              />
+              <label htmlFor="acceptTerms" className="text-sm text-neutral-400 cursor-pointer select-none">
+                I agree to the{" "}
+                <Link href="/terms" target="_blank" className="text-[#D4FF4F] hover:underline">
+                  Terms &amp; Conditions
+                </Link>
+                {" "}and{" "}
+                <Link href="/refund" target="_blank" className="text-[#D4FF4F] hover:underline">
+                  Refund Policy
+                </Link>
+              </label>
+            </div>
+
             {/* Price and Purchase */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
               <div className="text-center sm:text-left">
@@ -146,7 +169,7 @@ export default function PricingPage() {
                 variant="brand-lime"
                 className="px-12 text-base font-medium"
                 onClick={() => processPurchase(customAmount)}
-                disabled={isProcessing || customAmount <= 0}
+                disabled={isProcessing || customAmount <= 0 || !acceptedTerms}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">

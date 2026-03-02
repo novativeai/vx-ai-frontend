@@ -22,6 +22,7 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   if (!isOpen) return null;
 
@@ -207,9 +208,29 @@ export const PurchaseFormModal: React.FC<PurchaseFormModalProps> = ({
                     </div>
                   </div>
 
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="acceptTermsMarketplace"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded bg-neutral-900 border border-neutral-700 accent-[#D4FF4F] cursor-pointer shrink-0"
+                    />
+                    <label htmlFor="acceptTermsMarketplace" className="text-xs text-neutral-400 cursor-pointer select-none">
+                      I agree to the{" "}
+                      <Link href="/terms" target="_blank" className="text-[#D4FF4F] hover:underline">
+                        Terms &amp; Conditions
+                      </Link>
+                      {" "}and{" "}
+                      <Link href="/refund" target="_blank" className="text-[#D4FF4F] hover:underline">
+                        Refund Policy
+                      </Link>
+                    </label>
+                  </div>
+
                   <Button
                     onClick={handlePurchase}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !acceptedTerms}
                     className="w-full bg-[#D4FF4F] hover:bg-[#D4FF4F]/90 text-black font-bold py-3 rounded-lg transition-all disabled:opacity-70"
                   >
                     {isProcessing ? (
