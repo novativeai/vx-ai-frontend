@@ -429,7 +429,7 @@ export default function StudentVerifyPage() {
               • Verification is typically completed within 24-48 hours
             </li>
             <li>
-              • Questions? Contact us at support@reelzila.com
+              • Questions? Contact us at support@reelzila.studio
             </li>
           </ul>
         </div>

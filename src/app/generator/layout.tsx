@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AI Video Generator | reelzila",
     description: "Create stunning AI-generated videos",
-    url: "https://reelzila.com/generator",
+    url: "https://reelzila.studio/generator",
   },
 };
 

@@ -68,7 +68,7 @@ export default function ContactPage() {
               CONTACT US
             </h1>
             <p className="text-lg text-neutral-400 max-w-md">
-              Do you have any questions, suggestions, or complaints? Please contact us via the contact form or email us at <span className="text-white">info@reelzila.com</span>.
+              Do you have any questions, suggestions, or complaints? Please contact us via the contact form or email us at <span className="text-white">info@reelzila.studio</span>.
             </p>
           </div>
 
