@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/account", "/api/"],
     },
-    sitemap: "https://reelzila.com/sitemap.xml",
+    sitemap: "https://reelzila.studio/sitemap.xml",
   };
 }

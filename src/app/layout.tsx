@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   authors: [{ name: "reelzila" }],
   creator: "reelzila",
   publisher: "reelzila",
-  metadataBase: new URL('https://reelzila.com'),
+  metadataBase: new URL('https://reelzila.studio'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://reelzila.com',
+    url: 'https://reelzila.studio',
     title: 'reelzila | AI-Powered Video Generation Studio',
     description: 'Transform your creative vision into stunning videos with advanced AI models. Professional-grade video generation for filmmakers and creative teams.',
     siteName: 'reelzila',
