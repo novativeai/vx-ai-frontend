@@ -195,7 +195,16 @@ function GeneratorComponent() {
     }
   }, [handleParamChange]);
 
+  // Ref guard to prevent duplicate generation requests (survives re-renders)
+  const generatingRef = useRef(false);
+
   const handleGenerate = useCallback(async () => {
+    // Ref-based guard: prevents any duplicate calls even across re-renders
+    if (generatingRef.current) {
+      console.warn('[Generation] Blocked duplicate request — generation already in progress');
+      return;
+    }
+
     if (!user) {
       toast.error('Sign in required', 'Please sign in to generate videos');
       return;
@@ -205,6 +214,8 @@ function GeneratorComponent() {
       toast.error('Insufficient credits', `This generation requires ${calculatedCredits} credits. You have ${credits} credits.`);
       return;
     }
+
+    generatingRef.current = true;
     setGenerating(true);
     setOutputUrls([]);
     setCurrentOutputIndex(0);
@@ -254,10 +265,6 @@ function GeneratorComponent() {
       } else {
         throw new Error("The model did not return a valid output.");
       }
-      // NOTE: Credit deduction is handled by the backend using atomic Firestore transactions.
-      // The real-time Firestore listener in AuthContext will automatically update the
-      // credits state when the database changes, ensuring the frontend always shows
-      // the accurate balance from the database.
     } catch (err) {
       const error = err as Error;
       let errorMessage = error.message;
@@ -278,8 +285,10 @@ function GeneratorComponent() {
     } finally {
       clearTimeout(timeoutId);
       setGenerating(false);
+      // Keep ref guard active for 2s after completion to prevent rapid re-triggers
+      setTimeout(() => { generatingRef.current = false; }, 2000);
     }
-  }, [user, credits, modelId, params, currentModelConfig, calculatedCredits]);
+  }, [user, credits, modelId, params, calculatedCredits]);
 
   if (!currentModelConfig) {
     return (
