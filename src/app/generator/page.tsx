@@ -274,14 +274,25 @@ function GeneratorComponent() {
         errorMessage = 'Generation timed out. The video was likely created - check your History.';
       }
 
+      // Handle network errors (connection dropped by server/proxy timeout)
+      if (errorMessage === 'Failed to fetch' || errorMessage.includes('NetworkError') || errorMessage.includes('network')) {
+        errorMessage = 'Connection lost during generation. Your video may still be processing — check your History in a few minutes. If not there, your credits have been refunded.';
+      }
+
+      // Handle content policy violations with a clean message
+      const isContentPolicy = errorMessage.includes('CONTENT_POLICY:');
+      if (isContentPolicy) {
+        errorMessage = errorMessage.replace('CONTENT_POLICY: ', '');
+      }
+
       console.error('[Generation] Failed:', {
         error: err,
         message: errorMessage,
         model_id: modelId,
         timestamp: new Date().toISOString(),
       });
-      setGenerationError(errorMessage);
-      toast.error('Generation failed', errorMessage);
+      setGenerationError(isContentPolicy ? `content_policy:${errorMessage}` : errorMessage);
+      toast.error(isContentPolicy ? 'Content Policy Violation' : 'Generation failed', errorMessage);
     } finally {
       clearTimeout(timeoutId);
       setGenerating(false);
@@ -378,10 +389,19 @@ function GeneratorComponent() {
             <CardContent className="flex flex-col gap-4">
               {/* Error display */}
               {generationError && !generating && (
-                <div className="w-full p-4 rounded-md bg-destructive/10 border border-destructive/20">
-                  <p className="text-sm font-medium text-destructive mb-1">Generation Failed</p>
-                  <p className="text-sm text-destructive/80 break-words">{generationError}</p>
-                </div>
+                generationError.startsWith('content_policy:') ? (
+                  <div className="w-full p-4 rounded-md bg-yellow-500/10 border border-yellow-500/30">
+                    <p className="text-sm font-medium text-yellow-500 mb-1">Content Policy Violation</p>
+                    <p className="text-sm text-yellow-400/80 break-words">
+                      {generationError.replace('content_policy:', '')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="w-full p-4 rounded-md bg-destructive/10 border border-destructive/20">
+                    <p className="text-sm font-medium text-destructive mb-1">Generation Failed</p>
+                    <p className="text-sm text-destructive/80 break-words">{generationError}</p>
+                  </div>
+                )
               )}
               <div
                 className="group relative w-full h-[500px] lg:h-[600px] bg-black rounded-md flex items-center justify-center overflow-hidden transition-all duration-300"
