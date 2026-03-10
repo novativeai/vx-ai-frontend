@@ -223,61 +223,78 @@ function GeneratorComponent() {
     setGenerationError(null);
     setVideoLoadError(false);
 
-    // Create AbortController for 10-minute timeout (long generations like Veo 3.1 can take 6+ minutes)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutes
-
     try {
       const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate-video`
         : 'http://localhost:8000/generate-video';
 
-      console.log('[Generation] Starting request to:', apiUrl, { model_id: modelId, params: { ...params, image: params.image ? '[base64 data]' : undefined } });
+      console.log('[Generation] Submitting request to:', apiUrl, { model_id: modelId, params: { ...params, image: params.image ? '[base64 data]' : undefined } });
 
+      // Step 1: Submit generation (returns immediately with transaction_id)
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.uid, model_id: modelId, params }),
-        signal: controller.signal,
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: 'Unknown error occurred' }));
         const errorMessage = errorData.detail || `HTTP ${response.status}: ${response.statusText}`;
-        console.error('[Generation] API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-          model_id: modelId,
-        });
+        console.error('[Generation] Submit Error:', { status: response.status, errorData, model_id: modelId });
         throw new Error(errorMessage);
       }
 
-      const data = await response.json();
-      console.log('[Generation] Success:', { output_urls: data.output_urls });
+      const submitData = await response.json();
+      const transactionId = submitData.transaction_id;
 
-      if (data.output_urls && Array.isArray(data.output_urls) && data.output_urls.length > 0) {
-        // Store all output URLs for navigation
-        setOutputUrls(data.output_urls);
-        setCurrentOutputIndex(0);
-        // Detect and set the output type from the first URL
-        setDetectedOutputType(getOutputTypeFromUrl(data.output_urls[0]));
-      } else {
-        throw new Error("The model did not return a valid output.");
+      if (!transactionId) {
+        throw new Error('No transaction ID returned from server.');
       }
+
+      console.log('[Generation] Submitted, polling transaction:', transactionId);
+
+      // Step 2: Poll for completion (decoupled from proxy timeout)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+      const maxPollTime = 720000; // 12 minutes max polling
+      const pollInterval = 3000; // Poll every 3 seconds
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < maxPollTime) {
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+
+        try {
+          const statusRes = await fetch(`${backendUrl}/generation-status/${transactionId}`);
+          const statusData = await statusRes.json();
+
+          console.log('[Generation] Poll status:', statusData.status);
+
+          if (statusData.status === 'completed' && statusData.output_urls?.length > 0) {
+            setOutputUrls(statusData.output_urls);
+            setCurrentOutputIndex(0);
+            setDetectedOutputType(getOutputTypeFromUrl(statusData.output_urls[0]));
+            return; // Success — exit the handler
+          }
+
+          if (statusData.status === 'failed_generation' || statusData.status === 'failed_submission') {
+            throw new Error(statusData.error || 'Generation failed on server.');
+          }
+
+          // Still processing — continue polling
+        } catch (pollErr) {
+          // If it's a thrown error from above (failed status), re-throw
+          if (pollErr instanceof Error && !pollErr.message.includes('fetch')) {
+            throw pollErr;
+          }
+          // Network blip during polling — continue trying
+          console.warn('[Generation] Poll network error, retrying...', pollErr);
+        }
+      }
+
+      // If we get here, polling timed out
+      throw new Error('Generation is taking longer than expected. Check your History — your video may still appear shortly.');
     } catch (err) {
       const error = err as Error;
       let errorMessage = error.message;
-
-      // Handle timeout/abort specifically
-      if (error.name === 'AbortError') {
-        errorMessage = 'Generation timed out. The video was likely created - check your History.';
-      }
-
-      // Handle network errors (connection dropped by server/proxy timeout)
-      if (errorMessage === 'Failed to fetch' || errorMessage.includes('NetworkError') || errorMessage.includes('network')) {
-        errorMessage = 'Connection lost during generation. Your video may still be processing — check your History in a few minutes. If not there, your credits have been refunded.';
-      }
 
       // Handle content policy violations with a clean message
       const isContentPolicy = errorMessage.includes('CONTENT_POLICY:');
@@ -285,16 +302,10 @@ function GeneratorComponent() {
         errorMessage = errorMessage.replace('CONTENT_POLICY: ', '');
       }
 
-      console.error('[Generation] Failed:', {
-        error: err,
-        message: errorMessage,
-        model_id: modelId,
-        timestamp: new Date().toISOString(),
-      });
+      console.error('[Generation] Failed:', { error: err, message: errorMessage, model_id: modelId, timestamp: new Date().toISOString() });
       setGenerationError(isContentPolicy ? `content_policy:${errorMessage}` : errorMessage);
       toast.error(isContentPolicy ? 'Content Policy Violation' : 'Generation failed', errorMessage);
     } finally {
-      clearTimeout(timeoutId);
       setGenerating(false);
       // Keep ref guard active for 2s after completion to prevent rapid re-triggers
       setTimeout(() => { generatingRef.current = false; }, 2000);
