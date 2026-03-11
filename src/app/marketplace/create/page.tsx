@@ -33,6 +33,7 @@ function ProductCreationContent() {
   const [submitting, setSubmitting] = useState(false);
   const [thumbnailDataUrl, setThumbnailDataUrl] = useState<string | null>(null);
   const [thumbnailStatus, setThumbnailStatus] = useState<"idle" | "generating" | "ready" | "failed">("idle");
+  const thumbnailStartedRef = useRef(false);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
 
   const [formData, setFormData] = useState({
@@ -73,7 +74,8 @@ function ProductCreationContent() {
 
   // Auto-generate thumbnail from preview video once generation loads
   useEffect(() => {
-    if (!generation || generation.outputType !== "video" || thumbnailStatus !== "idle") return;
+    if (!generation || generation.outputType !== "video" || thumbnailStartedRef.current) return;
+    thumbnailStartedRef.current = true;
 
     setThumbnailStatus("generating");
 
@@ -138,13 +140,20 @@ function ProductCreationContent() {
     video.addEventListener("error", handleError);
     video.load();
 
+    // Safety timeout — if nothing resolves within 30s, mark as failed
+    const timeout = setTimeout(() => {
+      setThumbnailStatus((prev) => (prev === "generating" ? "failed" : prev));
+    }, 30000);
+
     return () => {
+      clearTimeout(timeout);
       video.removeEventListener("loadedmetadata", handleMetadata);
       video.removeEventListener("seeked", handleSeeked);
       video.removeEventListener("error", handleError);
       video.remove();
     };
-  }, [generation, thumbnailStatus]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [generation]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
