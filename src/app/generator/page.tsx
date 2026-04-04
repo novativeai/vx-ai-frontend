@@ -326,13 +326,10 @@ function GeneratorComponent() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 md:py-24">
-      <section className="text-center w-full mx-auto mb-10">
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center justify-center gap-3">
+      <section className="text-center w-full mx-auto mb-10 px-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight wrap-break-word">
           What do you want to create today?
         </h1>
-        <h3 className="text-gray-500 tracking-tight flex items-center justify-center gap-3">
-          What do you want to create today?
-        </h3>
       </section>
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-2">

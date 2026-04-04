@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail, ActionCodeSettings } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,11 @@ export default function ForgotPassword() {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      const actionCodeSettings: ActionCodeSettings = {
+        url: 'https://reelzila.studio/auth/action',
+        handleCodeInApp: false,
+      };
+      await sendPasswordResetEmail(auth, email, actionCodeSettings);
       setSuccess(true);
     } catch (err) {
       const errorMessage = (err as { code?: string }).code;

@@ -225,22 +225,22 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
       }
     ]
   },
-  "sora-2": {
-    id: "sora-2",
-    displayName: "Sora 2",
-    description: "OpenAI's flagship video generation model with exceptional temporal consistency and photorealistic output. Creates up to 12-second videos with smooth motion, accurate physics, and stunning visual quality across diverse styles and subjects.",
+  "pixverse-v6": {
+    id: "pixverse-v6",
+    displayName: "PixVerse v6",
+    description: "Industry-leading cinematic video generation with advanced lens controls, 20+ camera movements, and optional audio synthesis. Create stunning 5-10 second videos at up to 1080p with photorealistic, anime, 3D, and cyberpunk styles.",
     bannerImage: "/banners/wan-banner.jpg",
     cardVideo: `${WEBSITE_VIDEOS}/f1-speeding.mp4`,
     exampleVideo: `${MARKETPLACE_VIDEOS}/054_Emerald_Eyes_Kitchen_Dance.mp4`,
-    tags: ["top-rated", "photorealistic", "cinematic"],
+    tags: ["top-rated", "cinematic", "multi-style"],
     outputType: 'video',
-    creditCost: 4,
+    creditCost: 5,
     creditPricing: {
-      base: 4,
+      base: 5,
       modifiers: [
         {
           param: "duration",
-          values: { "4": 4, "8": 8, "12": 12 },
+          values: { "5": 5, "8": 7, "10": 9 },
           type: "set"
         }
       ]
@@ -259,25 +259,38 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         defaultValue: null,
       },
       {
+        name: "negative_prompt",
+        label: "Negative Prompt",
+        type: "textarea",
+        defaultValue: "",
+      },
+      {
         name: "duration",
         label: "Duration (seconds)",
         type: "dropdown",
-        defaultValue: "4",
-        options: ["4", "8", "12"],
+        defaultValue: "5",
+        options: ["5", "8", "10"],
       },
       {
         name: "aspect_ratio",
         label: "Aspect Ratio",
         type: "dropdown",
         defaultValue: "16:9",
-        options: ["16:9", "9:16"],
+        options: ["16:9", "9:16", "1:1", "4:3", "3:4"],
       },
       {
         name: "resolution",
         label: "Resolution",
         type: "dropdown",
         defaultValue: "720p",
-        options: ["720p"],
+        options: ["360p", "540p", "720p", "1080p"],
+      },
+      {
+        name: "style",
+        label: "Style",
+        type: "dropdown",
+        defaultValue: "photorealistic",
+        options: ["photorealistic", "anime", "3d_animation", "clay", "comic", "cyberpunk"],
       },
     ],
     tips: [
@@ -285,16 +298,16 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         title: "Prompting Guide",
         content: [
           {
-            subtitle: "Cinematic Language",
-            text: "Sora 2 excels with cinematic terminology. Use terms like 'dolly shot', 'tracking shot', 'crane movement', 'shallow depth of field', and specific lens references (35mm, 85mm) for professional results.",
+            subtitle: "Cinematic Controls",
+            text: "PixVerse v6 features 20+ lens and camera controls. Use terms like 'dolly shot', 'tracking shot', 'crane movement', 'push in', 'pull out', and specific lens references (35mm, 85mm) for professional results.",
             list: [
               "Example: 'Tracking shot following a runner through city streets, shallow DOF, golden hour'",
               "Example: 'Slow dolly push-in on subject's face, dramatic lighting, film grain'"
             ]
           },
           {
-            subtitle: "Motion Descriptions",
-            text: "Be specific about movement. Describe both subject motion and camera motion separately for best results. Sora 2 handles complex multi-subject scenes with ease."
+            subtitle: "Style Selection",
+            text: "Choose from multiple visual styles: photorealistic for lifelike footage, anime for Japanese animation, 3D animation for rendered scenes, clay for stop-motion aesthetics, comic for illustrated styles, and cyberpunk for futuristic neon visuals."
           },
           {
             subtitle: "Lighting and Atmosphere",
@@ -309,11 +322,11 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         content: [
           {
             subtitle: "Commercial Production",
-            text: "Create broadcast-quality video content for advertising, social media campaigns, and brand storytelling. The exceptional motion quality rivals professional footage."
+            text: "Create broadcast-quality video content for advertising, social media campaigns, and brand storytelling. The exceptional motion quality and style versatility rival professional footage."
           },
           {
             subtitle: "Creative Content",
-            text: "Perfect for music videos, short films, and artistic projects. The cinematic control and consistent quality enable professional-grade creative expression."
+            text: "Perfect for music videos, short films, and artistic projects. Multiple style presets and cinematic controls enable professional-grade creative expression across genres."
           },
           {
             subtitle: "Portrait Animation",

@@ -106,8 +106,28 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Slider - Thinner Premium Style */}
+            {/* Amount Input + Slider */}
             <div className="max-w-2xl mx-auto mb-10">
+              <div className="flex items-center justify-center gap-2 mb-6">
+                <span className="text-3xl text-neutral-400 font-light">€</span>
+                <input
+                  type="number"
+                  min={10}
+                  max={1500}
+                  value={customAmount}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val)) {
+                      setCustomAmount(Math.min(1500, Math.max(10, val)));
+                    }
+                  }}
+                  onBlur={() => {
+                    if (customAmount < 10) setCustomAmount(10);
+                    if (customAmount > 1500) setCustomAmount(1500);
+                  }}
+                  className="w-28 bg-transparent border-b-2 border-neutral-700 focus:border-[#D4FF4F] text-center text-3xl font-regular text-white outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
               <Slider
                 value={[customAmount]}
                 onValueChange={handleSliderChange}
