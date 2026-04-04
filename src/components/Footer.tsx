@@ -7,15 +7,38 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useEffect, useState } from 'react';
+
+interface MediumArticle {
+  title: string;
+  link: string;
+}
+
+function useMediumArticles() {
+  const [articles, setArticles] = useState<MediumArticle[]>([]);
+  useEffect(() => {
+    fetch('/api/medium-feed')
+      .then(res => res.json())
+      .then(data => {
+        if (data.articles) {
+          setArticles(data.articles.slice(0, 5));
+        }
+      })
+      .catch(() => {});
+  }, []);
+  return articles;
+}
 
 export default function Footer() {
   const { user } = useAuth();
+  const articles = useMediumArticles();
+
   return (
     <footer className="bg-black border-t border-neutral-800">
       <div className="container mx-auto py-24 px-4 md:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
 
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
@@ -43,6 +66,37 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="/about" className="text-sm text-muted-foreground hover:text-primary">About Us</Link></li>
               <li><Link href="/contact" className="text-sm text-muted-foreground hover:text-primary">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold text-foreground">Blog</h3>
+            <ul className="space-y-2">
+              {articles.length > 0 ? (
+                articles.map((article) => (
+                  <li key={article.link}>
+                    <a
+                      href={article.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-muted-foreground hover:text-primary line-clamp-1"
+                    >
+                      {article.title}
+                    </a>
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <a
+                    href="https://medium.com/@reelzila"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
+                  >
+                    Read on Medium <ExternalLink className="h-3 w-3" />
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 

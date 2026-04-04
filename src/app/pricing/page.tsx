@@ -106,10 +106,23 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Amount Input + Slider */}
-            <div className="max-w-2xl mx-auto mb-10">
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <span className="text-3xl text-neutral-400 font-light">€</span>
+            {/* Slider + Amount Input */}
+            <div className="max-w-2xl mx-auto mb-14">
+              <Slider
+                value={[customAmount]}
+                onValueChange={handleSliderChange}
+                min={10}
+                max={1500}
+                step={1}
+                className="w-full [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:bg-[#D4FF4F] [&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-[#D4FF4F] [&_[data-slot=slider-thumb]]:bg-black"
+              />
+              <div className="flex justify-between mt-4 text-xs text-neutral-600 uppercase tracking-wider">
+                <span>€10</span>
+                <span>€1500</span>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <span className="text-2xl text-neutral-500 font-light">€</span>
                 <input
                   type="number"
                   min={10}
@@ -125,20 +138,9 @@ export default function PricingPage() {
                     if (customAmount < 10) setCustomAmount(10);
                     if (customAmount > 1500) setCustomAmount(1500);
                   }}
-                  className="w-28 bg-transparent border-b-2 border-neutral-700 focus:border-[#D4FF4F] text-center text-3xl font-regular text-white outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-24 bg-transparent border-b border-neutral-700 focus:border-[#D4FF4F] text-center text-2xl font-regular text-white outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-              </div>
-              <Slider
-                value={[customAmount]}
-                onValueChange={handleSliderChange}
-                min={10}
-                max={1500}
-                step={1}
-                className="w-full [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-track]]:bg-neutral-800 [&_[data-slot=slider-range]]:bg-[#D4FF4F] [&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-thumb]]:border-2 [&_[data-slot=slider-thumb]]:border-[#D4FF4F] [&_[data-slot=slider-thumb]]:bg-black"
-              />
-              <div className="flex justify-between mt-4 text-xs text-neutral-600 uppercase tracking-wider">
-                <span>€10</span>
-                <span>€1500</span>
+                <span className="text-xs text-neutral-600 uppercase tracking-wider ml-1">or type amount</span>
               </div>
             </div>
 
