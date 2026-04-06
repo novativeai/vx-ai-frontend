@@ -15,6 +15,8 @@ export default function PricingPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [customAmount, setCustomAmount] = useState(10);
+  const [inputValue, setInputValue] = useState("10");
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -58,6 +60,9 @@ export default function PricingPage() {
 
   const handleSliderChange = (value: number[]) => {
     setCustomAmount(value[0]);
+    if (!isInputFocused) {
+      setInputValue(String(value[0]));
+    }
   };
 
   const presetAmounts = [10, 25, 50, 100, 250];
@@ -127,20 +132,30 @@ export default function PricingPage() {
                   type="number"
                   min={10}
                   max={1500}
-                  value={customAmount}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value, 10);
-                    if (!isNaN(val)) {
-                      setCustomAmount(Math.min(1500, Math.max(10, val)));
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      (e.target as HTMLInputElement).blur();
                     }
                   }}
                   onBlur={() => {
-                    if (customAmount < 10) setCustomAmount(10);
-                    if (customAmount > 1500) setCustomAmount(1500);
+                    setIsInputFocused(false);
+                    const val = parseInt(inputValue, 10);
+                    if (isNaN(val) || val < 10) {
+                      setCustomAmount(10);
+                      setInputValue("10");
+                    } else if (val > 1500) {
+                      setCustomAmount(1500);
+                      setInputValue("1500");
+                    } else {
+                      setCustomAmount(val);
+                      setInputValue(String(val));
+                    }
                   }}
                   className="w-24 bg-transparent border-b border-neutral-700 focus:border-[#D4FF4F] text-center text-2xl font-regular text-white outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <span className="text-xs text-neutral-600 uppercase tracking-wider ml-1">or type amount</span>
               </div>
             </div>
 
@@ -149,7 +164,7 @@ export default function PricingPage() {
               {presetAmounts.map((amount) => (
                 <Button
                   key={amount}
-                  onClick={() => setCustomAmount(amount)}
+                  onClick={() => { setCustomAmount(amount); setInputValue(String(amount)); }}
                   variant={customAmount === amount ? "brand-lime" : "outline"}
                   className={cn(
                     "min-w-[80px] font-medium",
