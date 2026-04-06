@@ -289,8 +289,8 @@ export const modelConfigs: { [key: string]: ModelConfig } = {
         name: "style",
         label: "Style",
         type: "dropdown",
-        defaultValue: "photorealistic",
-        options: ["photorealistic", "anime", "3d_animation", "clay", "comic", "cyberpunk"],
+        defaultValue: "none",
+        options: ["none", "anime", "3d_animation", "clay", "comic", "cyberpunk"],
       },
     ],
     tips: [
