@@ -41,7 +41,7 @@ export function ModelHighlightSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <h2 className="text-7xl md:text-9xl font-extrabold tracking-tighter">New</h2>
+          <h2 className="text-5xl sm:text-7xl md:text-9xl font-extrabold tracking-tighter">New</h2>
           <p className="mt-4 md:mt-8 max-w-sm text-xl md:text-2xl z-10 leading-tight">
             <span className="text-white font-bold">Native audio synthesis meets cinematic generation</span> in our most immersive video model yet.
           </p>
@@ -93,7 +93,7 @@ export function ModelHighlightSection() {
           {/* Centered on "E" by offsetting right to compensate for "3.1" width */}
           {/* Using isolation on parent and mix-blend-difference on text for negative effect */}
           <motion.h3
-            className="absolute inset-0 flex items-center justify-center text-8xl md:text-9xl tracking-tighter text-white mix-blend-difference"
+            className="absolute inset-0 flex items-center justify-center text-5xl sm:text-7xl md:text-9xl tracking-tighter text-white mix-blend-difference"
             initial={{ scale: 0.8, y: 20 }}
             whileInView={{ scale: 1, y: 0 }}
             viewport={{ once: true }}
@@ -121,7 +121,7 @@ export function ModelHighlightSection() {
           </p>
 
           <Link href="/generator?model=veo-3.1" className="block mt-4">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors whitespace-nowrap">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter hover:text-neutral-300 transition-colors">
               Available Now
             </h2>
           </Link>
