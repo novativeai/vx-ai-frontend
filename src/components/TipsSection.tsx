@@ -31,7 +31,7 @@ export function TipsSection({ tips }: TipsSectionProps) {
         <div key={sectionIndex} className="mb-12">
           <Card>
             <CardContent className="p-6">
-          <h2 className="text-8xl font-bold tracking-tight mb-6">{section.title}</h2>
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6">{section.title}</h2>
           
           {/* THE FIX: A single card now wraps all the tip items for this section. */}
           
