@@ -13,7 +13,7 @@ export function AboutUsSection() {
   return (
     <section className="bg-black text-white h-full flex flex-col justify-center">
       {/* THE FIX: Responsive gap between columns */}
-      <div className="container mx-auto grid md:grid-cols-2 gap-16 md:gap-32">
+      <div className="container mx-auto px-4 grid md:grid-cols-2 gap-16 md:gap-32">
         {/* Left Column: Title and Button */}
         <div>
           {/* Section Label and Title - matching MODELS and CONTROL style */}

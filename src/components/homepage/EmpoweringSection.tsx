@@ -5,7 +5,7 @@ import Image from "next/image";
 export function EmpoweringSection() {
   return (
     <section className="bg-black text-white h-full flex flex-col justify-center">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         <h2 className="text-4xl sm:text-6xl md:text-8xl font-extrabold tracking-tighter mb-12">Empowering</h2>
         
         {/* --- THE MAIN CARD CONTAINER --- */}
