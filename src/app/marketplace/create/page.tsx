@@ -186,23 +186,32 @@ function ProductCreationContent() {
         : null;
       const userName = profileName || user.displayName || user.email || "Anonymous";
 
-      // Upload thumbnail to Firebase Storage if we captured one
-      let finalThumbnailUrl = generation.outputUrl; // fallback to video URL
+      // Upload thumbnail to Firebase Storage — require a proper thumbnail
+      let finalThumbnailUrl: string | null = null;
+
       if (thumbnailDataUrl && thumbnailStatus === "ready") {
         if (thumbnailDataUrl.startsWith("data:")) {
           // Canvas-captured data URL — upload to Firebase Storage
-          try {
-            const storage = getStorage();
-            const thumbPath = `marketplace/thumbnails/${user.uid}/${Date.now()}.jpg`;
-            const thumbRef = storageRef(storage, thumbPath);
-            await uploadString(thumbRef, thumbnailDataUrl, "data_url");
-            finalThumbnailUrl = await getDownloadURL(thumbRef);
-          } catch (err) {
-            logger.warn("Failed to upload thumbnail, using video URL");
-          }
+          const storageInstance = getStorage();
+          const thumbPath = `marketplace/thumbnails/${user.uid}/${Date.now()}.jpg`;
+          const thumbRef = storageRef(storageInstance, thumbPath);
+          await uploadString(thumbRef, thumbnailDataUrl, "data_url");
+          finalThumbnailUrl = await getDownloadURL(thumbRef);
         } else {
           // Server-generated URL (already on Firebase Storage)
           finalThumbnailUrl = thumbnailDataUrl;
+        }
+      }
+
+      // If thumbnail generation failed, try server-side one more time before giving up
+      if (!finalThumbnailUrl) {
+        try {
+          const res = await apiClient.generateThumbnail(generation.outputUrl);
+          finalThumbnailUrl = res.thumbnailUrl;
+        } catch {
+          // Last resort: use video URL (will show skeleton on marketplace)
+          finalThumbnailUrl = generation.outputUrl;
+          logger.warn("All thumbnail methods failed, using video URL as fallback");
         }
       }
 

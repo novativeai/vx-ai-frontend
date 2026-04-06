@@ -49,11 +49,12 @@ const ProductCard = memo(function ProductCard({
   // Determine if we have a real static thumbnail (image, not video URL)
   const hasStaticThumb = isStaticThumbnail(product.thumbnailUrl);
   const posterUrl = hasStaticThumb ? product.thumbnailUrl : fallbackPoster;
+  const [posterFailed, setPosterFailed] = useState(false);
 
   // Only generate a fallback poster if no static thumbnail exists
   // This runs once per card for legacy listings that lack a real thumbnail
   useEffect(() => {
-    if (hasStaticThumb || fallbackPoster || posterLoading) return;
+    if (hasStaticThumb || fallbackPoster || posterLoading || posterFailed) return;
 
     setPosterLoading(true);
 
@@ -75,6 +76,12 @@ const ProductCard = memo(function ProductCard({
       video.remove();
     };
 
+    const markFailed = () => {
+      setPosterLoading(false);
+      setPosterFailed(true);
+      cleanup();
+    };
+
     const handleSeeked = () => {
       try {
         const canvas = document.createElement("canvas");
@@ -86,13 +93,15 @@ const ProductCard = memo(function ProductCard({
           const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
           if (dataUrl.length > 3000) {
             setFallbackPoster(dataUrl);
+            setPosterLoading(false);
+            cleanup();
+            return;
           }
         }
       } catch {
         // CORS failure — expected for fal.ai URLs
       }
-      setPosterLoading(false);
-      cleanup();
+      markFailed();
     };
 
     const handleMetadata = () => {
@@ -100,8 +109,7 @@ const ProductCard = memo(function ProductCard({
     };
 
     const handleError = () => {
-      setPosterLoading(false);
-      cleanup();
+      markFailed();
     };
 
     video.addEventListener("loadedmetadata", handleMetadata);
@@ -111,15 +119,14 @@ const ProductCard = memo(function ProductCard({
 
     // Timeout: abort after 5s to avoid lingering downloads
     const timeout = setTimeout(() => {
-      setPosterLoading(false);
-      cleanup();
+      markFailed();
     }, 5000);
 
     return () => {
       clearTimeout(timeout);
       cleanup();
     };
-  }, [product.videoUrl, hasStaticThumb, fallbackPoster, posterLoading]);
+  }, [product.videoUrl, hasStaticThumb, fallbackPoster, posterLoading, posterFailed]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -160,11 +167,18 @@ const ProductCard = memo(function ProductCard({
       <Card className="overflow-hidden rounded-2xl relative cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4FF4F]/20 hover:scale-[1.02] p-0 gap-0">
         {/* Fixed square aspect ratio, video fills completely */}
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
-          {/* Skeleton shimmer — lowest layer, visible until image loads */}
-          {(!imageLoaded || !posterUrl) && !videoPlaying && (
+          {/* Skeleton shimmer — lowest layer, visible until image loads or poster fails */}
+          {(!imageLoaded || !posterUrl) && !videoPlaying && !posterFailed && (
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute inset-0 bg-neutral-800" />
               <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
+            </div>
+          )}
+
+          {/* Dark placeholder when poster generation completely failed */}
+          {posterFailed && !posterUrl && !videoPlaying && (
+            <div className="absolute inset-0 bg-neutral-900 flex items-center justify-center">
+              <Play size={32} className="text-neutral-700" />
             </div>
           )}
 
