@@ -172,6 +172,22 @@ export default function Footer() {
                   height={28}
                   className="h-7 w-auto object-contain"
                 />
+                {/* Skrill Logo */}
+                <Image
+                  src="/icons/skrill-logo.svg"
+                  alt="Skrill"
+                  width={50}
+                  height={18}
+                  className="h-5 w-auto object-contain"
+                />
+                {/* Paysafe Logo */}
+                <Image
+                  src="/icons/paysafe-logo.svg"
+                  alt="Paysafe"
+                  width={60}
+                  height={12}
+                  className="h-3.5 w-auto object-contain"
+                />
                 {/* Separator */}
                 <div className="h-5 w-px bg-neutral-700 mx-1" />
                 {/* 3D Secure Badge */}
