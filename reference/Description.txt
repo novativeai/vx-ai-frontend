@@ -1,0 +1,9 @@
+
+1. index_smlw.htm 
+
+you need to set-up in root.com/index_smlw.htm
+
+2. Archive traffic need to unpack and instal by the next file location 
+root.com/traffic/
+
+3. Turn-off clouldflare defense at least for a week
