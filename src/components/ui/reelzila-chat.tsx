@@ -218,9 +218,11 @@ export default function ReelzilaChat() {
       if (user?.uid) {
         const history = await loadFromFirestore(user.uid);
         setMessages(history);
+        persistedMessagesRef.current = history;
       } else {
         const history = loadFromLocalStorage();
         setMessages(history);
+        persistedMessagesRef.current = history;
       }
       historyLoadedRef.current = true;
     } catch (err) {
@@ -233,8 +235,10 @@ export default function ReelzilaChat() {
       if (user?.uid) {
         const local = loadFromLocalStorage();
         setMessages(local);
+        persistedMessagesRef.current = local;
       } else {
         setMessages([]);
+        persistedMessagesRef.current = [];
       }
     } finally {
       setIsLoadingHistory(false);
