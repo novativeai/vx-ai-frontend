@@ -444,8 +444,8 @@ export default function ReelzilaChat() {
                 </div>
               )}
 
-              {/* Error State */}
-              {!isLoadingHistory && loadError && (
+              {/* Error State — only show for authenticated users (anonymous falls back silently) */}
+              {!isLoadingHistory && loadError && user?.uid && (
                 <div className="flex flex-col items-center justify-center gap-3 px-4 py-8">
                   <AlertCircle className="w-8 h-8 text-amber-400" />
                   <p className="text-neutral-300 text-sm text-center">{loadError}</p>
