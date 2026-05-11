@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ReelzilaChat from "@/components/ui/reelzila-chat";
 
 // Pages that should NOT trigger the profile-completion redirect
 const PUBLIC_PATHS = [
@@ -66,6 +67,7 @@ export default function LayoutManager({
       <Navbar />
       <main id="main-content" tabIndex={-1} className="flex-grow">{children}</main>
       {!hideFooter && <Footer />}
+      <ReelzilaChat />
     </>
   );
 }
