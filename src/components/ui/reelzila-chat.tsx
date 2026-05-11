@@ -12,8 +12,6 @@ import {
   addDoc,
   getDocs,
   serverTimestamp,
-  enableNetwork,
-  waitForPendingWrites,
   Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -117,13 +115,9 @@ interface PersistedMessage {
   timestamp: number;
 }
 
-// ── Welcome message ───────────────────────────────────────────────────────────
+// ── Welcome message (local-only, never persisted) ─────────────────────────────
 
-const WELCOME_MESSAGE: Message = {
-  sender: "bot",
-  text: "👋 Hi! I'm **Reelzila**, your AI assistant. I can help with questions about our platform, pricing, AI models, credits, marketplace, or troubleshooting. How can I help you today?",
-  timestamp: Date.now(),
-};
+const WELCOME_TEXT = "👋 Hi! I'm **Reelzila** FAQ chatbot. I can help with questions about our platform, pricing, AI models, credits, marketplace, or troubleshooting. How can I help you today?";
 
 // ── Persistence Helpers ───────────────────────────────────────────────────────
 
@@ -212,7 +206,6 @@ export default function ReelzilaChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevUserIdRef = useRef<string | null>(null);
-  // Track whether we've done initial load for current user state
   const historyLoadedRef = useRef(false);
 
   // ── Load chat history when user auth state changes ──────────────────────────
@@ -223,24 +216,11 @@ export default function ReelzilaChat() {
 
     try {
       if (user?.uid) {
-        // Authenticated user: load from Firestore
         const history = await loadFromFirestore(user.uid);
-        if (history.length > 0) {
-          setMessages(history);
-        } else {
-          // First time — seed with welcome message and save it
-          const seeded = [{ ...WELCOME_MESSAGE }];
-          setMessages(seeded);
-          await appendToFirestore(user.uid, WELCOME_MESSAGE);
-        }
+        setMessages(history);
       } else {
-        // Anonymous user: load from localStorage
         const history = loadFromLocalStorage();
-        if (history.length > 0) {
-          setMessages(history);
-        } else {
-          setMessages([{ ...WELCOME_MESSAGE }]);
-        }
+        setMessages(history);
       }
       historyLoadedRef.current = true;
     } catch (err) {
@@ -250,12 +230,11 @@ export default function ReelzilaChat() {
           ? "Couldn't load your chat history from the cloud. Showing local messages."
           : "Couldn't load saved messages."
       );
-      // Fallback to local storage for authenticated users
       if (user?.uid) {
         const local = loadFromLocalStorage();
-        setMessages(local.length > 0 ? local : [{ ...WELCOME_MESSAGE }]);
+        setMessages(local);
       } else {
-        setMessages([{ ...WELCOME_MESSAGE }]);
+        setMessages([]);
       }
     } finally {
       setIsLoadingHistory(false);
@@ -267,7 +246,7 @@ export default function ReelzilaChat() {
     const currentUid = user?.uid ?? null;
     if (currentUid !== prevUserIdRef.current) {
       prevUserIdRef.current = currentUid;
-      setMessages([]); // Clear immediately to avoid flash of wrong data
+      setMessages([]);
       historyLoadedRef.current = false;
       loadHistory();
     }
@@ -287,12 +266,11 @@ export default function ReelzilaChat() {
     }
   }, [isOpen, isLoadingHistory]);
 
-  // ── Persist messages after each change (debounced via effect) ──────────────
+  // ── Persist messages after each change ─────────────────────────────────────
 
   const persistedMessagesRef = useRef<Message[]>([]);
 
   useEffect(() => {
-    // Don't persist while still loading history or if messages haven't changed
     if (isLoadingHistory || messages.length === 0) return;
 
     const prev = persistedMessagesRef.current;
@@ -302,11 +280,7 @@ export default function ReelzilaChat() {
     persistedMessagesRef.current = messages;
 
     if (user?.uid) {
-      // Save only the newest message to Firestore (the one not yet persisted)
-      // We find messages after the last known persisted count
-      // For simplicity and reliability, we save only the last message
       const lastMsg = messages[messages.length - 1];
-      // Only save if it hasn't been saved yet (we track by checking if message was from this session)
       appendToFirestore(user.uid, lastMsg).catch(() => {});
     } else {
       saveToLocalStorage(messages);
@@ -325,7 +299,6 @@ export default function ReelzilaChat() {
     setIsLoading(true);
 
     try {
-      // Build conversation history context
       const history = [...messages, userMessage]
         .slice(-MAX_CONTEXT_MESSAGES)
         .map((m) => ({
@@ -434,7 +407,7 @@ export default function ReelzilaChat() {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-              {/* Loading State: Skeleton */}
+              {/* Loading State */}
               {isLoadingHistory && (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
                   <Loader2 className="w-8 h-8 text-[#D4FF4F] animate-spin" />
@@ -444,7 +417,7 @@ export default function ReelzilaChat() {
                 </div>
               )}
 
-              {/* Error State — only show for authenticated users (anonymous falls back silently) */}
+              {/* Error State — only for authenticated users */}
               {!isLoadingHistory && loadError && user?.uid && (
                 <div className="flex flex-col items-center justify-center gap-3 px-4 py-8">
                   <AlertCircle className="w-8 h-8 text-amber-400" />
@@ -459,11 +432,20 @@ export default function ReelzilaChat() {
                 </div>
               )}
 
-              {/* Empty State (when loaded but no messages) */}
+              {/* Welcome message — shown inline only when no history exists (never persisted to Firestore) */}
               {!isLoadingHistory && !loadError && messages.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full gap-3">
-                  <p className="text-neutral-500 text-sm">No messages yet. Start a conversation!</p>
-                </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex justify-start"
+                >
+                  <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed bg-neutral-800 text-neutral-100 rounded-bl-md">
+                    <div className="[&_a]:text-[#D4FF4F] [&_strong]:font-bold [&_a]:underline">
+                      {formatMessage(WELCOME_TEXT)}
+                    </div>
+                  </div>
+                </motion.div>
               )}
 
               {/* Messages */}
@@ -538,7 +520,6 @@ export default function ReelzilaChat() {
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-              {/* Persistence indicator */}
               {!isLoadingHistory && (
                 <p className="text-[10px] text-neutral-600 text-center mt-1.5">
                   {user?.uid
