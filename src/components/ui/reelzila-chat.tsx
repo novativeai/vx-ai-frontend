@@ -245,15 +245,19 @@ export default function ReelzilaChat() {
     }
   }, [user?.uid]);
 
-  // Re-load history when user auth state changes (login/logout)
+  // Load history on mount and re-load when user auth state changes (login/logout)
   useEffect(() => {
     const currentUid = user?.uid ?? null;
-    if (currentUid !== prevUserIdRef.current) {
-      prevUserIdRef.current = currentUid;
-      setMessages([]);
-      historyLoadedRef.current = false;
-      loadHistory();
+    // On first mount (historyLoadedRef is false) or on auth change, load history.
+    // For unauthenticated users: currentUid === null, prevUserIdRef is also null
+    // on first mount, so we must use historyLoadedRef as the trigger.
+    if (historyLoadedRef.current && currentUid === prevUserIdRef.current) {
+      return;
     }
+    prevUserIdRef.current = currentUid;
+    setMessages([]);
+    historyLoadedRef.current = false;
+    loadHistory();
   }, [user?.uid, loadHistory]);
 
   // ── Auto-scroll & focus ─────────────────────────────────────────────────────

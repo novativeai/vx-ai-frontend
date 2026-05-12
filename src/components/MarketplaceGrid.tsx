@@ -13,20 +13,29 @@ interface MarketplaceGridProps {
   initialDisplayCount?: number;
 }
 
-// Check if a URL points to a video file rather than an image
+// Detect if a URL content-type is likely a video.
+const VIDEO_CONTENT_HINTS = [".mp4", ".webm", ".mov", ".avi", ".mkv", "fal.media", "video/"];
+
 const isVideoUrl = (url: string): boolean => {
-  const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
-  return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+  const lower = url.toLowerCase();
+  return VIDEO_CONTENT_HINTS.some((hint) => lower.includes(hint));
 };
 
-// Check if a URL is a Firebase Storage image thumbnail (not a video)
+// Robust check: returns true IFF the URL points to a real static image.
 const isStaticThumbnail = (url?: string): boolean => {
   if (!url) return false;
-  // Firebase Storage download URLs with tokens are static images
-  if (url.includes("firebasestorage.googleapis.com") && url.includes("token="))
+
+  const lower = url.toLowerCase();
+
+  // Firebase Storage URLs with image extensions are definitely static
+  if (
+    (lower.includes("firebasestorage.googleapis.com") || lower.includes("storage.googleapis.com")) &&
+    (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp"))
+  ) {
     return true;
-  if (url.includes("storage.googleapis.com") && !isVideoUrl(url)) return true;
-  // Any non-video URL is a valid static thumbnail
+  }
+
+  // Any URL that is explicitly NOT a video can be trusted as static
   return !isVideoUrl(url);
 };
 
@@ -157,6 +166,11 @@ const ProductCard = memo(function ProductCard({
     setImageLoaded(true);
   }, []);
 
+  const handleImageError = useCallback(() => {
+    setImageLoaded(false);
+    setPosterFailed(true);
+  }, []);
+
   return (
     <button
       onClick={() => onProductClick(product)}
@@ -195,6 +209,7 @@ const ProductCard = memo(function ProductCard({
               priority={false}
               unoptimized={posterUrl.startsWith("data:")}
               onLoad={handleImageLoad}
+              onError={handleImageError}
             />
           )}
 
