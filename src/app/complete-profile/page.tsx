@@ -118,16 +118,16 @@ export default function CompleteProfile() {
     setIsSubmitting(true);
 
     try {
-      const { updateDoc } = await import('firebase/firestore');
+      const { setDoc } = await import('firebase/firestore');
       const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
+      await setDoc(userDocRef, {
         phone: formData.phone,
         country: formData.country,
         address: formData.address,
         city: formData.city,
         postCode: formData.postCode,
         profileComplete: true,
-      });
+      }, { merge: true });
 
       toast.success('Profile completed!', 'Your billing details have been saved.');
       router.push('/');
