@@ -42,15 +42,14 @@ Content creators, social media managers, small businesses needing marketing visu
 3. You will receive 10 free credits upon registration
 
 ### First generation
-1. Go to the **Explore** page and browse the available AI models
-2. Click on any model — this takes you to the **Generator** page with that model selected
+1. Go to the **Explore** page and browse the available AI model cards
+2. Click on any model card — this takes you to the **Generator** page with that model pre-selected
 3. Type a prompt describing your desired output
 4. Select the output type: Video or Image
-5. Choose an AI model from the dropdown (or use the one pre-selected)
-6. Adjust settings if available (aspect ratio, duration, resolution)
-7. Click Generate
-8. Wait for processing — typically 10–60 seconds depending on the model
-9. Preview, download, or share your result
+5. Adjust settings if available (aspect ratio, duration, resolution)
+6. Click Generate
+7. Wait for processing — typically 10–60 seconds depending on the model
+8. Preview, download, or share your result
 
 ---
 
