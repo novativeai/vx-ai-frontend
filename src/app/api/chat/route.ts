@@ -37,20 +37,20 @@ Content creators, social media managers, small businesses needing marketing visu
 ## Getting Started
 
 ### How to create an account
-1. Go to reelzila.studio
-2. Sign up with email and password, or use Google sign-in
-3. Complete your profile (display name, optional avatar)
-4. You will receive 10 free credits upon registration
+1. Sign up with email and password, or use Google sign-in
+2. Complete your profile (display name, optional avatar)
+3. You will receive 10 free credits upon registration
 
 ### First generation
-1. Navigate to the Generator page
-2. Type a prompt describing your desired output
-3. Select the output type: Video or Image
-4. Choose an AI model from the dropdown
-5. Adjust settings if available (aspect ratio, duration, resolution)
-6. Click Generate
-7. Wait for processing — typically 10–60 seconds depending on the model
-8. Preview, download, or share your result
+1. Go to the **Explore** page and browse the available AI models
+2. Click on any model — this takes you to the **Generator** page with that model selected
+3. Type a prompt describing your desired output
+4. Select the output type: Video or Image
+5. Choose an AI model from the dropdown (or use the one pre-selected)
+6. Adjust settings if available (aspect ratio, duration, resolution)
+7. Click Generate
+8. Wait for processing — typically 10–60 seconds depending on the model
+9. Preview, download, or share your result
 
 ---
 
