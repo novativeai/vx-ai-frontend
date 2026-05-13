@@ -231,12 +231,29 @@ export default function ReelzilaChat() {
     try {
       if (user?.uid) {
         const history = await loadFromFirestore(user.uid);
-        setMessages(history);
-        persistedMessagesRef.current = history;
+        // If no chat history, prepend the welcome message so it persists in state
+        if (history.length === 0) {
+          const withWelcome: Message[] = [
+            { sender: "bot", text: WELCOME_TEXT, timestamp: Date.now() },
+          ];
+          setMessages(withWelcome);
+          persistedMessagesRef.current = withWelcome;
+        } else {
+          setMessages(history);
+          persistedMessagesRef.current = history;
+        }
       } else {
         const history = loadFromLocalStorage();
-        setMessages(history);
-        persistedMessagesRef.current = history;
+        if (history.length === 0) {
+          const withWelcome: Message[] = [
+            { sender: "bot", text: WELCOME_TEXT, timestamp: Date.now() },
+          ];
+          setMessages(withWelcome);
+          persistedMessagesRef.current = withWelcome;
+        } else {
+          setMessages(history);
+          persistedMessagesRef.current = history;
+        }
       }
       historyLoadedRef.current = true;
     } catch (err) {
@@ -248,11 +265,22 @@ export default function ReelzilaChat() {
       );
       if (user?.uid) {
         const local = loadFromLocalStorage();
-        setMessages(local);
-        persistedMessagesRef.current = local;
+        if (local.length === 0) {
+          const withWelcome: Message[] = [
+            { sender: "bot", text: WELCOME_TEXT, timestamp: Date.now() },
+          ];
+          setMessages(withWelcome);
+          persistedMessagesRef.current = withWelcome;
+        } else {
+          setMessages(local);
+          persistedMessagesRef.current = local;
+        }
       } else {
-        setMessages([]);
-        persistedMessagesRef.current = [];
+        const withWelcome: Message[] = [
+          { sender: "bot", text: WELCOME_TEXT, timestamp: Date.now() },
+        ];
+        setMessages(withWelcome);
+        persistedMessagesRef.current = withWelcome;
       }
     } finally {
       setIsLoadingHistory(false);
@@ -454,21 +482,7 @@ export default function ReelzilaChat() {
                 </div>
               )}
 
-              {/* Welcome message — shown inline only when no history exists (never persisted to Firestore) */}
-              {!isLoadingHistory && !loadError && messages.length === 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex justify-start"
-                >
-                  <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed bg-neutral-800 text-neutral-100 rounded-bl-md">
-                    <div className="[&_a]:text-[#D4FF4F] [&_strong]:font-bold [&_a]:underline">
-                      {formatMessage(WELCOME_TEXT)}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+              {/* Note: welcome message is injected into state on first load, so it persists across messages */}
 
               {/* Messages */}
               {!isLoadingHistory &&
