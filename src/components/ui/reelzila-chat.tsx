@@ -35,6 +35,20 @@ function formatMessage(text: string): React.ReactNode {
       return;
     }
 
+    // Handle markdown headings: ###, ##, or #
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length; // 1, 2, or 3
+      const text = headingMatch[2];
+      const sizeClass = level === 1 ? "text-lg font-bold" : level === 2 ? "text-base font-bold" : "text-sm font-semibold";
+      result.push(
+        <div key={`line-${lineIdx}`} className={`${sizeClass} text-white mt-3 mb-1`}>
+          {parseInline(text)}
+        </div>
+      );
+      return;
+    }
+
     const segments = parseInline(line);
     result.push(
       <div key={`line-${lineIdx}`} className="leading-relaxed">
