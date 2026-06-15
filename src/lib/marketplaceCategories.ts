@@ -42,54 +42,65 @@ export type MarketplaceUseCase = (typeof MARKETPLACE_USE_CASES)[number];
  * repetitive / overly-niche tags from the 100+ in the database.
  * Matching is case-insensitive.
  */
+const MARKETPLACE_ALLOWED_TAGS_DISPLAY = [
+  // ── Styles & Mood ──
+  'Abstract',
+  'Cinematic',
+  'Colorful',
+  'Dark',
+  'Dramatic',
+  'Dreamy',
+  'Elegant',
+  'Futuristic',
+  'Minimalist',
+  'Neon',
+  'Retro',
+  'Surreal',
+  // ── Subjects & Themes ──
+  'Aerial',
+  'Animals',
+  'Architecture',
+  'Fire',
+  'Landscape',
+  'Nature',
+  'Night',
+  'People',
+  'Space',
+  'Sunset',
+  'Underwater',
+  'Urban',
+  'Water',
+  'Weather',
+  // ── Industries & Verticals ──
+  'Corporate',
+  'Education',
+  'Fashion',
+  'Food & Travel',
+  'Horror & Thriller',
+  'Lifestyle',
+  'Music & Audio',
+  'Sci-Fi',
+  'Social Media',
+  'Sports',
+  'Technology',
+  // ── Techniques ──
+  '3D Render',
+  'Animation',
+  'Motion Graphics',
+  'Particle Effects',
+  'Slow Motion',
+  'Time-lapse',
+] as const;
+
 export const MARKETPLACE_ALLOWED_TAGS: ReadonlySet<string> = new Set(
-  [
-    // ── Styles & Mood ──
-    'Abstract',
-    'Cinematic',
-    'Colorful',
-    'Dark',
-    'Dramatic',
-    'Dreamy',
-    'Elegant',
-    'Futuristic',
-    'Minimalist',
-    'Neon',
-    'Retro',
-    'Surreal',
-    // ── Subjects & Themes ──
-    'Aerial',
-    'Animals',
-    'Architecture',
-    'Fire',
-    'Landscape',
-    'Nature',
-    'Night',
-    'People',
-    'Space',
-    'Sunset',
-    'Underwater',
-    'Urban',
-    'Water',
-    'Weather',
-    // ── Industries & Verticals ──
-    'Corporate',
-    'Education',
-    'Fashion',
-    'Food & Travel',
-    'Horror & Thriller',
-    'Lifestyle',
-    'Music & Audio',
-    'Sci-Fi',
-    'Social Media',
-    'Sports',
-    'Technology',
-    // ── Techniques ──
-    '3D Render',
-    'Animation',
-    'Motion Graphics',
-    'Particle Effects',
-    'Slow Motion',
-    'Time-lapse',
-  ].map(t => t.toLowerCase()),
+  MARKETPLACE_ALLOWED_TAGS_DISPLAY.map(t => t.toLowerCase()),
+);
+
+/**
+ * Maps a lowercase tag key to its canonical display label.
+ * Used to collapse case variants (e.g. "Cinematic" / "cinematic") into a
+ * single filter entry so categories are never duplicated in the sidebar.
+ */
+export const MARKETPLACE_TAG_DISPLAY: ReadonlyMap<string, string> = new Map(
+  MARKETPLACE_ALLOWED_TAGS_DISPLAY.map(t => [t.toLowerCase(), t]),
 );

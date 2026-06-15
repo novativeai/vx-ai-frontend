@@ -73,10 +73,10 @@ export default function PricingPage() {
   const estimatedImages = Math.floor(credits / 3);
 
   return (
-    <div className="bg-black text-white min-h-screen pt-8 md:pt-16 w-full">
-      <div className="w-full md:px-28 px-4 py-8 md:py-16">
+    <div className="bg-black text-white min-h-screen pt-6 md:pt-10 w-full">
+      <div className="w-full md:px-28 px-4 py-6 md:py-10">
         {/* Header - Brand Style */}
-        <div className="text-center mx-auto mb-16">
+        <div className="text-center mx-auto mb-8 md:mb-10">
           <p className="text-sm uppercase tracking-widest text-neutral-400">Pay as you go</p>
           <h1 className="text-5xl md:text-7xl font-regular tracking-tighter mt-2">
             CREDITS
@@ -88,18 +88,18 @@ export default function PricingPage() {
 
         {/* Main Credit Purchase Card */}
         <div className="bg-[#0A0A0A] border border-neutral-900 rounded-2xl overflow-hidden max-w-4xl mx-auto">
-          <div className="p-8 md:p-16">
+          <div className="p-6 md:p-10">
             {/* Credits Display */}
-            <div className="text-center mb-12">
-              <p className="text-sm uppercase tracking-widest text-neutral-500 mb-4">You will receive</p>
-              <div className="text-8xl md:text-[10rem] font-regular tracking-tighter text-white leading-none">
+            <div className="text-center mb-8">
+              <p className="text-sm uppercase tracking-widest text-neutral-500 mb-3">You will receive</p>
+              <div className="text-7xl md:text-8xl font-regular tracking-tighter text-white leading-none">
                 {credits}
               </div>
-              <p className="text-xl text-neutral-500 mt-4 uppercase tracking-wider">credits</p>
+              <p className="text-xl text-neutral-500 mt-3 uppercase tracking-wider">credits</p>
             </div>
 
             {/* Estimation - Clean Text Only */}
-            <div className="flex justify-center gap-12 md:gap-20 mb-14">
+            <div className="flex justify-center gap-12 md:gap-20 mb-8 md:mb-10">
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-regular text-white tracking-tight">{estimatedVideos}</div>
                 <div className="text-sm text-neutral-500 uppercase tracking-wider mt-1">videos approx.</div>
@@ -112,7 +112,7 @@ export default function PricingPage() {
             </div>
 
             {/* Slider + Amount Input */}
-            <div className="max-w-2xl mx-auto mb-14">
+            <div className="max-w-2xl mx-auto mb-8 md:mb-10">
               <Slider
                 value={[customAmount]}
                 onValueChange={handleSliderChange}
@@ -126,7 +126,7 @@ export default function PricingPage() {
                 <span>€1500</span>
               </div>
 
-              <div className="flex items-center justify-center gap-2 mt-8">
+              <div className="flex items-center justify-center gap-2 mt-6">
                 <span className="text-2xl text-neutral-500 font-light">€</span>
                 <input
                   type="number"
@@ -160,7 +160,7 @@ export default function PricingPage() {
             </div>
 
             {/* Preset Amounts */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
               {presetAmounts.map((amount) => (
                 <Button
                   key={amount}

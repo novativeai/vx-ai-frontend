@@ -15,7 +15,7 @@ import { CheckCircle, AlertCircle, Play, Download } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { MARKETPLACE_ALLOWED_TAGS } from "@/lib/marketplaceCategories";
+import { MARKETPLACE_ALLOWED_TAGS, MARKETPLACE_TAG_DISPLAY } from "@/lib/marketplaceCategories";
 import { logger } from "@/lib/logger";
 
 interface PurchasedVideo {
@@ -239,26 +239,35 @@ function MarketplaceContent() {
 
   // Combine tag extraction and filtering into single memoized operation
   const { allTags, allUseCases, filteredProducts } = useMemo(() => {
-    const tagSet = new Set<string>();
+    // Collapse tag case variants into one canonical label per lowercase key so
+    // categories like "Cinematic"/"cinematic" never appear twice in the sidebar.
+    const tagDisplayByKey = new Map<string, string>();
     const useCaseSet = new Set<string>();
 
+    // Selections are compared case-insensitively.
+    const selectedTagKeys = new Set(selectedTags.map(t => t.toLowerCase()));
+    const selectedUseCaseKeys = new Set(selectedUseCases.map(u => u.toLowerCase()));
+
     const filtered = products.filter(product => {
-      // Collect tags and use cases while filtering
-      product.tags?.forEach(tag => tagSet.add(tag));
+      // Collect allowed tags (canonicalized) and use cases while filtering
+      product.tags?.forEach(tag => {
+        const key = tag.toLowerCase();
+        if (MARKETPLACE_ALLOWED_TAGS.has(key) && !tagDisplayByKey.has(key)) {
+          tagDisplayByKey.set(key, MARKETPLACE_TAG_DISPLAY.get(key) ?? tag);
+        }
+      });
       product.useCases?.forEach(useCase => useCaseSet.add(useCase));
 
-      const tagMatch = selectedTags.length === 0 ||
-        selectedTags.some(tag => product.tags?.includes(tag));
-      const useCaseMatch = selectedUseCases.length === 0 ||
-        selectedUseCases.some(useCase => product.useCases?.includes(useCase));
+      const tagMatch = selectedTagKeys.size === 0 ||
+        (product.tags?.some(tag => selectedTagKeys.has(tag.toLowerCase())) ?? false);
+      const useCaseMatch = selectedUseCaseKeys.size === 0 ||
+        (product.useCases?.some(useCase => selectedUseCaseKeys.has(useCase.toLowerCase())) ?? false);
 
       return tagMatch && useCaseMatch;
     });
 
     return {
-      allTags: Array.from(tagSet)
-        .filter(tag => MARKETPLACE_ALLOWED_TAGS.has(tag.toLowerCase()))
-        .sort(),
+      allTags: Array.from(tagDisplayByKey.values()).sort(),
       allUseCases: Array.from(useCaseSet).sort(),
       filteredProducts: filtered
     };
@@ -297,7 +306,7 @@ function MarketplaceContent() {
     <div className="bg-black text-white">
       <DynamicBanner slides={bannerSlides} />
 
-      <div className="container mx-auto px-4 py-16 md:py-24">
+      <div className="container mx-auto px-4 py-10 md:py-16">
         {/* Purchase Status Message */}
         {showStatusMessage && (
           <div className="mb-8 p-4 rounded-lg flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500" style={{
@@ -362,7 +371,7 @@ function MarketplaceContent() {
           )}
           {/* Section Title */}
           <section>
-            <div className="mb-12">
+            <div className="mb-8">
               <p className="text-sm uppercase tracking-widest text-neutral-400">Discover & Buy</p>
               <h2 className="text-4xl md:text-6xl font-regular tracking-tighter mt-2">Marketplace</h2>
               <p className="max-w-2xl text-neutral-300 mt-4">

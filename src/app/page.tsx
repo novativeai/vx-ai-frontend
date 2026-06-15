@@ -58,7 +58,7 @@ const HomeFooterSection = dynamic(
 
 export default function HomePage() {
   return (
-    <main className="relative bg-black h-screen overflow-y-auto snap-y snap-mandatory scroll-smooth">
+    <main className="relative bg-black scroll-smooth">
       {/* Hero section loads immediately - critical for LCP */}
       <SnapSection>
         <HeroSection />

@@ -18,7 +18,7 @@ export default function AboutUsPage() {
   return (
     <div className="bg-black space-y-24 md:space-y-24">
       <DynamicBanner slides={aboutUsSlides} />
-      <AboutUsSection />
+      <AboutUsSection showJoinButton={false} />
       <div className="h-12"/>
     </div>
   );

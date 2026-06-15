@@ -22,6 +22,7 @@ import { FirebaseError } from "firebase/app";
 import { COUNTRIES } from "@/lib/countries";
 import { AccountNav, AccountNavMobile, type AccountTab } from "@/components/AccountNav";
 import { HistoryCard } from "@/components/HistoryCard";
+import { ListingsManager } from "@/components/ListingsManager";
 import { VideoViewerModal } from "@/components/VideoViewerModal";
 import { PurchasedVideos } from "@/components/PurchasedVideos";
 import { SellerEarningsCard } from "@/components/SellerEarningsCard";
@@ -71,10 +72,13 @@ function UsageStats() {
   );
 }
 
+const BILLING_PREVIEW_COUNT = 5;
+
 function BillingHistory() {
   const { user } = useAuth();
   const [history, setHistory] = useState<PaymentTransaction[]>([]);
   const [userBilling, setUserBilling] = useState<UserBillingDetails | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -136,11 +140,14 @@ function BillingHistory() {
       </div>
     );
   }
+  const visibleHistory = showAll ? history : history.slice(0, BILLING_PREVIEW_COUNT);
+  const hiddenCount = history.length - BILLING_PREVIEW_COUNT;
+
   return (
      <div>
         <h2 className="font-semibold text-lg mb-4">Billing History</h2>
         <div className="space-y-4">
-            {history.map(item => (
+            {visibleHistory.map(item => (
                 <div key={item.id} className="flex justify-between items-center border-b border-neutral-800 pb-2">
                     <div>
                         <p className="text-sm text-neutral-300">{item.createdAt?.toDate().toLocaleDateString()}</p>
@@ -165,6 +172,14 @@ function BillingHistory() {
                 </div>
             ))}
         </div>
+        {hiddenCount > 0 && (
+          <button
+            onClick={() => setShowAll(prev => !prev)}
+            className="mt-4 text-sm font-medium text-[#D4FF4F] hover:text-[#c2ef3d] transition-colors"
+          >
+            {showAll ? "Show less" : `Show more (${hiddenCount})`}
+          </button>
+        )}
      </div>
   );
 }
@@ -881,6 +896,10 @@ export default function AccountPage() {
                                     />
                                 )}
                             </div>
+                        )}
+
+                        {activeTab === "listings" && (
+                            <ListingsManager />
                         )}
 
                         {activeTab === "purchased" && (

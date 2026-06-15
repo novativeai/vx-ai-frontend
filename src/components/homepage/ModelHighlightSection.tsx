@@ -35,7 +35,7 @@ export function ModelHighlightSection() {
       <div className="container mx-auto h-full relative flex flex-col justify-center px-4 md:px-0 md:block py-8 md:py-12">
 
         <motion.div
-          className="relative z-10 md:absolute md:top-0 md:left-0"
+          className="relative z-10 md:absolute md:top-20 md:left-0"
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -54,7 +54,7 @@ export function ModelHighlightSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <p>VEO 3.1 generates <strong style={{ color: '#ffffff' }} className="font-bold">synchronized dialogue</strong>, <strong style={{ color: '#ffffff' }} className="font-bold">ambient soundscapes</strong>, and <strong style={{ color: '#ffffff' }} className="font-bold">realistic Foley effects</strong> automatically. <strong style={{ color: '#ffffff' }} className="font-bold">No post-production audio needed</strong>—everything is created in one generation.</p>
+          <p>VEO 3.1 generates <strong style={{ color: '#ffffff' }} className="font-bold">synchronized dialogue</strong>, <strong style={{ color: '#ffffff' }} className="font-bold">ambient soundscapes</strong>, and <strong style={{ color: '#ffffff' }} className="font-bold">realistic Foley effects</strong> automatically. <strong style={{ color: '#ffffff' }} className="font-bold">No post-production audio needed</strong> – everything is created in one generation.</p>
         </motion.div>
 
         <Link
@@ -101,7 +101,7 @@ export function ModelHighlightSection() {
           >
             <span className="flex items-baseline translate-x-[0.75em]">
               <span className="font-extrabold">VEO</span>
-              <span className="font-light ml-1">3.1</span>
+              <span className="font-light ml-[0.22em]">3.1</span>
             </span>
           </motion.h3>
         </Link>

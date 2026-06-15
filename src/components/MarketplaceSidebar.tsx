@@ -46,7 +46,7 @@ export const MarketplaceSidebar: React.FC<MarketplaceSidebarProps> = ({
   };
 
   return (
-    <div className="w-full md:w-80 shrink-0">
+    <div className="w-full lg:w-80 shrink-0">
       {/* Sidebar Container */}
       <div className="sticky top-24 space-y-8">
         {/* Header */}

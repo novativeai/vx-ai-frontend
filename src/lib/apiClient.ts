@@ -237,6 +237,17 @@ export const apiClient = {
   },
 
   /**
+   * Delete a marketplace listing owned by the authenticated seller.
+   * Removes it from both the seller's items and the public listings.
+   */
+  deleteListing: async (itemId: string) => {
+    return apiClient.post<{ status: string; itemId: string; listingsRemoved: number }>(
+      '/marketplace/delete-listing',
+      { itemId },
+    );
+  },
+
+  /**
    * Create one-time payment
    */
   createPayment: async (userId: string, customAmount: number) => {

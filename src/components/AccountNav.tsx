@@ -1,8 +1,8 @@
 "use client";
 
-import { User, History, ShoppingBag, TrendingUp } from "lucide-react";
+import { User, History, ShoppingBag, Store, TrendingUp } from "lucide-react";
 
-export type AccountTab = "account" | "history" | "purchased" | "seller";
+export type AccountTab = "account" | "history" | "listings" | "purchased" | "seller";
 
 interface AccountNavProps {
   activeTab: AccountTab;
@@ -20,6 +20,11 @@ export function AccountNav({ activeTab, onTabChange }: AccountNavProps) {
       id: "history",
       label: "History",
       icon: <History className="w-5 h-5" />,
+    },
+    {
+      id: "listings",
+      label: "Listings",
+      icon: <Store className="w-5 h-5" />,
     },
     {
       id: "purchased",
@@ -58,6 +63,7 @@ export function AccountNavMobile({ activeTab, onTabChange }: AccountNavProps) {
   const navItems: Array<{ id: AccountTab; label: string }> = [
     { id: "account", label: "Account" },
     { id: "history", label: "History" },
+    { id: "listings", label: "Listings" },
     { id: "purchased", label: "Purchased" },
     { id: "seller", label: "Seller" },
   ];

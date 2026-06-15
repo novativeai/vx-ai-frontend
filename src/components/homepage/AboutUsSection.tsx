@@ -9,7 +9,14 @@ const missionParagraphs = [
     <>We are charting the course for the future of digital storytelling. By pioneering the <strong style={{ color: '#ffffff' }} className="font-bold">next generation of creative AI</strong>, we are building a world where any <strong style={{ color: '#ffffff' }} className="font-bold">imagined vision can be realized</strong>.</>
 ];
 
-export function AboutUsSection() {
+interface AboutUsSectionProps {
+  /** Show the "Join us" CTA. Hidden on the About page itself (redundant there). */
+  showJoinButton?: boolean;
+  /** Destination for the "Join us" CTA. Defaults to the models/explore page. */
+  joinHref?: string;
+}
+
+export function AboutUsSection({ showJoinButton = true, joinHref = "/explore" }: AboutUsSectionProps = {}) {
   return (
     <section className="bg-black text-white h-full flex flex-col justify-center">
       {/* THE FIX: Responsive gap between columns */}
@@ -22,11 +29,13 @@ export function AboutUsSection() {
           <p className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tighter leading-tight mt-8">
             Our mission is to build the perfect generation platform, to elevate creative minds to the next level.
           </p>
-          <Link href="/about">
-            <Button size="lg" className="mt-8 bg-white text-black hover:bg-neutral-200 transition-colors font-semibold">
-              Join us
-            </Button>
-          </Link>
+          {showJoinButton && (
+            <Link href={joinHref}>
+              <Button size="lg" className="mt-8 bg-white text-black hover:bg-neutral-200 transition-colors font-semibold">
+                Join us
+              </Button>
+            </Link>
+          )}
         </div>
         {/* Right Column Wrapper: THE FIX - Justify alignment is now responsive */}
         <div className="flex md:justify-end">

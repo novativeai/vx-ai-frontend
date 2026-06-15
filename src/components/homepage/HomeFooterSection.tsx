@@ -72,31 +72,28 @@ export function HomeFooterSection() {
           <div className="space-y-4">
             <h3 className="font-semibold text-foreground">Blog</h3>
             <ul className="space-y-2">
-              {articles.length > 0 ? (
-                articles.map((article) => (
-                  <li key={article.link}>
-                    <a
-                      href={article.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-muted-foreground hover:text-primary line-clamp-1"
-                    >
-                      {article.title}
-                    </a>
-                  </li>
-                ))
-              ) : (
-                <li>
+              {articles.map((article) => (
+                <li key={article.link}>
                   <a
-                    href="https://medium.com/@reelzila"
+                    href={article.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
+                    className="text-sm text-muted-foreground hover:text-primary line-clamp-1"
                   >
-                    Read on Medium <ExternalLink className="h-3 w-3" />
+                    {article.title}
                   </a>
                 </li>
-              )}
+              ))}
+              <li>
+                <a
+                  href="https://medium.com/@reelzila"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1"
+                >
+                  Blog <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
             </ul>
           </div>
 

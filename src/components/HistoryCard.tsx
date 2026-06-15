@@ -34,11 +34,11 @@ interface HistoryCardProps {
 
 export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard({ item, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [fallbackPoster, setFallbackPoster] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(false);
+  const [videoFrameReady, setVideoFrameReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const isVideo = item.outputType === 'video';
@@ -117,13 +117,8 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    if (isVideo) {
-      setShowVideo(true);
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.play().catch(() => {});
-        }
-      }, 50);
+    if (isVideo && videoRef.current) {
+      videoRef.current.play().catch(() => {});
     }
   }, [isVideo]);
 
@@ -132,7 +127,8 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     setVideoPlaying(false);
     if (videoRef.current) {
       videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+      // Reset to the first frame so the card keeps a visible poster, not black.
+      videoRef.current.currentTime = 0.05;
     }
   }, []);
 
@@ -140,24 +136,62 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
     setVideoPlaying(true);
   }, []);
 
+  // Seek to the first frame once metadata is ready so a still frame is always
+  // visible — this is our reliable poster when no static thumbnail exists and
+  // canvas capture is CORS-blocked (e.g. fal.media URLs).
+  const handleVideoMetadata = useCallback(() => {
+    if (videoRef.current && videoRef.current.currentTime === 0) {
+      videoRef.current.currentTime = 0.05;
+    }
+  }, []);
+
+  const handleVideoFrameReady = useCallback(() => {
+    setVideoFrameReady(true);
+  }, []);
+
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
   }, []);
 
-  const handleDownload = useCallback((e: React.MouseEvent) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (item.outputUrl) {
+    if (!item.outputUrl || isDownloading) return;
+
+    const fileName = `${item.prompt?.slice(0, 30) || "generation"}.${item.outputType === 'video' ? 'mp4' : 'png'}`;
+
+    setIsDownloading(true);
+    try {
+      // Fetch as a blob so the browser saves the file directly instead of
+      // navigating to it (the `download` attribute is ignored cross-origin).
+      const response = await fetch(item.outputUrl);
+      if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open in a new tab if the blob fetch is blocked (e.g. CORS).
       const link = document.createElement("a");
       link.href = item.outputUrl;
-      link.download = `${item.prompt?.slice(0, 30) || "generation"}.${item.outputType === 'video' ? 'mp4' : 'png'}`;
+      link.download = fileName;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } finally {
+      setIsDownloading(false);
     }
-  }, [item.outputUrl, item.prompt, item.outputType]);
+  }, [item.outputUrl, item.prompt, item.outputType, isDownloading]);
 
   const handleCardClick = useCallback(() => {
     onClick?.(item);
@@ -174,9 +208,9 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
         onClick={handleCardClick}
       >
         <div className="bg-neutral-900 relative overflow-hidden aspect-square">
-          {/* Skeleton shimmer — visible until poster/image loads */}
+          {/* Skeleton shimmer — visible until a poster, video frame, or playback is ready */}
           {isVideo ? (
-            (!imageLoaded || !posterUrl) && !videoPlaying && (
+            !videoPlaying && !videoFrameReady && !(posterUrl && imageLoaded) && (
               <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute inset-0 bg-neutral-800" />
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-neutral-700/40 to-transparent" />
@@ -209,21 +243,23 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
                 />
               )}
 
-              {/* Playback layer — only mounted on hover, crossfades in when actually playing */}
-              {showVideo && (
-                <video
-                  ref={videoRef}
-                  src={item.outputUrl}
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  onPlaying={handleVideoPlaying}
-                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
-                    videoPlaying && isHovered ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-              )}
+              {/* Video layer — always mounted. When no static poster exists, its
+                  first frame IS the poster (always visible, no hover needed).
+                  Plays on hover. preload="none" when a static poster covers it. */}
+              <video
+                ref={videoRef}
+                src={item.outputUrl}
+                muted
+                loop
+                playsInline
+                preload={posterUrl ? "none" : "metadata"}
+                onLoadedMetadata={handleVideoMetadata}
+                onLoadedData={handleVideoFrameReady}
+                onPlaying={handleVideoPlaying}
+                className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+                  (videoPlaying && isHovered) || !posterUrl ? "opacity-100" : "opacity-0"
+                }`}
+              />
 
               {/* Play indicator — visible on hover until video is playing */}
               <div className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-300 ${
@@ -251,10 +287,11 @@ export const HistoryCard: React.FC<HistoryCardProps> = memo(function HistoryCard
           {/* Download button - top right */}
           <button
             onClick={handleDownload}
-            className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-white/80 hover:bg-[#D4FF4F] text-black rounded-full pl-3 pr-3.5 py-1.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg text-xs font-semibold"
+            disabled={isDownloading}
+            className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-white/80 hover:bg-[#D4FF4F] text-black rounded-full pl-3 pr-3.5 py-1.5 transition-all duration-300 opacity-0 group-hover:opacity-100 shadow-lg text-xs font-semibold disabled:opacity-100 disabled:cursor-wait"
           >
-            <Download size={14} />
-            <span>Save</span>
+            <Download size={14} className={isDownloading ? "animate-pulse" : ""} />
+            <span>{isDownloading ? "Saving…" : "Save"}</span>
           </button>
 
           {/* Sell button - top left */}
